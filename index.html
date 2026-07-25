@@ -258,7 +258,7 @@ html,body{
       <div class="chip">PINS <b id="s-pins">10</b></div>
     </div>
 
-    <div id="popup"></div>
+    <div id="popup" role="status" aria-live="polite"></div>
 
     <div id="power"><div id="powerfill"></div></div>
     <div id="powerlbl">PWR</div>
@@ -1679,7 +1679,13 @@ function showPopup(text, color){
   void UI.popup.offsetWidth;              // restart the CSS animation
   UI.popup.classList.add('show');
   clearTimeout(popupTimer);
-  popupTimer = setTimeout(()=>UI.popup.classList.remove('show'), 1600);
+  popupTimer = setTimeout(()=>{
+    UI.popup.classList.remove('show');
+    // Clear the text as well as hiding it: the element fades out via opacity,
+    // which does NOT remove it from the accessibility tree, so leaving the old
+    // string behind would keep a stale "GUTTER" readable by a screen reader.
+    UI.popup.textContent = '';
+  }, 1600);
 }
 
 function setHint(t){ UI.hint.textContent = t; }
