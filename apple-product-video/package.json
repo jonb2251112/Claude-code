@@ -1,0 +1,36 @@
+{
+  "name": "apple-product-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cinematic, Apple-style 40-second product film. 100% code-driven with Remotion + React Three Fiber.",
+  "license": "MIT",
+  "scripts": {
+    "start": "remotion studio",
+    "studio": "remotion studio",
+    "build": "remotion render AuraFilm out/aura-1080p.mp4",
+    "build:4k": "remotion render AuraFilm4K out/aura-4k.mp4",
+    "still": "remotion still AuraPoster out/poster.png",
+    "audio": "node scripts/generate-audio.mjs",
+    "postinstall": "node scripts/generate-audio.mjs",
+    "typecheck": "tsc --noEmit",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@react-three/drei": "10.7.7",
+    "@react-three/fiber": "9.6.1",
+    "@react-three/postprocessing": "3.0.4",
+    "@remotion/cli": "4.0.499",
+    "@remotion/three": "4.0.499",
+    "postprocessing": "6.37.8",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.499",
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.9",
+    "@types/three": "0.180.0",
+    "typescript": "5.8.3"
+  }
+}

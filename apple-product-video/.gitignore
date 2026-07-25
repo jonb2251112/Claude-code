@@ -1,0 +1,10 @@
+node_modules/
+out/
+build/
+.remotion/
+.DS_Store
+*.log
+
+# Placeholder sound design is synthesised on `npm install` (npm run audio).
+# Delete these lines if you replace them with real stems you want tracked.
+public/audio/
