@@ -1,0 +1,35 @@
+<!--
+  Add these keys inside the top-level <dict> of ios/Runner/Info.plist.
+
+  The first two expose the app's Documents directory in the iOS Files app,
+  which is how a user gets ZIPs in and ISOs out on iOS. Without them the
+  extracted files are invisible outside the app and the whole workflow
+  dead-ends.
+
+  There are no permission usage descriptions here on purpose: the app uses
+  UIDocumentPickerViewController (via file_picker), which grants access to
+  exactly what the user selects and requires no privacy prompt. See
+  ios_podfile_snippet.rb for stripping permission_handler's unused iOS
+  permission code, which App Review will otherwise flag.
+-->
+
+<key>UIFileSharingEnabled</key>
+<true/>
+
+<key>LSSupportsOpeningDocumentsInPlace</key>
+<true/>
+
+<!-- Declare that the app can open ZIP archives handed to it by other apps. -->
+<key>CFBundleDocumentTypes</key>
+<array>
+    <dict>
+        <key>CFBundleTypeName</key>
+        <string>ZIP Archive</string>
+        <key>LSHandlerRank</key>
+        <string>Alternate</string>
+        <key>LSItemContentTypes</key>
+        <array>
+            <string>public.zip-archive</string>
+        </array>
+    </dict>
+</array>

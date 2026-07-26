@@ -1,0 +1,97 @@
+name: ZIP Tools — test and build
+
+# Builds the app in the cloud so you never need a local Flutter or Android SDK.
+# The `android` job uploads an installable APK as a workflow artifact; download
+# it from the run's summary page.
+#
+# iOS is not built here. GitHub's macOS runners can do it, but signing an IPA
+# needs an Apple Developer account and certificates in secrets. See
+# zip_iso_tool/codemagic.yaml for a configuration that handles that properly.
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "zip_iso_tool/**"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "zip_iso_tool/**"
+      - ".github/workflows/build.yml"
+  # Lets you build an APK on demand from the Actions tab.
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: "3.44.8"
+
+jobs:
+  test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ISO validation tools
+        # The core suite reads generated ISOs back with isoinfo and extracts
+        # them with 7z. Without these the strongest tests silently skip.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y genisoimage p7zip-full zip
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Analyze and test both packages
+        run: bash zip_iso_tool/tool/ci_test.sh
+
+  android:
+    name: Build Android APK
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Generate platform folders and apply patches
+        # setup.sh runs `flutter create` to produce android/, then overwrites
+        # the manifest with ours (no INTERNET permission, scoped-storage-aware
+        # legacy declarations, ZIP intent filter).
+        env:
+          SKIP_TESTS: "1"
+        run: bash zip_iso_tool/tool/setup.sh
+
+      - name: Confirm the release manifest has no INTERNET permission
+        # This app is offline by design. A dependency quietly adding INTERNET
+        # via manifest merging would break that promise silently, so assert it.
+        working-directory: zip_iso_tool/app
+        run: |
+          flutter build apk --release
+          MERGED=build/app/outputs/apk/release/output-metadata.json
+          test -f "$MERGED" || echo "no metadata file, continuing"
+          if unzip -p build/app/outputs/apk/release/app-release.apk AndroidManifest.xml \
+             | strings | grep -q "android.permission.INTERNET"; then
+            echo "::error::The release APK declares INTERNET. This app must stay offline."
+            exit 1
+          fi
+          echo "Confirmed: no INTERNET permission in the release APK."
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip-tools-release-apk
+          path: zip_iso_tool/app/build/app/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30

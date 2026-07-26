@@ -1,0 +1,33 @@
+name: zip_tools
+description: "Extract ZIP archives and convert game ZIPs to ISO images, offline."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  # share_plus 13 sets the floor here; see README if you are on older Flutter.
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # All ZIP/ISO logic lives in a pure-Dart package so it can be unit-tested
+  # without a Flutter binding and run inside background isolates.
+  disc_core:
+    path: ../packages/disc_core
+
+  cupertino_icons: ^1.0.8
+  file_picker: ^11.0.2
+  path: ^1.9.0
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
+  share_plus: ^12.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
