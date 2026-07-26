@@ -1,0 +1,19 @@
+name: disc_core
+description: >-
+  Pure-Dart core for the ZIP Tools app: ZIP inspection and streaming
+  extraction, disc-image detection, CUE parsing, raw-sector conversion and an
+  ISO 9660 + Joliet image writer. Deliberately free of any Flutter imports so
+  it can be unit-tested with the plain Dart VM.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  archive: ^3.6.1
+  path: ^1.9.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0
