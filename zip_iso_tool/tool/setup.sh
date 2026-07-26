@@ -51,14 +51,14 @@ else
   warn "Android manifest not found; skipping"
 fi
 
-# file_picker and permission_handler need a recent compileSdk. Nudge it if the
-# generated Gradle config is older than what the plugins require.
-GRADLE_KTS="$APP_DIR/android/app/build.gradle.kts"
-GRADLE_GROOVY="$APP_DIR/android/app/build.gradle"
-for gradle_file in "$GRADLE_KTS" "$GRADLE_GROOVY"; do
+# Every plugin here needs minSdk 21 or lower. Flutter's own default
+# (flutter.minSdkVersion) is well above that, so the generated Gradle config
+# needs no changes — only flag a project that has pinned something older.
+for gradle_file in "$APP_DIR/android/app/build.gradle.kts" "$APP_DIR/android/app/build.gradle"; do
   [ -f "$gradle_file" ] || continue
-  if grep -qE 'minSdk(Version)?\s*=?\s*(flutter\.minSdkVersion|1[0-9]\b|2[0-0]\b)' "$gradle_file"; then
-    info "Check $gradle_file: minSdk should be at least 21 for this plugin set"
+  pinned=$(grep -oE 'minSdk(Version)?\s*=?\s*([0-9]+)' "$gradle_file" | grep -oE '[0-9]+$' || true)
+  if [ -n "$pinned" ] && [ "$pinned" -lt 21 ]; then
+    warn "$gradle_file pins minSdk $pinned; this plugin set needs at least 21."
   fi
 done
 
@@ -96,14 +96,15 @@ if [ -f "$APP_DIR/ios/Podfile" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-info "Running the core test suite"
-cd "$REPO_ROOT/packages/disc_core"
-dart pub get >/dev/null
-dart test
+# CI builds only need the platform folders patched; they run the tests as a
+# separate job. Set SKIP_TESTS=1 to stop here.
+if [ "${SKIP_TESTS:-0}" = "1" ]; then
+  info "SKIP_TESTS=1 — platform setup done, not running tests"
+  exit 0
+fi
 
-cd "$APP_DIR"
-info "Running widget tests"
-flutter test
+info "Running the test suites"
+"$REPO_ROOT/tool/ci_test.sh"
 
 cat <<'EOF'
 

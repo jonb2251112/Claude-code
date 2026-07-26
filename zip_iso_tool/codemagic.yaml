@@ -1,0 +1,149 @@
+# Codemagic configuration — the practical way to get an iOS build without
+# owning a Mac, and Android builds in the same place.
+#
+# To use it: connect this repository in Codemagic and set the project root to
+# `zip_iso_tool`. Start with `ios-unsigned`; it needs no Apple account at all
+# and proves the app compiles for iOS. Nothing secret lives in this file —
+# keystores and Apple credentials are referenced by name and configured in the
+# Codemagic UI.
+
+workflows:
+  # --------------------------------------------------------------------------
+  test:
+    name: Analyze and test
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      flutter: 3.44.8
+      java: 17
+    triggering:
+      events:
+        - push
+        - pull_request
+    scripts:
+      - name: Install ISO validation tools
+        # The core suite reads generated ISOs back with isoinfo and extracts
+        # them with 7z. Without these, the strongest tests silently skip.
+        script: sudo apt-get update && sudo apt-get install -y genisoimage p7zip-full zip
+      - name: Analyze and test both packages
+        script: bash tool/ci_test.sh
+
+  # --------------------------------------------------------------------------
+  android:
+    name: Android APK and AAB
+    instance_type: linux_x2
+    max_build_duration: 45
+    environment:
+      flutter: 3.44.8
+      java: 17
+      # Configure a keystore in the Codemagic UI under
+      # Teams > Code signing identities, then reference it here by name.
+      # Codemagic wires it into the Gradle build itself — there is no
+      # key.properties to write. Comment this out to build unsigned.
+      android_signing:
+        - zip_tools_keystore
+    scripts:
+      - name: Generate platform folders and apply patches
+        # setup.sh runs `flutter create` to produce android/, then installs our
+        # manifest (no INTERNET permission, scoped-storage-aware legacy
+        # declarations, ZIP intent filter).
+        script: SKIP_TESTS=1 bash tool/setup.sh
+      - name: Build APK
+        script: cd app && flutter build apk --release
+      - name: Build AAB
+        script: cd app && flutter build appbundle --release
+      - name: Verify the release build stayed offline
+        script: |
+          cd app
+          if unzip -p build/app/outputs/apk/release/app-release.apk AndroidManifest.xml \
+             | strings | grep -q "android.permission.INTERNET"; then
+            echo "The release APK declares INTERNET. This app must stay offline."
+            exit 1
+          fi
+          echo "Confirmed: no INTERNET permission in the release APK."
+    artifacts:
+      - app/build/**/outputs/**/*.apk
+      - app/build/**/outputs/**/*.aab
+      - app/build/**/outputs/**/mapping.txt
+
+  # --------------------------------------------------------------------------
+  ios-unsigned:
+    name: iOS (unsigned — no Apple account needed)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      flutter: 3.44.8
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Generate platform folders and apply patches
+        script: SKIP_TESTS=1 bash tool/setup.sh
+      - name: Apply the permission_handler Podfile patch
+        # permission_handler compiles in references to camera, contacts and
+        # microphone APIs. Without these macros App Review rejects the binary
+        # for having no matching usage descriptions. The reasoning is in
+        # app/platform_patches/ios_podfile_snippet.rb.
+        script: |
+          cd app/ios
+          if ! grep -q "PERMISSION_CAMERA=0" Podfile; then
+            python3 - <<'PY'
+          import re, pathlib
+          podfile = pathlib.Path('Podfile')
+          text = podfile.read_text()
+          snippet = pathlib.Path('../platform_patches/ios_podfile_snippet.rb').read_text()
+          block = snippet[snippet.index('post_install'):]
+          if 'post_install' in text:
+              text = re.sub(r'post_install do \|installer\|.*\Z', block, text, flags=re.S)
+          else:
+              text += '\n' + block
+          podfile.write_text(text)
+          print('Podfile patched.')
+          PY
+          fi
+          pod install
+      - name: Build unsigned .app
+        script: cd app && flutter build ios --release --no-codesign
+    artifacts:
+      - app/build/ios/iphoneos/*.app
+
+  # --------------------------------------------------------------------------
+  ios-signed:
+    name: iOS IPA (needs an Apple Developer account)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: 3.44.8
+      xcode: latest
+      cocoapods: default
+      # Set up App Store Connect integration in the Codemagic UI first, then
+      # change this bundle id to one your team owns.
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.example.zipTools
+    scripts:
+      - name: Generate platform folders and apply patches
+        script: SKIP_TESTS=1 bash tool/setup.sh
+      - name: Apply the permission_handler Podfile patch
+        script: |
+          cd app/ios
+          if ! grep -q "PERMISSION_CAMERA=0" Podfile; then
+            python3 - <<'PY'
+          import re, pathlib
+          podfile = pathlib.Path('Podfile')
+          text = podfile.read_text()
+          snippet = pathlib.Path('../platform_patches/ios_podfile_snippet.rb').read_text()
+          block = snippet[snippet.index('post_install'):]
+          if 'post_install' in text:
+              text = re.sub(r'post_install do \|installer\|.*\Z', block, text, flags=re.S)
+          else:
+              text += '\n' + block
+          podfile.write_text(text)
+          PY
+          fi
+          pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: cd app && flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - app/build/ios/ipa/*.ipa

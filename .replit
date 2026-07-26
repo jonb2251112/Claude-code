@@ -1,0 +1,49 @@
+# Replit configuration for the ZIP Tools project (zip_iso_tool/).
+#
+# WHAT REPLIT CAN AND CANNOT DO HERE — read this before you spend time on it.
+#
+# Replit is a good place to *develop and test* this project: the entire ZIP and
+# ISO engine is pure Dart with no Flutter dependency, so `dart test` exercises
+# all of it, including validating generated ISO images against isoinfo and 7z.
+# That is what the Run button does.
+#
+# Replit cannot produce a runnable app:
+#
+#   * There is no Android emulator or iOS simulator, so `flutter run` has no
+#     device to target.
+#   * A web build compiles and the UI even renders, but it is a dead shell:
+#     path_provider has no web implementation and dart:io file operations do
+#     not work in a browser, so every extraction and conversion fails
+#     immediately. This was tested, not assumed — the app throws on startup
+#     the moment it asks for the documents directory. Web is deliberately not
+#     a supported target.
+#
+# To get an installable APK or IPA without a local toolchain, use the GitHub
+# Actions workflow (.github/workflows/build.yml) or Codemagic
+# (zip_iso_tool/codemagic.yaml). Both are committed and documented in
+# zip_iso_tool/README.md.
+
+run = "bash zip_iso_tool/tool/ci_test.sh"
+entrypoint = "zip_iso_tool/README.md"
+
+hidden = [".dart_tool", "build", ".config", "**/pubspec.lock"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+# Nix puts Flutter's bundled Dart here; keep both on PATH.
+PATH = "/home/runner/$REPL_SLUG/.pub-cache/bin:$PATH"
+PUB_CACHE = "/home/runner/$REPL_SLUG/.pub-cache"
+
+[languages.dart]
+pattern = "**/*.dart"
+
+[languages.dart.languageServer]
+start = "dart language-server --protocol=lsp"
+
+[unitTest]
+language = "dart"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix"]

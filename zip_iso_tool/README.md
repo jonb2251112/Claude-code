@@ -27,7 +27,10 @@ zip_iso_tool/
 │   ├── lib/ui/                Material 3 screens and shared widgets
 │   ├── platform_patches/      Manifest / plist / Podfile changes to apply
 │   └── test/                  Widget and model tests
-└── tool/setup.sh              Generates platform folders and applies patches
+├── codemagic.yaml             Cloud builds, including iOS without a Mac
+└── tool/
+    ├── setup.sh               Generates platform folders, applies patches
+    └── ci_test.sh             Analyze + test both packages (used everywhere)
 ```
 
 The split is the important part. All ZIP and ISO logic lives in `disc_core`,
@@ -47,6 +50,9 @@ git clone <this repo>
 cd zip_iso_tool
 ./tool/setup.sh
 ```
+
+No local Flutter? Skip to
+[Building without a local toolchain](#building-without-a-local-toolchain).
 
 `setup.sh` runs `flutter create` to generate `android/` and `ios/`, applies the
 patches in `app/platform_patches/`, fetches packages, and runs both test
@@ -90,6 +96,82 @@ this app uses, so nothing is lost.
 
 If you upgrade `file_picker` past 11, re-check that constraint before also
 bumping `share_plus`.
+
+---
+
+## Building without a local toolchain
+
+If you do not want to install Flutter and the Android SDK, everything here can
+be built and tested in the cloud. Pick based on what you actually need:
+
+| I want to… | Use | Needs |
+| --- | --- | --- |
+| Edit code and run the tests | **Replit** (`.replit`, `replit.nix`) | nothing |
+| Get an installable **APK** | **GitHub Actions** (`.github/workflows/build.yml`) | a GitHub repo |
+| Get an **iOS** build without a Mac | **Codemagic** (`codemagic.yaml`) | a Codemagic account |
+| Ship to the App Store | Codemagic `ios-signed` | Apple Developer account |
+
+All three call the same `tool/ci_test.sh`, so "the tests pass" means the same
+thing everywhere.
+
+### Replit
+
+Import the repo and press Run. It analyzes and tests both packages, including
+the ISO round-trip tests against `isoinfo` and `7z` (`replit.nix` installs
+them).
+
+**Replit cannot run the app**, and it is worth being clear about why rather
+than letting you discover it the slow way:
+
+- There is no Android emulator or iOS simulator to target.
+- A **web build is not a workaround.** It compiles, and the UI genuinely
+  renders — but it is a dead shell. `path_provider` has no web implementation,
+  so the app throws on startup the moment it asks for the documents directory,
+  and `dart:io` file operations do not exist in a browser, so no extraction or
+  conversion can run at all. This was tested in a real browser, not assumed.
+  Web is deliberately not a supported target.
+
+So use Replit for the engine — which is where all the interesting logic is —
+and one of the two below for an actual app.
+
+### GitHub Actions → APK
+
+Push the repo. The workflow runs on any branch touching `zip_iso_tool/`, and
+you can also trigger it by hand from the **Actions** tab (`workflow_dispatch`).
+
+Two jobs: `test` analyzes and tests both packages, then `android` generates the
+platform folders, applies our manifest, and builds a release APK. Download it
+from the run's summary page under **Artifacts**.
+
+The build job also asserts something worth asserting: it unzips the finished
+APK and fails the build if `android.permission.INTERNET` appears in the merged
+manifest. This app is offline by design, and a dependency could quietly
+reintroduce that permission through manifest merging without anyone noticing.
+
+The APK is debug-signed, which is fine for sideloading. For Play Store
+uploads, use Codemagic's signing or add a keystore following the
+[Flutter signing docs](https://docs.flutter.dev/deployment/android#signing-the-app).
+
+### Codemagic → iOS without a Mac
+
+Connect the repo and **set the project root to `zip_iso_tool`**. Four
+workflows:
+
+- `test` — analyze and test.
+- `android` — APK and AAB. Add a keystore under *Teams → Code signing
+  identities* named `zip_tools_keystore` and Codemagic wires it into Gradle
+  itself; comment out `android_signing` to build unsigned.
+- `ios-unsigned` — **start here.** Needs no Apple account and proves the app
+  compiles for iOS.
+- `ios-signed` — a real IPA. Needs an Apple Developer account, App Store
+  Connect integration configured in the UI, and a `bundle_identifier` your team
+  owns.
+
+Both iOS workflows apply the `permission_handler` Podfile patch automatically,
+so the manual step from the setup section is already handled there.
+
+No credentials live in `codemagic.yaml` — keystores and Apple accounts are
+referenced by name and configured in the Codemagic UI.
 
 ---
 
