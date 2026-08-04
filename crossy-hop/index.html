@@ -1441,6 +1441,118 @@ kbd{
 }
 #boostchip.on{display:flex;animation:streakpop .35s ease;}
 
+/* --- Never-before addiction chrome ---------------------------------------- */
+#dopafuse{
+  position:absolute;left:50%;bottom:calc(var(--safe-b) + 96px);transform:translateX(-50%);
+  width:min(78vw,280px);display:none;flex-direction:column;gap:3px;z-index:8;pointer-events:none;
+}
+#dopafuse.on{display:flex;}
+#dopafuse .row{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:#fff;text-shadow:0 2px 0 rgba(18,52,80,.45);}
+#dopafuse .row b{color:#ffe07a;}
+#dopafuse .bar{height:10px;border-radius:6px;background:rgba(12,38,62,.45);overflow:hidden;
+  box-shadow:0 3px 0 rgba(18,52,80,.25);}
+#dopafuse .bar i{
+  display:block;height:100%;width:0%;border-radius:6px;
+  background:linear-gradient(90deg,#67e8f9,#c084fc,#ff6b6b,#ffe07a);
+  background-size:200% 100%;animation:jbarflow 1.6s linear infinite;
+  transition:width .2s cubic-bezier(.2,1.2,.3,1);
+  box-shadow:0 0 14px rgba(255,201,60,.55);
+}
+#dopafuse.hot .bar i{animation:jbarflow .7s linear infinite, jnearpulse .55s ease-in-out infinite;}
+#wagerchip{
+  position:absolute;left:50%;bottom:calc(var(--safe-b) + 132px);transform:translateX(-50%);
+  width:min(88vw,340px);display:none;align-items:center;gap:8px;z-index:9;
+  border:0;cursor:pointer;font-family:inherit;text-align:left;
+  background:linear-gradient(105deg,#1a0b2e,#4c1d95 50%,#7c3aed);
+  color:#fff;border-radius:14px;padding:8px 10px;
+  box-shadow:0 5px 0 #2e1065, 0 0 18px rgba(124,58,237,.4);
+}
+#wagerchip.show{display:flex;animation:pop .35s cubic-bezier(.2,1.4,.4,1) both;}
+#wagerchip .ico{
+  width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#ffe07a,#ff9a3c);color:#3c2500;font-size:9px;font-weight:900;
+  letter-spacing:.08em;box-shadow:0 2px 0 #c27818;animation:jcta 1.2s ease-in-out infinite;
+}
+#wagerchip .copy{flex:1;min-width:0;}
+#wagerchip .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;}
+#wagerchip .n{font-size:13px;font-weight:800;}
+#wagerchip.active{background:linear-gradient(105deg,#064e3b,#059669 55%,#34d399);box-shadow:0 5px 0 #065f46;}
+#rivalban{
+  position:absolute;top:calc(var(--safe-t) + 86px);left:50%;transform:translateX(-50%);
+  width:min(90vw,360px);display:none;align-items:center;gap:8px;z-index:8;pointer-events:none;
+  background:rgba(12,38,62,.72);color:#fff;border-radius:12px;padding:6px 10px;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  box-shadow:0 4px 0 rgba(18,52,80,.3);
+}
+#rivalban.show{display:flex;animation:streakpop .35s ease;}
+#rivalban b{color:#ff6b6b;}
+#rivalban .ahead{color:#ffe07a;}
+#echonest{
+  width:min(92vw,420px);border:0;cursor:pointer;font-family:inherit;text-align:left;
+  border-radius:16px;padding:10px 12px;display:none;align-items:center;gap:10px;
+  box-shadow:0 5px 0 rgba(18,52,80,.22);margin:4px auto;
+  background:linear-gradient(135deg,#fff1f2,#ffe4e6);color:var(--ink);
+}
+#echonest.show{display:flex;}
+#echonest.ready{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+#echonest .ico{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#fda4af,#fb7185);color:#fff;font-size:9px;font-weight:900;
+  letter-spacing:.08em;box-shadow:0 3px 0 #be123c;animation:jcta 1.6s ease-in-out infinite;
+}
+#echonest.ready .ico{background:linear-gradient(#ffe07a,#ff9a3c);color:#3c2500;box-shadow:0 3px 0 #c27818;}
+#echonest .copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+#echonest .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+#echonest .n{font-size:14px;color:var(--ink);font-weight:800;}
+#echonest .h{font-size:10px;color:var(--ink-soft);}
+#echonest .bar{height:6px;border-radius:4px;background:#e2e9f0;overflow:hidden;margin-top:3px;}
+#echonest .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#fb7185,#ffe07a);transition:width .4s ease;}
+#sniperfeed{
+  width:min(92vw,420px);margin:4px auto;display:none;align-items:center;gap:8px;
+  background:rgba(12,38,62,.55);color:#fff;border-radius:12px;padding:7px 10px;
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+}
+#sniperfeed.show{display:flex;}
+#sniperfeed b{color:#ff6b6b;}
+#clutch{
+  display:none;flex-direction:column;align-items:center;gap:8px;width:min(92vw,400px);
+  background:rgba(255,253,246,.98);border-radius:18px;padding:14px 16px;margin:6px auto;
+  box-shadow:0 8px 0 rgba(18,52,80,.22);text-align:center;
+}
+#clutch.show{display:flex;animation:pop .4s cubic-bezier(.2,1.4,.4,1) both;}
+#clutch .k{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#ef4d4d;}
+#clutch .n{font-size:18px;color:var(--ink);font-weight:900;}
+#clutch .h{font-size:11px;color:var(--ink-soft);}
+#clutch .bar{width:100%;height:14px;border-radius:8px;background:#e2e9f0;overflow:hidden;}
+#clutch .bar i{
+  display:block;height:100%;width:0%;border-radius:8px;
+  background:linear-gradient(90deg,#22c55e,#ffe07a,#ef4d4d);
+  transition:width .08s linear;
+}
+#clutch .mash{
+  width:100%;border:0;cursor:pointer;font-family:inherit;font-weight:900;
+  letter-spacing:.12em;text-transform:uppercase;padding:14px;
+  border-radius:14px;background:linear-gradient(#ff6b6b,#ef4d4d);color:#fff;
+  box-shadow:0 5px 0 #9a1818;animation:jcta .7s ease-in-out infinite;
+}
+#clutch .mash:active{transform:scale(.97);}
+#clutch.done .mash{animation:none;background:linear-gradient(#86efac,#22c55e);box-shadow:0 5px 0 #166534;}
+#btn-comeback{
+  display:none;width:min(92vw,400px);margin:4px auto;border:0;cursor:pointer;font-family:inherit;
+  border-radius:14px;padding:12px 14px;text-align:center;
+  background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;box-shadow:0 5px 0 #0e7490;
+}
+#btn-comeback.show{display:block;animation:jmenupulse 1.2s ease-in-out infinite;}
+#btn-comeback .sub{display:block;font-size:10px;opacity:.85;margin-top:2px;letter-spacing:.1em;}
+#chipbank{
+  display:none;align-items:center;justify-content:center;gap:6px;margin:4px auto;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;
+}
+#chipbank.show{display:flex;}
+#chipbank b{color:#67e8f9;}
+
 /* --- landscape ------------------------------------------------------------ */
 @media (orientation:landscape) and (max-height:560px){
   #title{font-size:clamp(34px,11vh,64px);}
@@ -1457,6 +1569,7 @@ kbd{
   #j-dangle .jack,#j-progress .bar i,.jcell.claimable,#btn-journey.hot,#btn-journey2.hot,
   #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,
   #j-drops .track,#j-vault.ready .go,#hourlycrate .ico,#mysterydeal .ico,.jtier.jackpot,
+  #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
   #start:not(.hidden) #title .one,#start:not(.hidden) #title .two,
   .screen.sheet:not(.hidden),#reveal::before,#hatch::before{animation:none!important;transition:none!important;}
 }
@@ -1489,6 +1602,18 @@ kbd{
     <div id="toasts"></div>
     <div id="powers" class="hidden"></div>
     <div id="eventban"><div class="n">Event</div><div class="h">something wild</div></div>
+    <div id="rivalban"><span>rival</span><span class="ahead" id="rivalban-n">beakboss · row 0</span></div>
+    <button type="button" id="wagerchip" aria-label="Accept whisper wager">
+      <span class="ico">BET</span>
+      <span class="copy">
+        <span class="k" id="wager-k">whisper wager</span>
+        <span class="n" id="wager-n">survive 8 · ×3 coins</span>
+      </span>
+    </button>
+    <div id="dopafuse">
+      <div class="row"><span>dopamine fuse</span><span><b id="fuse-n">0</b>/100</span></div>
+      <div class="bar"><i id="fuse-bar" style="width:0%"></i></div>
+    </div>
     <div id="flycoins"></div>
     <div id="confetti"></div>
     <div id="flash"></div>
@@ -1542,6 +1667,17 @@ kbd{
         <span class="h" id="vault-h">survive streaks to fill it</span>
       </span>
     </button>
+    <button type="button" id="echonest" aria-label="Echo nest">
+      <span class="ico">NEST</span>
+      <span class="copy">
+        <span class="k" id="nest-k">echo nest · incubating</span>
+        <span class="n" id="nest-n">Something is hatching</span>
+        <span class="h" id="nest-h">come back when it cracks</span>
+        <span class="bar"><i id="nest-bar" style="width:0%"></i></span>
+      </span>
+    </button>
+    <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
+    <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
     <button id="btn-play" class="btn">Play</button>
     <div id="menurow" class="menugrid">
       <button id="btn-chars"  class="btn ghost">Characters</button>
@@ -1581,10 +1717,18 @@ kbd{
       <div id="o-meta">journey <b id="o-stars">0</b> · xp gained this run</div>
     </div>
     <div id="newbest" class="hidden">new best!</div>
+    <div id="clutch">
+      <div class="k">clutch salvage</div>
+      <div class="n" id="clutch-n">MASH TO SALVAGE</div>
+      <div class="h" id="clutch-h">3.0s · rip coins from the wreck</div>
+      <div class="bar"><i id="clutch-bar" style="width:0%"></i></div>
+      <button type="button" class="mash" id="btn-clutch">MASH</button>
+    </div>
     <div id="revivewrap" class="hidden">
       <button id="btn-revive" class="btn revive">Second Chance<span class="sub" id="revive-cost">25 coins · once per run</span></button>
       <div id="revivehint">keep your score · hop from safety</div>
     </div>
+    <button type="button" id="btn-comeback">Comeback revive<span class="sub" id="comeback-sub">3 chips · free soft revive</span></button>
     <button id="btn-retry" class="btn">Retry</button>
     <div id="menurow2" class="menugrid">
       <button id="btn-chars2"  class="btn ghost">Characters</button>
@@ -114315,6 +114459,7 @@ function nearMiss(){
   camKick(0.18);
   state.shake = Math.max(state.shake, 0.25);
   nearMissPay();
+  addFuse(4, 'near');
   checkAwards();
   tickQuests();
 }
@@ -115230,13 +115375,18 @@ function gameOver(){
   if(!stats.vipPass && (stats.journeyStep|0) >= 2){
     setTimeout(() => maybeShowJourneyUpsell('death'), 700);
   }
-  // Dangle a second chance when the player can afford one and has not used it.
+  // Dangle a second chance — but Clutch Salvage owns the screen first.
   const wrap = $('revivewrap');
   const offer = canRevive();
-  wrap.classList.toggle('hidden', !offer);
-  if(offer){
-    $('revive-cost').textContent = `${CFG.REVIVE_COST} coins · once per run · you have ${stats.coins}`;
-    $('btn-revive').disabled = false;
+  if(clutch.active){
+    wrap.classList.add('hidden');
+  } else {
+    wrap.classList.toggle('hidden', !offer);
+    if(offer){
+      $('revive-cost').textContent = `${CFG.REVIVE_COST} coins · once per run · you have ${stats.coins}`;
+      $('btn-revive').disabled = false;
+    }
+    updateComebackBtn();
   }
   alertEl.classList.remove('show');
   Sfx.over();
@@ -115339,6 +115489,10 @@ for(const [id, fn] of [
   ['hourlycrate', () => openHourlyCrate()],
   ['mysterydeal', () => buyMysteryDeal()],
   ['streakvaultchip', () => cashStreakVault()],
+  ['echonest', () => openEchoNest()],
+  ['wagerchip', () => acceptWager()],
+  ['btn-clutch', () => tapClutch()],
+  ['btn-comeback', () => doComebackRevive()],
 ]){
   const el = $(id);
   if(el) el.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); fn(); });
@@ -115354,8 +115508,9 @@ $('btn-revive').addEventListener('click', e=>{
 });
 screens.start.addEventListener('click', ()=>{ Sfx.click(); startGame(); });
 screens.over.addEventListener('click', e=>{
-  // Don't restart if the tap was aiming at the second-chance offer.
-  if(e.target && e.target.closest && e.target.closest('#revivewrap')) return;
+  // Don't restart if the tap was aiming at the second-chance offer / clutch mash.
+  if(e.target && e.target.closest && e.target.closest('#revivewrap, #clutch, #btn-comeback')) return;
+  if(clutch.active && !clutch.done){ tapClutch(); return; }
   if(state.overT > 0.9){ Sfx.click(); startGame(); }
 });
 
@@ -117944,6 +118099,438 @@ function cashStreakVault(){
 }
 
 /* --- Integration hooks called from the main loop ------------------------- */
+
+/* --- NEVER-BEFORE ADDICTION SYSTEMS (soft currency only) ----------------- *
+ * 1. Dopamine Fuse — fill mid-run, detonate into a prize cascade
+ * 2. Whisper Wager — mid-run soft bet: survive N rows for ×3
+ * 3. Clutch Salvage — post-death mash mini-game to rip coins from the wreck
+ * 4. Echo Nest — real-time incubating nest that hatches soft loot
+ * 5. Rival Sniper + Comeback Chips — fake rival FOMO + free soft revive currency
+ * -------------------------------------------------------------------------- */
+const FUSE_MAX = 100;
+const WAGER_STAKE = 15;
+const WAGER_ROWS = 8;
+const WAGER_MULT = 3;
+const NEST_MS = 6 * 60e3;
+const CLUTCH_MS = 3000;
+const COMEBACK_NEED = 3;
+const RIVAL_NAMES = ['beakboss','roadkill_rev','chick_fan','pixelpeck','log_rider','vip_whale','anon_hopper','featherfax'];
+
+const clutch = { active:false, taps:0, t:0, paid:0, done:false };
+const wager = { offered:false, active:false, stake:0, need:0, left:0, payout:0 };
+const fuse = { val:0, detonating:false };
+const rival = { name:'beakboss', row:12, nextAt:0 };
+
+function resetNovelRun(){
+  fuse.val = 0; fuse.detonating = false;
+  wager.offered = false; wager.active = false; wager.stake = 0; wager.need = 0; wager.left = 0; wager.payout = 0;
+  updateFuseChrome();
+  updateWagerChrome();
+  hideRivalBan();
+}
+
+function updateFuseChrome(){
+  const el = $('dopafuse');
+  if(!el) return;
+  const on = state.mode === 'play';
+  el.classList.toggle('on', on);
+  if(!on) return;
+  const pct = Math.min(100, Math.round((fuse.val / FUSE_MAX) * 100));
+  const n = $('fuse-n'); if(n) n.textContent = Math.min(FUSE_MAX, fuse.val|0);
+  const bar = $('fuse-bar'); if(bar) bar.style.width = pct + '%';
+  el.classList.toggle('hot', fuse.val >= 70);
+}
+
+function addFuse(n, why){
+  if(state.mode !== 'play' || fuse.detonating) return;
+  fuse.val = Math.min(FUSE_MAX, (fuse.val|0) + (n|0));
+  updateFuseChrome();
+  if(fuse.val >= FUSE_MAX) detonateFuse();
+}
+
+function detonateFuse(){
+  if(fuse.detonating) return;
+  fuse.detonating = true;
+  fuse.val = 0;
+  updateFuseChrome();
+  const pay = 8 + Math.floor(Math.random() * 18) + Math.min(20, Math.floor((run.peakStreak|0) / 2));
+  const stars = 2 + (run.feverId ? 2 : 0);
+  addCoins(pay); run.coins = (run.coins|0) + pay;
+  addJourneyStars(stars);
+  badge('FUSE DETONATED!', '+' + pay + ' coins · +' + stars + ' stars');
+  Sfx.prize();
+  flashScreen('overdrive');
+  burstConfetti(36, ['#67e8f9','#c084fc','#ff6b6b','#ffe07a','#ffffff']);
+  camKick(0.65);
+  buzz([16, 30, 16, 30, 20]);
+  toast('FUSE!', player.x, player.y + 1.2, player.z, 'overdrive');
+  flyCoins(player.x, player.y + 0.5, player.z, Math.min(5, 2 + Math.floor(pay / 10)));
+  setTimeout(() => { fuse.detonating = false; }, 400);
+}
+
+function maybeOfferWager(){
+  if(wager.offered || wager.active) return;
+  if(state.mode !== 'play') return;
+  if((state.score|0) < 12) return;
+  if((stats.coins|0) < WAGER_STAKE) return;
+  if(Math.random() > 0.55 && (state.score|0) < 25) return;
+  wager.offered = true;
+  wager.stake = WAGER_STAKE;
+  wager.need = WAGER_ROWS;
+  wager.payout = WAGER_STAKE * WAGER_MULT;
+  updateWagerChrome();
+  badge('Whisper wager', 'bet ' + wager.stake + ' · survive ' + wager.need + ' for ×' + WAGER_MULT);
+  Sfx.fever();
+}
+
+function updateWagerChrome(){
+  const el = $('wagerchip');
+  if(!el) return;
+  if(wager.active){
+    el.classList.add('show', 'active');
+    el.classList.remove('offered');
+    const k = $('wager-k'); if(k) k.textContent = 'wager live · ' + wager.left + ' rows left';
+    const n = $('wager-n'); if(n) n.textContent = 'win ' + wager.payout + ' coins · don\'t die';
+  } else if(wager.offered && state.mode === 'play'){
+    el.classList.add('show');
+    el.classList.remove('active');
+    const k = $('wager-k'); if(k) k.textContent = 'whisper wager · tap to lock';
+    const n = $('wager-n'); if(n) n.textContent = 'bet ' + wager.stake + ' · survive ' + wager.need + ' · ×' + WAGER_MULT;
+  } else {
+    el.classList.remove('show', 'active');
+  }
+}
+
+function acceptWager(){
+  if(!wager.offered || wager.active) return false;
+  if(state.mode !== 'play') return false;
+  if((stats.coins|0) < wager.stake){ badge('Need coins', wager.stake + ' to whisper'); Sfx.bump(); return false; }
+  stats.coins -= wager.stake;
+  hudCoins(true);
+  wager.offered = false;
+  wager.active = true;
+  wager.left = wager.need;
+  updateWagerChrome();
+  badge('WAGER LOCKED', 'survive ' + wager.left + ' rows');
+  Sfx.streak();
+  flashScreen('ultra');
+  buzz([10, 30, 10]);
+  save();
+  return true;
+}
+
+function tickWagerOnProgress(){
+  if(!wager.active) {
+    if(!wager.offered && (state.score|0) >= 12 && (state.score % 9 === 0)) maybeOfferWager();
+    return;
+  }
+  wager.left = Math.max(0, (wager.left|0) - 1);
+  updateWagerChrome();
+  if(wager.left <= 0){
+    const pay = wager.payout|0;
+    wager.active = false;
+    updateWagerChrome();
+    addCoins(pay); run.coins = (run.coins|0) + pay;
+    badge('WHISPER PAID!', '+' + pay + ' coins');
+    Sfx.prize();
+    flashScreen('gold');
+    burstConfetti(28, ['#c084fc','#ffe07a','#ffffff']);
+    toast('×' + WAGER_MULT, player.x, player.y + 1.1, player.z, 'big');
+    // Chain itch — offer again later in the run.
+    setTimeout(() => { if(state.mode === 'play'){ wager.offered = false; maybeOfferWager(); } }, 6000);
+  }
+}
+
+function failWager(){
+  if(!wager.active) return;
+  wager.active = false;
+  updateWagerChrome();
+  badge('Whisper lost', 'stake burned · soft currency only');
+  Sfx.bump();
+}
+
+function pickRivalName(){
+  return RIVAL_NAMES[Math.floor(Math.random() * RIVAL_NAMES.length)];
+}
+function refreshRival(){
+  rival.name = pickRivalName();
+  const best = Math.max(8, stats.best|0);
+  rival.row = best + 2 + Math.floor(Math.random() * 7);
+  rival.nextAt = Date.now() + 8000 + Math.floor(Math.random() * 10000);
+}
+function hideRivalBan(){
+  const el = $('rivalban');
+  if(el) el.classList.remove('show');
+}
+function updateRivalBan(){
+  const el = $('rivalban');
+  if(!el) return;
+  if(state.mode !== 'play'){ el.classList.remove('show'); return; }
+  const you = state.score|0;
+  const ahead = Math.max(0, (rival.row|0) - you);
+  const n = $('rivalban-n');
+  if(n){
+    n.textContent = ahead > 0
+      ? (rival.name + ' · ' + ahead + ' ahead')
+      : (rival.name + ' · YOU PASSED THEM');
+  }
+  el.classList.add('show');
+  if(you >= rival.row && !rival._beat){
+    rival._beat = true;
+    badge('RIVAL CRUSHED!', rival.name + ' left in the dust');
+    addCoins(5); run.coins = (run.coins|0) + 5;
+    addFuse(12, 'rival');
+    Sfx.streak();
+  }
+}
+function refreshSniperFeed(){
+  const el = $('sniperfeed');
+  if(!el) return;
+  el.classList.add('show');
+  const n = $('sniper-n');
+  if(!n) return;
+  const lines = [
+    rival.name + ' sniped a jackpot tease ' + (8 + Math.floor(Math.random()*40)) + 's ago',
+    rival.name + ' is ' + Math.max(1, (rival.row|0) - (stats.best|0)) + ' rows past your best',
+    rival.name + ' claimed heat bonus you almost had',
+    rival.name + ' unlocked VIP lane loot · soft currency',
+    'someone named ' + rival.name + ' just cash-in\'d a star vault',
+  ];
+  n.innerHTML = '<b>live</b> · ' + lines[Math.floor(Date.now() / 12000) % lines.length];
+}
+
+function nestReady(){
+  return Date.now() - (Number(stats.nestAt) || 0) >= NEST_MS;
+}
+function ensureEchoNest(){
+  if(!(Number(stats.nestAt) || 0)){
+    stats.nestAt = Date.now() - Math.floor(NEST_MS * 0.35); // partially incubated on first boot
+  }
+}
+function refreshEchoNest(){
+  ensureEchoNest();
+  const el = $('echonest');
+  if(!el) return;
+  el.classList.add('show');
+  const ready = nestReady();
+  el.classList.toggle('ready', ready);
+  const left = Math.max(0, NEST_MS - (Date.now() - (Number(stats.nestAt) || 0)));
+  const pct = Math.min(100, Math.round(((NEST_MS - left) / NEST_MS) * 100));
+  const bar = $('nest-bar'); if(bar) bar.style.width = pct + '%';
+  const k = $('nest-k');
+  const n = $('nest-n');
+  const h = $('nest-h');
+  const ico = el.querySelector('.ico');
+  if(ready){
+    if(k) k.textContent = 'echo nest · CRACKING';
+    if(n) n.textContent = 'Tap to hatch the echo';
+    if(h) h.textContent = 'soft loot · never the same twice';
+    if(ico) ico.textContent = 'HATCH';
+  } else {
+    if(k) k.textContent = left < 60e3 ? 'echo nest · ALMOST' : 'echo nest · incubating';
+    if(n) n.textContent = 'Hatches in ' + formatHMS(left).replace(/^00:/, '');
+    if(h) h.textContent = pct + '% · leave it cooking';
+    if(ico) ico.textContent = 'NEST';
+  }
+}
+function openEchoNest(){
+  ensureEchoNest();
+  if(!nestReady()){
+    const left = NEST_MS - (Date.now() - (Number(stats.nestAt) || 0));
+    badge('Still incubating', formatHMS(Math.max(0,left)).replace(/^00:/, '') + ' left');
+    Sfx.bump();
+    refreshEchoNest();
+    return false;
+  }
+  stats.nestAt = Date.now();
+  const roll = Math.random();
+  let label = '';
+  if(roll < 0.1){ hatchPet(); label = 'Pet egg echo!'; }
+  else if(roll < 0.22){ grantChest('gold', 'Echo nest'); label = 'Gold chest'; }
+  else if(roll < 0.4){ grantChest('silver', 'Echo nest'); label = 'Silver chest'; }
+  else if(roll < 0.55){ stats.spins = (stats.spins|0) + 2; label = '+2 spins'; }
+  else if(roll < 0.7){ addJourneyStars(6); label = '+6 journey stars'; }
+  else { const c = 30 + Math.floor(Math.random() * 50); addCoins(c); label = '+' + c + ' coins'; }
+  badge('ECHO HATCHED!', label);
+  Sfx.prize();
+  flashScreen('overdrive');
+  burstConfetti(40, ['#fb7185','#ffe07a','#c084fc','#ffffff']);
+  save();
+  refreshEchoNest();
+  hudMeta();
+  return true;
+}
+
+function refreshChipBank(){
+  const el = $('chipbank');
+  const n = $('chipbank-n');
+  if(n) n.textContent = String(Math.min(COMEBACK_NEED, stats.comebackChips|0));
+  if(el) el.classList.toggle('show', true);
+}
+
+function earnComebackChip(){
+  const before = stats.comebackChips|0;
+  stats.comebackChips = Math.min(5, before + 1);
+  if(stats.comebackChips > before){
+    badge('Comeback chip', (stats.comebackChips) + ' / ' + COMEBACK_NEED);
+  }
+  refreshChipBank();
+}
+
+function canComebackRevive(){
+  return !run.revived && (stats.comebackChips|0) >= COMEBACK_NEED && state.score > 0;
+}
+
+function doComebackRevive(){
+  if(!canComebackRevive() || state.mode !== 'over'){ badge('Need chips', COMEBACK_NEED + ' comeback chips'); Sfx.bump(); return false; }
+  stats.comebackChips -= COMEBACK_NEED;
+  stats.revives = (stats.revives | 0) + 1;
+  run.revived = true;
+  refreshChipBank();
+  save();
+
+  eagle.visible = false;
+  for(const p of partPool) p.life = 0;
+  queue.length = 0;
+  state.shake = 0;
+  state.deathT = 0;
+
+  const land = findSafeLanding();
+  player.row = land.row;
+  player.col = land.col;
+  player.x = land.col;
+  player.z = ROW_Z(land.row);
+  player.y = land.y;
+  player.hopping = false; player.hopT = 0;
+  player.ride = null; player.idle = 0; player.bump = 0;
+  player.iframe = CFG.REVIVE_IFRAME;
+  player.yaw = 0; player.yawTo = 0;
+  avatar.visible = true;
+  avatar.scale.set(1,1,1);
+  avatar.rotation.set(0,0,0);
+  avatar.position.set(player.x, player.y, player.z);
+
+  endFever();
+  run.streak = 0;
+  hudStreak();
+  hideClutch();
+  state.mode = 'play';
+  state.panel = null;
+  show(null);
+  const wrap = $('revivewrap'); if(wrap) wrap.classList.add('hidden');
+  const cb = $('btn-comeback'); if(cb) cb.classList.remove('show');
+  if(Sfx.revive) Sfx.revive(); else Sfx.fever();
+  badge('COMEBACK!', 'soft revive · chips spent');
+  buzz([18, 50, 18]);
+  spawnFeathers(player.x, player.y + 0.4, player.z, 10, COIN_C, 0.7);
+  flashScreen('mint');
+  burstConfetti(28, ['#67e8f9','#ffffff','#7dffb0','#ffe07a']);
+  landRing(player.x, player.y, player.z, 'mint');
+  camKick(0.45);
+  return true;
+}
+
+function updateComebackBtn(){
+  const btn = $('btn-comeback');
+  if(!btn) return;
+  const ok = canComebackRevive();
+  btn.classList.toggle('show', ok && state.mode === 'over' && !clutch.active);
+  const sub = $('comeback-sub');
+  if(sub) sub.textContent = (stats.comebackChips|0) + ' chips · need ' + COMEBACK_NEED + ' · free soft revive';
+}
+
+function startClutchSalvage(){
+  const potential = Math.min(60, 6 + Math.floor((run.coins|0) * 0.35) + Math.floor((run.peakStreak|0) * 0.8));
+  if(potential < 4 || (state.score|0) < 5){
+    hideClutch();
+    return;
+  }
+  clutch.active = true;
+  clutch.taps = 0;
+  clutch.t = CLUTCH_MS / 1000;
+  clutch.paid = potential;
+  clutch.done = false;
+  const el = $('clutch');
+  if(el){ el.classList.add('show'); el.classList.remove('done'); }
+  const n = $('clutch-n'); if(n) n.textContent = 'MASH TO SALVAGE';
+  const h = $('clutch-h'); if(h) h.textContent = clutch.t.toFixed(1) + 's · up to +' + potential + ' coins';
+  const bar = $('clutch-bar'); if(bar) bar.style.width = '0%';
+  const mash = $('btn-clutch'); if(mash) mash.textContent = 'MASH';
+  // Hide revive/comeback until clutch resolves so the mash owns the screen.
+  $('revivewrap')?.classList.add('hidden');
+  $('btn-comeback')?.classList.remove('show');
+}
+
+function hideClutch(){
+  clutch.active = false;
+  const el = $('clutch');
+  if(el) el.classList.remove('show', 'done');
+}
+
+function tapClutch(){
+  if(!clutch.active || clutch.done) return;
+  clutch.taps++;
+  const pct = Math.min(100, Math.round((clutch.taps / 28) * 100));
+  const bar = $('clutch-bar'); if(bar) bar.style.width = pct + '%';
+  const n = $('clutch-n'); if(n) n.textContent = clutch.taps + ' taps · ripping…';
+  Sfx.coin();
+  buzz(8);
+  if(clutch.taps >= 28) finishClutch(true);
+}
+
+function updateClutch(dt){
+  if(!clutch.active || clutch.done) return;
+  clutch.t -= dt;
+  const h = $('clutch-h');
+  if(h) h.textContent = Math.max(0, clutch.t).toFixed(1) + 's · up to +' + clutch.paid + ' coins';
+  if(clutch.t <= 0) finishClutch(false);
+}
+
+function finishClutch(maxed){
+  if(clutch.done) return;
+  clutch.done = true;
+  clutch.active = false;
+  const ratio = Math.min(1, clutch.taps / 28);
+  const pay = Math.max(0, Math.floor(clutch.paid * ratio));
+  const el = $('clutch');
+  if(el) el.classList.add('done');
+  const n = $('clutch-n');
+  const h = $('clutch-h');
+  const mash = $('btn-clutch');
+  if(pay > 0){
+    addCoins(pay);
+    if(n) n.textContent = 'SALVAGED +' + pay;
+    if(h) h.textContent = maxed ? 'perfect mash · max haul' : (clutch.taps + ' taps · soft coins ripped');
+    if(mash) mash.textContent = '+' + pay + ' COINS';
+    badge('Clutch salvage!', '+' + pay + ' coins');
+    Sfx.prize();
+    flashScreen('gold');
+    burstConfetti(20, ['#22c55e','#ffe07a','#ffffff']);
+  } else {
+    if(n) n.textContent = 'nothing salvaged';
+    if(h) h.textContent = 'mash harder next wreck';
+    if(mash) mash.textContent = 'MISS';
+    Sfx.bump();
+  }
+  save();
+  hudCoins();
+  // Reveal revive / comeback after the mash itch.
+  setTimeout(() => {
+    hideClutch();
+    const wrap = $('revivewrap');
+    const offer = canRevive();
+    if(wrap){
+      wrap.classList.toggle('hidden', !offer);
+      if(offer){
+        const cost = $('revive-cost');
+        if(cost) cost.textContent = CFG.REVIVE_COST + ' coins · once per run · you have ' + stats.coins;
+        const btn = $('btn-revive'); if(btn) btn.disabled = false;
+      }
+    }
+    updateComebackBtn();
+  }, 900);
+}
+
 function addictionOnBoot(){
   mergeExtraCritters();
   if(!stats.level) stats.level = 1;
@@ -117960,12 +118547,19 @@ function addictionOnBoot(){
   refreshMysteryDeal();
   refreshStreakVaultChip();
   updateSpinPityChrome();
+  ensureEchoNest();
+  refreshEchoNest();
+  refreshRival();
+  refreshSniperFeed();
+  refreshChipBank();
   hudMeta();
 }
 
 function addictionOnStart(){
   resetPowers();
   resetEvents();
+  resetNovelRun();
+  hideClutch();
   // Spend banked power-ups at run start if the player armed them.
   if(run.armShield && (stats.bankShield|0) > 0){
     stats.bankShield--; grantPower("shield"); run.armShield = false;
@@ -117977,10 +118571,16 @@ function addictionOnStart(){
   tickWeeklies();
   hudPowers();
   hideEventBanner();
+  refreshRival();
+  rival._beat = false;
+  updateFuseChrome();
 }
 
 function addictionOnProgress(){
   addXp(1 + (run.feverId ? 1 : 0) + (run.perfects && run.perfects % 3 === 0 ? 1 : 0), "hop");
+  addFuse(2 + (run.feverId ? 1 : 0), 'hop');
+  tickWagerOnProgress();
+  updateRivalBan();
   petLuckTick();
   if(hasPower("golden")){
     const pay = Math.max(1, run.coinMult||1);
@@ -118004,6 +118604,7 @@ function addictionOnProgress(){
 function addictionOnFeverEnter(id){
   stats.weekFever = (stats.weekFever|0) + 1;
   stats.feverEnters = (stats.feverEnters|0) + 1;
+  addFuse(10, 'fever');
   if(stats.feverEnters >= 25) unlockTitle("feverish");
   if(id === "overdrive") unlockTitle("overdriven");
   tickWeeklies();
@@ -118012,6 +118613,7 @@ function addictionOnFeverEnter(id){
 function addictionOnPerfect(){
   stats.weekPerfect = (stats.weekPerfect|0) + 1;
   addXp(2, "perfect");
+  addFuse(5, 'perfect');
   if((run.perfects|0) >= 10) unlockTitle("perfect10");
   tickWeeklies();
 }
@@ -118028,6 +118630,7 @@ function addictionOnDeath(){
 }
 
 function addictionOnGameOver(){
+  failWager();
   const stars = journeyStarsFromRun();
   addJourneyStars(stars);
   // Streak vault — bank soft coins from the heat you just lost, cash later.
@@ -118041,6 +118644,9 @@ function addictionOnGameOver(){
       refreshStreakVaultChip();
     }
   }
+  earnComebackChip();
+  startClutchSalvage();
+  refreshSniperFeed();
   addXp(5 + Math.floor(state.score / 4), "run");
   refreshRank();
   if((stats.owned||[]).length >= 10) unlockTitle("collector");
@@ -118060,17 +118666,27 @@ function addictionOnGameOver(){
 function addictionUpdate(dt){
   updatePowers(dt);
   updateEvents(dt);
+  updateClutch(dt);
   // Slow UI drip for start-screen loops + mid-run star chip.
   if(!addictionUpdate._acc) addictionUpdate._acc = 0;
   addictionUpdate._acc += dt;
   if(addictionUpdate._acc >= 1){
     addictionUpdate._acc = 0;
-    if(state.mode === 'start' || (state.panel === '' && state.mode !== 'play')){
+    if(state.mode === 'menu' || state.mode === 'start' || (!state.panel && state.mode !== 'play' && state.mode !== 'dying')){
       refreshHourlyCrate();
       refreshMysteryDeal();
       refreshStreakVaultChip();
+      refreshEchoNest();
+      refreshSniperFeed();
+      refreshChipBank();
     }
-    if(state.mode === 'play') updateHudStars();
+    if(state.mode === 'play'){
+      updateHudStars();
+      updateFuseChrome();
+      updateWagerChrome();
+      if(Date.now() > (rival.nextAt||0)){ refreshRival(); rival._beat = false; rival.nextAt = Date.now() + 14000; }
+      updateRivalBan();
+    }
     if(state.panel === 'journey') updateJourneyChrome();
   }
 }
@@ -118138,6 +118754,8 @@ function addictionLoad(raw){
   stats.streakVault = raw.streakVault|0;
   stats.spinPity = raw.spinPity|0;
   stats.starVault = raw.starVault|0;
+  stats.nestAt = Number(raw.nestAt) || 0;
+  stats.comebackChips = raw.comebackChips|0;
 }
 
 function addictionSaveFields(){
@@ -118167,6 +118785,7 @@ function addictionSaveFields(){
     dealAt: Number(stats.dealAt) || 0, dealKind: stats.dealKind || '', dealCost: stats.dealCost|0,
     dealPay: stats.dealPay, dealLabel: stats.dealLabel || '',
     streakVault: stats.streakVault|0, spinPity: stats.spinPity|0, starVault: stats.starVault|0,
+    nestAt: Number(stats.nestAt) || 0, comebackChips: stats.comebackChips|0,
   };
 }
 
@@ -121252,6 +121871,9 @@ show('start');
 refreshHourlyCrate();
 refreshMysteryDeal();
 refreshStreakVaultChip();
+refreshEchoNest();
+refreshSniperFeed();
+refreshChipBank();
 applyChrome();
 
 let last = performance.now();
@@ -121295,6 +121917,7 @@ window.HOP = {
   addXp, doSpin, grantChest, hatchPet, grantPower,
   buyVipPass, skipJourneyTier, buyStarPack, buyStarBoost, claimAllJourney,
   openHourlyCrate, buyMysteryDeal, cashStreakVault, cashStarVault,
+  openEchoNest, acceptWager, doComebackRevive, detonateFuse, startClutchSalvage, tapClutch,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };

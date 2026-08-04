@@ -78,6 +78,10 @@ persist in `localStorage`.
   forces a juicy hit so the itch never goes cold.
 - **Journey amp.** VIP value meter, loot marquee, jackpot odds tags, claim heat,
   and a star vault you cash into tiers — FOMO chrome dialed up, still no real IAP.
+- **Never-before loops.** Dopamine Fuse detonates mid-run; Whisper Wagers let you
+  soft-bet on surviving the next rows; Clutch Salvage is a post-death mash for
+  coins; Echo Nest incubates real-time loot; Rival Sniper taunts your best; and
+  Comeback Chips bank into a free soft revive.
 - **Near misses.** A vehicle that passes within a whisker prints `close!` and
   counts towards an award.
 - **Milestones and the record gate.** Every 25th row pays a coin (multiplied in
