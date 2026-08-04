@@ -1691,6 +1691,293 @@ kbd{
 #chipbank b{color:#67e8f9;}
 
 
+
+/* --- Story Mode journey track + cutscene theater ------------------------ */
+#btn-story.hot, #btn-story2.hot{
+  background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;
+  box-shadow:0 5px 0 #0e7490, 0 10px 18px rgba(18,52,80,.25);
+  animation:jmenupulse 1.2s ease-in-out infinite;
+}
+#story.sheet{
+  justify-content:flex-start;overflow:hidden;height:100%;max-height:100dvh;
+  background:radial-gradient(120% 80% at 50% 0%, rgba(8,28,48,.55), rgba(8,20,36,.72));
+}
+#story.sheet .head{flex:0 0 auto;width:min(94vw,460px);}
+#story-hero{
+  width:min(94vw,460px);display:flex;flex-direction:column;gap:8px;align-items:stretch;
+  margin:0 0 8px;flex:0 0 auto;padding:0 2px;
+}
+#story-hero .eyebrow{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#67e8f9;
+  text-shadow:0 2px 0 rgba(18,52,80,.35);
+}
+#story-hero h3{
+  margin:0;font-size:clamp(22px,6vw,30px);line-height:1;color:#fff;
+  text-shadow:0 3px 0 rgba(18,52,80,.4);
+}
+#story-hero .blurb{
+  font-size:13px;color:#fff;opacity:.9;font-weight:700;line-height:1.35;
+  text-shadow:0 2px 0 rgba(18,52,80,.3);
+}
+#story-progress{
+  display:flex;align-items:center;gap:10px;background:rgba(255,253,246,.94);
+  border-radius:14px;padding:8px 10px;box-shadow:0 3px 0 rgba(18,52,80,.18);
+}
+#story-progress .txt{flex:1;min-width:0;text-align:left;}
+#story-progress .t{font-size:12px;color:var(--ink);}
+#story-progress .s{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
+#story-progress .bar{flex:1;height:10px;border-radius:6px;background:#e2e9f0;overflow:hidden;min-width:80px;}
+#story-progress .bar i{
+  display:block;height:100%;width:0%;border-radius:6px;
+  background:linear-gradient(90deg,#67e8f9,#7c3aed,#ffe07a);transition:width .35s ease;
+}
+#story-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+#story-actions .btn{min-height:var(--touch);font-size:12px;padding:10px 14px;}
+#story-actions .btn.watch{
+  background:linear-gradient(#c084fc,#7c3aed);color:#fff;box-shadow:0 5px 0 #5b21b6;
+}
+#story-actions .btn.watch:disabled,
+#story-actions .btn:disabled{opacity:.55;cursor:default;filter:grayscale(.2);}
+#story.sheet > .body{
+  width:min(94vw,460px);flex:1 1 auto;min-height:0;
+  max-height:calc(100dvh - var(--safe-t) - var(--safe-b) - 280px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+}
+.story-obj{
+  display:flex;align-items:center;gap:10px;text-align:left;
+  padding:10px 12px;border-radius:14px;background:rgba(255,253,246,.94);
+  box-shadow:0 3px 0 rgba(18,52,80,.18);margin-bottom:8px;
+}
+.story-obj .ico{
+  width:40px;height:40px;border-radius:12px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;
+  font-size:11px;font-weight:900;letter-spacing:.06em;
+  box-shadow:0 3px 0 #0e7490;
+}
+.story-obj.done .ico{background:linear-gradient(#7dffb0,#2ecc71);box-shadow:0 3px 0 #1e9a52;color:#0b3d24;}
+.story-obj .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.story-obj .n{font-size:13px;color:var(--ink);}
+.story-obj .h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+.story-obj .bar{width:100%;height:7px;border-radius:4px;background:#e2e9f0;overflow:hidden;}
+.story-obj .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#67e8f9,#ffe07a);transition:width .3s ease;}
+.story-obj .pay{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dk);white-space:nowrap;}
+.story-obj.done .pay{color:#1e9a52;}
+.story-chapter{
+  display:flex;align-items:center;gap:10px;text-align:left;
+  padding:10px 12px;border-radius:14px;background:rgba(12,38,62,.28);
+  margin-bottom:8px;color:#fff;
+}
+.story-chapter .num{
+  width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,253,246,.92);color:var(--ink);font-size:13px;font-weight:900;
+  box-shadow:0 3px 0 rgba(18,52,80,.2);
+}
+.story-chapter.cur{background:rgba(255,201,60,.22);box-shadow:0 0 0 2px var(--gold);}
+.story-chapter.locked{opacity:.55;}
+.story-chapter.done .num{background:linear-gradient(#7dffb0,#2ecc71);color:#0b3d24;}
+.story-chapter .txt{flex:1;min-width:0;}
+.story-chapter .n{font-size:13px;}
+.story-chapter .h{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.85;}
+#storychip{
+  display:none;align-items:center;justify-content:center;gap:8px;width:min(94vw,420px);
+  background:linear-gradient(105deg,#0c4a6e,#7c3aed 55%,#0891b2);color:#fff;
+  border:0;border-radius:14px;padding:9px 12px;cursor:pointer;font-family:inherit;
+  box-shadow:0 4px 0 #312e81;text-align:left;
+}
+#storychip.show{display:flex;animation:pop .4s cubic-bezier(.2,1.4,.4,1) both;}
+#storychip .ico{
+  width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#ffe07a,#ff9a3c);color:#3c2500;font-size:9px;font-weight:900;
+  letter-spacing:.08em;box-shadow:0 2px 0 #c27818;animation:jcta 1.4s ease-in-out infinite;
+}
+#storychip .copy{flex:1;min-width:0;}
+#storychip .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;}
+#storychip .n{font-size:13px;font-weight:800;}
+
+/* Cutscene theater */
+#storycut{
+  position:fixed;inset:0;z-index:80;display:none;flex-direction:column;
+  align-items:center;justify-content:flex-end;
+  background:#040a12;pointer-events:auto;
+  padding:calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 16px);
+}
+#storycut.show{display:flex;}
+#storycut.show.hidden{display:flex;}
+#storycut.hidden:not(.show){display:none;}
+#storycut .sc-stage{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+#storycut .sc-sky{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,#1a3a5c 0%,#4fc0f5 42%,#c9efff 70%,#7ec850 70%,#5aa83a 100%);
+  transition:background 1s ease;
+}
+#storycut[data-scene="night"] .sc-sky{
+  background:linear-gradient(180deg,#060b18 0%,#14233d 45%,#1e3a2f 70%,#163024 100%);
+}
+#storycut[data-scene="fever"] .sc-sky{
+  background:linear-gradient(180deg,#2a0a18 0%,#ef4d4d 35%,#ff9a3c 55%,#ffe07a 70%,#3e9e37 70%,#2d7a28 100%);
+}
+#storycut[data-scene="finale"] .sc-sky{
+  background:linear-gradient(180deg,#0b1c2e 0%,#7c3aed 30%,#ff9a3c 55%,#ffe07a 68%,#63c74d 68%,#3e9e37 100%);
+}
+#storycut .sc-sun{
+  position:absolute;width:72px;height:72px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff7cc,#ffc93c 45%,#ff9a3c 80%);
+  box-shadow:0 0 40px rgba(255,201,60,.55); top:14%; right:16%;
+  animation:scsun 6s ease-in-out infinite;
+}
+#storycut[data-scene="night"] .sc-sun{
+  background:radial-gradient(circle at 35% 35%,#f8fafc,#cbd5e1 60%);
+  box-shadow:0 0 28px rgba(203,213,225,.35); width:48px;height:48px;
+}
+@keyframes scsun{50%{transform:translateY(8px) scale(1.04);}}
+#storycut .sc-road{
+  position:absolute;left:0;right:0;bottom:28%;height:22%;
+  background:
+    repeating-linear-gradient(90deg,#5a5a5a 0 36px,#4a4a4a 36px 72px);
+  box-shadow:inset 0 8px 0 #3a3a3a, inset 0 -8px 0 #3a3a3a;
+}
+#storycut .sc-road::after{
+  content:"";position:absolute;left:0;right:0;top:50%;height:4px;
+  background:repeating-linear-gradient(90deg,#ffe07a 0 28px, transparent 28px 52px);
+  transform:translateY(-50%);
+  animation:scdash 1.1s linear infinite;
+}
+@keyframes scdash{to{transform:translateY(-50%) translateX(-52px);}}
+#storycut .sc-grass-top{
+  position:absolute;left:0;right:0;bottom:50%;height:8%;
+  background:repeating-linear-gradient(90deg,#7ec850 0 18px,#63c74d 18px 36px);
+}
+#storycut .sc-grass-bot{
+  position:absolute;left:0;right:0;bottom:0;height:28%;
+  background:repeating-linear-gradient(90deg,#63c74d 0 20px,#4eaf3c 20px 40px);
+}
+#storycut .sc-water{
+  position:absolute;left:0;right:0;bottom:28%;height:22%;
+  background:linear-gradient(180deg,#38bdf8,#0284c7);display:none;
+  overflow:hidden;
+}
+#storycut[data-scene="river"] .sc-road{display:none;}
+#storycut[data-scene="river"] .sc-water{display:block;}
+#storycut .sc-log{
+  position:absolute;bottom:36%;width:90px;height:28px;border-radius:14px;
+  background:linear-gradient(#a16207,#78350f);box-shadow:0 4px 0 #451a03;
+  animation:sclog 3.2s linear infinite;
+}
+#storycut .sc-log.l2{bottom:42%;width:70px;animation-duration:4s;animation-delay:-1s;opacity:.9;}
+@keyframes sclog{from{left:-30%;}to{left:110%;}}
+#storycut .sc-truck{
+  position:absolute;bottom:34%;width:86px;height:40px;
+  background:linear-gradient(#ef4d4d,#b91c1c);border-radius:8px 14px 6px 6px;
+  box-shadow:0 5px 0 #7f1d1d; animation:sctruck 2.4s linear infinite;
+}
+#storycut .sc-truck::before{
+  content:"";position:absolute;right:-28px;top:4px;width:30px;height:24px;
+  background:#1e293b;border-radius:4px;
+}
+#storycut .sc-truck.b{background:linear-gradient(#3b82f6,#1d4ed8);box-shadow:0 5px 0 #1e3a8a;animation-duration:3.1s;animation-delay:-.8s;bottom:38%;}
+@keyframes sctruck{from{left:110%;}to{left:-40%;}}
+#storycut[data-scene="dawn"] .sc-truck{display:none;}
+#storycut .sc-chick{
+  position:absolute;left:50%;bottom:31%;width:42px;height:48px;
+  transform:translateX(-50%); z-index:3;
+  filter:drop-shadow(0 6px 0 rgba(18,52,80,.25));
+  animation:schop 1.1s cubic-bezier(.2,1.3,.3,1) infinite;
+}
+#storycut[data-scene="dawn"] .sc-chick{bottom:36%;animation:scwake 2.4s ease-in-out infinite;}
+#storycut[data-scene="river"] .sc-chick{bottom:40%;animation:scbob 1.6s ease-in-out infinite;}
+#storycut[data-scene="finale"] .sc-chick{bottom:34%;animation:scfinale 2s ease-in-out infinite;}
+@keyframes schop{
+  0%,100%{transform:translateX(-50%) translateY(0);}
+  35%{transform:translateX(-50%) translateY(-18px) scale(1.05);}
+  55%{transform:translateX(-50%) translateY(0);}
+}
+@keyframes scwake{
+  0%,100%{transform:translateX(-50%) rotate(-4deg);}
+  50%{transform:translateX(-50%) rotate(4deg) translateY(-4px);}
+}
+@keyframes scbob{
+  0%,100%{transform:translateX(-50%) translateY(0);}
+  50%{transform:translateX(-50%) translateY(-6px);}
+}
+@keyframes scfinale{
+  0%,100%{transform:translateX(-50%) scale(1);}
+  50%{transform:translateX(-50%) scale(1.08) translateY(-10px);}
+}
+#storycut .sc-chick .body{
+  position:absolute;left:6px;bottom:8px;width:30px;height:26px;border-radius:10px;
+  background:#fcfcf6;box-shadow:inset 0 -4px 0 #e8e8d8;
+}
+#storycut .sc-chick .head{
+  position:absolute;left:10px;bottom:28px;width:22px;height:18px;border-radius:8px;background:#fcfcf6;
+}
+#storycut .sc-chick .comb{
+  position:absolute;left:16px;bottom:42px;width:10px;height:8px;border-radius:3px;background:#e0453f;
+}
+#storycut .sc-chick .beak{
+  position:absolute;left:28px;bottom:32px;width:10px;height:6px;border-radius:2px;background:#f2a12b;
+}
+#storycut .sc-chick .eye{
+  position:absolute;left:22px;bottom:36px;width:4px;height:4px;border-radius:50%;background:#16324f;
+}
+#storycut .sc-titlecard{
+  position:absolute;left:50%;top:22%;transform:translateX(-50%) scale(.92);
+  opacity:0;text-align:center;color:#fff;z-index:4;
+  transition:opacity .5s ease, transform .5s cubic-bezier(.2,1.2,.3,1);
+  text-shadow:0 4px 0 rgba(18,52,80,.45);
+}
+#storycut .sc-titlecard.on{opacity:1;transform:translateX(-50%) scale(1);}
+#storycut .sc-titlecard .k{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.9;}
+#storycut .sc-titlecard .n{font-size:clamp(28px,8vw,44px);line-height:.95;margin-top:6px;}
+#storycut .sc-vignette{
+  position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:radial-gradient(120% 80% at 50% 40%, transparent 40%, rgba(0,0,0,.45) 100%);
+}
+#storycut .sc-flare{
+  position:absolute;inset:0;opacity:0;z-index:6;pointer-events:none;
+  background:radial-gradient(circle at 50% 60%, rgba(255,224,122,.55), transparent 55%);
+  transition:opacity .45s ease;
+}
+#storycut .sc-flare.on{opacity:1;}
+#storycut .sc-caption{
+  position:relative;z-index:10;width:min(94vw,440px);
+  background:rgba(255,253,246,.96);border-radius:18px;padding:14px 16px 16px;
+  box-shadow:0 8px 0 rgba(18,52,80,.28), 0 18px 34px rgba(18,52,80,.35);
+  text-align:center;margin-bottom:10px;
+  animation:sheetin .4s cubic-bezier(.2,1.15,.3,1) both;
+}
+#storycut .sc-caption .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7c3aed;}
+#storycut .sc-caption .n{font-size:18px;color:var(--ink);margin:4px 0 6px;}
+#storycut .sc-caption .h{
+  font-size:13px;color:var(--ink-soft);font-weight:700;line-height:1.4;
+  min-height:2.8em;
+}
+#storycut .sc-controls{position:relative;z-index:10;display:flex;gap:8px;width:min(94vw,440px);}
+#storycut .sc-controls .btn{flex:1;min-height:48px;font-size:14px;}
+#storycut #sc-cont{display:none;}
+#storycut.done #sc-cont{display:block;}
+#storycut.done #sc-skip{display:none;}
+#storycut .sc-stars span{
+  position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;opacity:.0;
+}
+#storycut[data-scene="night"] .sc-stars span,
+#storycut[data-scene="finale"] .sc-stars span{opacity:.85;animation:scstar 2.4s ease-in-out infinite;}
+@keyframes scstar{50%{opacity:.25;transform:scale(1.4);}}
+
+@media (max-width:520px){
+  #story.sheet .head{width:100%;max-width:none;padding:12px 14px 8px;border-radius:18px 18px 0 0;}
+  #story-hero{width:100%;max-width:none;padding:0 12px;}
+  #story.sheet > .body{
+    width:100%;max-width:none;
+    max-height:none;flex:1 1 auto;
+    padding:6px 12px calc(16px + env(safe-area-inset-bottom,0px));
+  }
+  #storychip{width:100%;}
+  #storycut .sc-caption{padding:12px 14px;}
+}
+
 /* --- mobile-first compaction --------------------------------------------- */
 #retrydock{width:min(92vw,420px);display:flex;justify-content:center;}
 #retrydock #btn-retry{width:min(92vw,360px);}
@@ -1723,7 +2010,7 @@ kbd{
     padding:8px 10px;border-radius:12px;gap:8px;min-width:0;
   }
   #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{display:none;}
-  #sniperfeed, #chipbank{grid-column:1 / -1;}
+  #sniperfeed, #chipbank, #storychip{grid-column:1 / -1;}
   #hourlycrate .ico, #mysterydeal .ico, #streakvaultchip .ico, #echonest .ico{
     width:34px;height:34px;font-size:8px;border-radius:10px;flex-shrink:0;
   }
@@ -1959,7 +2246,8 @@ kbd{
   #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
   #j-mascot .shades,
   #start:not(.hidden) #title .one,#start:not(.hidden) #title .two,
-  .screen.sheet:not(.hidden),#reveal::before,#hatch::before{animation:none!important;transition:none!important;}
+  .screen.sheet:not(.hidden),#reveal::before,#hatch::before,
+  #storycut .sc-chick,#storycut .sc-truck,#storycut .sc-log,#storycut .sc-sun,#storycut .sc-road::after,#btn-story.hot,#btn-story2.hot,#storychip .ico{animation:none!important;transition:none!important;}
 }
 </style>
 </head>
@@ -2067,6 +2355,13 @@ kbd{
     </button>
     <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
     <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
+    <button type="button" id="storychip" aria-label="Open story mode">
+      <span class="ico">STORY</span>
+      <span class="copy">
+        <span class="k" id="storychip-k">story mode</span>
+        <span class="n" id="storychip-n">The Endless Crossing</span>
+      </span>
+    </button>
     </div>
     <div id="playdock">
     <button id="btn-play" class="btn">Play</button>
@@ -2076,6 +2371,7 @@ kbd{
       <button id="btn-chars"  class="btn ghost">Characters</button>
       <button id="btn-quests" class="btn ghost">Today</button>
       <button id="btn-journey" class="btn ghost">Journey</button>
+      <button id="btn-story" class="btn ghost">Story</button>
       <button id="btn-spin" class="btn ghost">Spin</button>
       <button id="btn-pets" class="btn ghost">Pets</button>
       <button id="btn-awards" class="btn ghost">Awards</button>
@@ -2132,6 +2428,7 @@ kbd{
       <button id="btn-chars2"  class="btn ghost">Characters</button>
       <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-journey2" class="btn ghost">Journey</button>
+      <button id="btn-story2" class="btn ghost">Story</button>
       <button id="btn-spin2" class="btn ghost">Spin</button>
       <button id="btn-awards2" class="btn ghost">Awards</button>
     </div>
@@ -2341,6 +2638,76 @@ kbd{
     </div>
   </div>
 
+
+  <!-- ===================== STORY MODE ===================== -->
+  <div id="story" class="screen sheet hidden">
+    <div class="head">
+      <h2>Story</h2>
+      <span class="count" id="story-count">1 / 5</span>
+      <button class="close-btn" data-close="story" aria-label="Close">✕</button>
+    </div>
+    <div id="story-hero">
+      <div class="eyebrow">the endless crossing</div>
+      <h3 id="story-title">Dawn on the Curb</h3>
+      <div class="blurb" id="story-blurb">A short hop-tale told in cutscenes. Clear objectives to unlock the next beat.</div>
+      <div id="story-progress">
+        <div class="txt">
+          <div class="t" id="story-prog-t">Chapter progress</div>
+          <div class="s" id="story-prog-s">0 / 2 objectives</div>
+        </div>
+        <div class="bar"><i id="story-prog-bar" style="width:0%"></i></div>
+      </div>
+      <div id="story-actions">
+        <button type="button" class="btn watch" id="btn-story-watch">Watch cutscene</button>
+        <button type="button" class="btn" id="btn-story-claim" disabled>Claim chapter</button>
+        <button type="button" class="btn ghost" id="btn-story-play">Play run</button>
+      </div>
+    </div>
+    <div class="body">
+      <div class="subhead">Objectives</div>
+      <div id="story-obj-list"></div>
+      <div class="subhead" style="margin-top:10px;">Chapters</div>
+      <div id="story-chapter-list"></div>
+    </div>
+  </div>
+
+  <!-- ===================== STORY CUTSCENE THEATER ===================== -->
+  <div id="storycut" class="hidden" aria-live="polite">
+    <div class="sc-stage" aria-hidden="true">
+      <div class="sc-sky"></div>
+      <div class="sc-sun"></div>
+      <div class="sc-stars">
+        <span style="left:12%;top:10%"></span><span style="left:28%;top:18%"></span>
+        <span style="left:46%;top:8%"></span><span style="left:63%;top:16%"></span>
+        <span style="left:78%;top:11%"></span><span style="left:88%;top:22%"></span>
+      </div>
+      <div class="sc-grass-top"></div>
+      <div class="sc-road"></div>
+      <div class="sc-water">
+        <div class="sc-log"></div>
+        <div class="sc-log l2"></div>
+      </div>
+      <div class="sc-truck"></div>
+      <div class="sc-truck b"></div>
+      <div class="sc-chick">
+        <div class="comb"></div><div class="head"></div><div class="eye"></div>
+        <div class="beak"></div><div class="body"></div>
+      </div>
+      <div class="sc-titlecard"><div class="k" id="sc-card-k">Story</div><div class="n" id="sc-card-n">Title</div></div>
+      <div class="sc-vignette"></div>
+      <div class="sc-flare"></div>
+    </div>
+    <div class="sc-caption">
+      <div class="k" id="sc-k">Chapter</div>
+      <div class="n" id="sc-n">Title</div>
+      <div class="h" id="sc-h">Line</div>
+    </div>
+    <div class="sc-controls">
+      <button type="button" class="btn ghost" id="sc-skip">Skip</button>
+      <button type="button" class="btn" id="sc-cont">Continue</button>
+    </div>
+  </div>
+
   <!-- ===================== LUCKY SPIN ===================== -->
   <div id="spin" class="screen sheet hidden">
     <div class="head">
@@ -2464,6 +2831,15 @@ kbd{
           <button type="button" class="btn ghost" id="admin-grant-coins">+200 coins</button>
           <button type="button" class="btn ghost" id="admin-grant-stars">+20 stars</button>
           <button type="button" class="btn ghost" id="admin-grant-vip">Grant VIP</button>
+        </div>
+      </div>
+      <div class="rowcard">
+        <div class="t">Story mode</div>
+        <div class="s">cutscene track · independent of seasons</div>
+        <div class="btns">
+          <button type="button" class="btn ghost" id="admin-story-next">Complete chapter</button>
+          <button type="button" class="btn ghost" id="admin-story-cut">Replay cutscene</button>
+          <button type="button" class="btn warn" id="admin-story-reset">Reset story</button>
         </div>
       </div>
     </div>
@@ -115402,7 +115778,7 @@ const streakEl = $('streak'), streakVal = streakEl.querySelector('.val');
 const screens = {
   start: $('start'), over: $('over'), pause: $('pause'),
   chars: $('chars'), awards: $('awards'), quests: $('quests'),
-  journey: $('journey'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
+  journey: $('journey'), story: $('story'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
   weekly: $('weekly'), shop: $('shop'), bank: $('bank'), encyc: $('encyc'),
   admin: $('admin'),
 };
@@ -116027,6 +116403,7 @@ for(const [id, panel] of [
   ['btn-awards','awards'], ['btn-awards2','awards'],
   ['btn-quests','quests'], ['btn-quests2','quests'],
   ['btn-journey','journey'], ['btn-journey2','journey'],
+  ['btn-story','story'], ['btn-story2','story'],
   ['btn-spin','spin'], ['btn-spin2','spin'],
   ['btn-pets','pets'], ['btn-titles','titles'],
   ['btn-weekly','weekly'], ['btn-shop','shop'],
@@ -116311,6 +116688,7 @@ const TITLES = [
   { id:'petlover', name:'Pet Person', hint:'Hatch a pet' },
   { id:'spinner', name:'High Roller', hint:'Spin the wheel 20 times' },
   { id:'journey', name:'Trailblazer', hint:'Clear the Journey track' },
+  { id:'crosser', name:'Crosser', hint:'Finish Story Mode: The Endless Crossing' },
   { id:'ghosted', name:'Ghosted', hint:'Beat your ghost' },
   { id:'storm', name:'Storm Chaser', hint:'Survive a coin storm' },
   { id:'golden', name:'Midas Beak', hint:'Clear a golden road' },
@@ -119313,6 +119691,501 @@ function finishClutch(maxed){
   }, 900);
 }
 
+/* ==========================================================================
+ * STORY MODE — "The Endless Crossing"
+ * Short journey track: animated cutscenes + hop objectives.
+ * Independent of seasonal Journey Pass progress.
+ * ========================================================================== */
+const STORY_CHAPTERS = [
+  {
+    id: 'dawn',
+    title: 'Dawn on the Curb',
+    blurb: 'Pip wakes before the cars. One hop is all it takes to begin.',
+    cutscene: 'prologue',
+    reward: { kind: 'coins', pay: 20, label: '+20 coins' },
+    objectives: [
+      { id: 'dawn_hops', name: 'First Crossing', hint: 'Reach 12 in one run', goal: 12, get: () => player.maxRow },
+      { id: 'dawn_coins', name: 'Pocket Change', hint: 'Pick up 3 coins in one run', goal: 3, get: () => run.coins },
+    ],
+  },
+  {
+    id: 'traffic',
+    title: 'Rush of Red',
+    blurb: 'Trucks invent new ways to ruin a morning. Stay sharp.',
+    cutscene: 'traffic',
+    reward: { kind: 'coins', pay: 35, label: '+35 coins' },
+    objectives: [
+      { id: 'traf_near', name: 'Brush With Paint', hint: 'Survive 2 near misses in a run', goal: 2, get: () => run.nears },
+      { id: 'traf_score', name: 'Through the Lane', hint: 'Reach 25 in one run', goal: 25, get: () => player.maxRow },
+    ],
+  },
+  {
+    id: 'river',
+    title: 'Borrowed Current',
+    blurb: 'The river does not care about chickens. Ride anyway.',
+    cutscene: 'river',
+    reward: { kind: 'spin', pay: 1, label: '+1 spin' },
+    objectives: [
+      { id: 'riv_logs', name: 'Log Rider', hint: 'Ride 3 river rows in one run', goal: 3, get: () => run.logs },
+      { id: 'riv_score', name: 'Far Shore', hint: 'Reach 40 in one run', goal: 40, get: () => player.maxRow },
+    ],
+  },
+  {
+    id: 'fever',
+    title: 'Heat in the Feathers',
+    blurb: 'Keep hopping and the road starts to hum.',
+    cutscene: 'fever',
+    reward: { kind: 'shield', pay: 1, label: 'Banked Shield' },
+    objectives: [
+      { id: 'fev_streak', name: 'Catch the Hum', hint: 'Chain a streak of 10', goal: 10, get: () => run.streak },
+      { id: 'fev_score', name: 'Blue Horizon', hint: 'Reach 55 in one run', goal: 55, get: () => player.maxRow },
+    ],
+  },
+  {
+    id: 'home',
+    title: 'The Road Goes On',
+    blurb: 'No finish line — only the next hop. That is the point.',
+    cutscene: 'finale',
+    reward: { kind: 'title', pay: 'crosser', label: 'Crosser title' },
+    objectives: [
+      { id: 'home_runs', name: 'One More Hop', hint: 'Finish 2 runs (any score)', goal: 2, get: () => (stats._storyRunMark|0) },
+      { id: 'home_score', name: 'Legendary Lane', hint: 'Reach 70 in one run', goal: 70, get: () => player.maxRow },
+    ],
+  },
+];
+
+const STORY_CUTSCENES = {
+  prologue: {
+    id: 'prologue',
+    chapter: 'Prologue',
+    title: 'Dawn on the Curb',
+    scene: 'dawn',
+    beats: [
+      { t: 0, line: 'Pip the chicken woke before the cars did.' },
+      { t: 1700, line: 'Beyond the grass: a road that never ended.' },
+      { t: 3400, line: 'One hop. Just one more.', card: true, cardK: 'Story Mode', cardN: 'The Endless Crossing' },
+    ],
+    duration: 5200,
+  },
+  traffic: {
+    id: 'traffic',
+    chapter: 'Chapter 2',
+    title: 'Rush of Red',
+    scene: 'traffic',
+    beats: [
+      { t: 0, line: 'Paint and metal arrived like weather.' },
+      { t: 1600, line: 'Pip hopped between thunderclaps of trucks.' },
+      { t: 3300, line: 'A near miss tastes like victory. Briefly.', card: true, cardK: 'Chapter 2', cardN: 'Rush of Red' },
+    ],
+    duration: 5000,
+  },
+  river: {
+    id: 'river',
+    chapter: 'Chapter 3',
+    title: 'Borrowed Current',
+    scene: 'river',
+    beats: [
+      { t: 0, line: 'The river offered wood, not kindness.' },
+      { t: 1700, line: 'Pip rode the current like a borrowed bicycle.' },
+      { t: 3400, line: 'Far shore. Wet feathers. Still hopping.', card: true, cardK: 'Chapter 3', cardN: 'Borrowed Current' },
+    ],
+    duration: 5200,
+  },
+  fever: {
+    id: 'fever',
+    chapter: 'Chapter 4',
+    title: 'Heat in the Feathers',
+    scene: 'fever',
+    beats: [
+      { t: 0, line: 'Streak heat climbed Pip\'s comb.' },
+      { t: 1600, line: 'The road hummed. Coins glittered like dares.' },
+      { t: 3300, line: 'Fever is just courage with better lighting.', card: true, cardK: 'Chapter 4', cardN: 'Heat in the Feathers' },
+    ],
+    duration: 5000,
+  },
+  finale: {
+    id: 'finale',
+    chapter: 'Finale',
+    title: 'The Road Goes On',
+    scene: 'finale',
+    beats: [
+      { t: 0, line: 'There was no last tile. Only sky.' },
+      { t: 1800, line: 'Pip looked back — every hop still echoed.' },
+      { t: 3600, line: 'The crossing never ends. That is why it matters.', card: true, cardK: 'The End', cardN: 'Keep Hopping' },
+    ],
+    duration: 5600,
+  },
+};
+
+let _storyCut = null;
+
+function storyChapterAt(i){
+  return STORY_CHAPTERS[Math.max(0, Math.min(STORY_CHAPTERS.length - 1, i|0))];
+}
+function currentStoryChapter(){
+  return storyChapterAt(stats.storyChapter|0);
+}
+function ensureStoryState(){
+  if(!stats.storyObjs || typeof stats.storyObjs !== 'object') stats.storyObjs = {};
+  if(!Array.isArray(stats.storyDone)) stats.storyDone = [];
+  if(!Array.isArray(stats.storySeen)) stats.storySeen = [];
+  if(!Array.isArray(stats.storyClaimed)) stats.storyClaimed = [];
+  if((stats.storyChapter|0) < 0) stats.storyChapter = 0;
+  if((stats.storyChapter|0) > STORY_CHAPTERS.length) stats.storyChapter = STORY_CHAPTERS.length;
+}
+function storyObjProgress(id){
+  ensureStoryState();
+  return stats.storyObjs[id]|0;
+}
+function storyChapterObjectivesDone(ch){
+  if(!ch) return true;
+  return ch.objectives.every(o => (stats.storyObjs[o.id]|0) >= o.goal);
+}
+function storyChapterReady(ch){
+  if(!ch) return false;
+  if((stats.storyClaimed||[]).includes(ch.id)) return false;
+  return storyChapterObjectivesDone(ch);
+}
+function storyAllComplete(){
+  return (stats.storyChapter|0) >= STORY_CHAPTERS.length;
+}
+function storyCutsceneSeen(id){
+  return (stats.storySeen||[]).includes(id);
+}
+
+function applyStoryReward(rew){
+  if(!rew) return;
+  if(rew.kind === 'coins') addCoins(rew.pay|0);
+  else if(rew.kind === 'spin') stats.spins = (stats.spins|0) + (rew.pay|0);
+  else if(rew.kind === 'shield') stats.bankShield = (stats.bankShield|0) + (rew.pay|0);
+  else if(rew.kind === 'magnet') stats.bankMagnet = (stats.bankMagnet|0) + (rew.pay|0);
+  else if(rew.kind === 'xp') addXp(rew.pay|0, 'story');
+  else if(rew.kind === 'title') unlockTitle(rew.pay || 'crosser');
+}
+
+function tickStoryObjectives(){
+  ensureStoryState();
+  if(storyAllComplete()) return false;
+  const ch = currentStoryChapter();
+  if(!ch) return false;
+  let changed = false;
+  for(const o of ch.objectives){
+    let at = 0;
+    try{ at = o.get()|0; }catch(e){ at = 0; }
+    if(o.id === 'home_runs') at = stats._storyRunMark|0;
+    at = Math.min(o.goal, Math.max(0, at));
+    const prev = stats.storyObjs[o.id]|0;
+    if(at > prev){
+      stats.storyObjs[o.id] = at;
+      changed = true;
+    }
+  }
+  if(changed){
+    save();
+    pulseStoryMenu();
+    refreshStoryChip();
+    if(state.panel === 'story') renderStory();
+    if(storyChapterReady(ch)){
+      badge('Story', ch.title + ' ready');
+      flashScreen('gold');
+    }
+  }
+  return changed;
+}
+
+function claimStoryChapter(){
+  ensureStoryState();
+  const ch = currentStoryChapter();
+  if(!ch || !storyChapterReady(ch)) return false;
+  if((stats.storyClaimed||[]).includes(ch.id)) return false;
+  stats.storyClaimed.push(ch.id);
+  if(!(stats.storyDone||[]).includes(ch.id)) stats.storyDone.push(ch.id);
+  applyStoryReward(ch.reward);
+  stats.storyChapter = (stats.storyChapter|0) + 1;
+  if((currentStoryChapter()||{}).id === 'home') stats._storyRunMark = 0;
+  save();
+  badge('Chapter clear!', ch.reward.label || ch.title);
+  flashScreen('gold');
+  burstConfetti(28, ['#67e8f9','#c084fc','#ffe07a','#ffffff']);
+  buzz([16, 40, 16, 40, 24]);
+  try{ Sfx.award(); }catch(e){ try{ Sfx.quest(); }catch(e2){} }
+  pulseStoryMenu();
+  refreshStoryChip();
+  renderStory();
+  if(!storyAllComplete()){
+    const next = currentStoryChapter();
+    if(next && !storyCutsceneSeen(next.cutscene)){
+      setTimeout(() => playStoryCutscene(next.cutscene, { fromClaim: true }), 450);
+    }
+  }
+  return true;
+}
+
+function setStoryScene(scene){
+  const el = $('storycut');
+  if(el) el.dataset.scene = scene || 'traffic';
+}
+
+function playStoryCutscene(id, opts){
+  opts = opts || {};
+  const cut = STORY_CUTSCENES[id];
+  const root = $('storycut');
+  if(!cut || !root) return false;
+  if(_storyCut && _storyCut.timers) _storyCut.timers.forEach(clearTimeout);
+  ensureStoryState();
+  root.classList.remove('hidden', 'done');
+  root.classList.add('show');
+  setStoryScene(cut.scene);
+  if($('sc-k')) $('sc-k').textContent = cut.chapter;
+  if($('sc-n')) $('sc-n').textContent = cut.title;
+  if($('sc-h')) $('sc-h').textContent = cut.beats[0] ? cut.beats[0].line : '';
+  const card = root.querySelector('.sc-titlecard');
+  const flare = root.querySelector('.sc-flare');
+  if(card) card.classList.remove('on');
+  if(flare) flare.classList.remove('on');
+  try{ Sfx.streak(); }catch(e){}
+  buzz([10, 30, 10]);
+
+  const timers = [];
+  for(const beat of cut.beats){
+    timers.push(setTimeout(() => {
+      if($('sc-h')) $('sc-h').textContent = beat.line;
+      if(beat.card){
+        if($('sc-card-k')) $('sc-card-k').textContent = beat.cardK || cut.chapter;
+        if($('sc-card-n')) $('sc-card-n').textContent = beat.cardN || cut.title;
+        if(card) card.classList.add('on');
+        if(flare) flare.classList.add('on');
+        try{ Sfx.milestone(); }catch(e){ try{ Sfx.award(); }catch(e2){} }
+        buzz([18, 50, 18]);
+      } else {
+        try{ Sfx.wheelTick(0.7); }catch(e){}
+      }
+    }, beat.t));
+  }
+  timers.push(setTimeout(() => {
+    root.classList.add('done');
+    if(!storyCutsceneSeen(id)){
+      stats.storySeen.push(id);
+      save();
+    }
+  }, cut.duration));
+  _storyCut = { id, timers, opts };
+  return true;
+}
+
+function endStoryCutscene(){
+  const root = $('storycut');
+  if(_storyCut && _storyCut.timers) _storyCut.timers.forEach(clearTimeout);
+  const id = _storyCut && _storyCut.id;
+  _storyCut = null;
+  if(root){
+    root.classList.remove('show', 'done');
+    root.classList.add('hidden');
+    const card = root.querySelector('.sc-titlecard');
+    const flare = root.querySelector('.sc-flare');
+    if(card) card.classList.remove('on');
+    if(flare) flare.classList.remove('on');
+  }
+  if(id && !storyCutsceneSeen(id)){
+    ensureStoryState();
+    stats.storySeen.push(id);
+    save();
+  }
+  if(state.panel === 'story') renderStory();
+  refreshStoryChip();
+}
+
+function renderStory(){
+  ensureStoryState();
+  const doneAll = storyAllComplete();
+  const idx = Math.min(stats.storyChapter|0, STORY_CHAPTERS.length - 1);
+  const ch = doneAll ? STORY_CHAPTERS[STORY_CHAPTERS.length - 1] : storyChapterAt(idx);
+  const countEl = $('story-count');
+  if(countEl) countEl.textContent = doneAll
+    ? (STORY_CHAPTERS.length + ' / ' + STORY_CHAPTERS.length)
+    : ((idx + 1) + ' / ' + STORY_CHAPTERS.length);
+  if($('story-title')) $('story-title').textContent = doneAll ? 'Crossing Complete' : ch.title;
+  if($('story-blurb')) $('story-blurb').textContent = doneAll
+    ? 'You finished the short tale. Replay any cutscene, or keep hopping forever.'
+    : ch.blurb;
+
+  const objs = doneAll ? [] : (ch.objectives || []);
+  let doneN = 0;
+  for(const o of objs){ if((stats.storyObjs[o.id]|0) >= o.goal) doneN++; }
+  if($('story-prog-t')) $('story-prog-t').textContent = doneAll ? 'Story complete' : 'Chapter progress';
+  if($('story-prog-s')) $('story-prog-s').textContent = doneAll
+    ? 'all chapters cleared'
+    : (doneN + ' / ' + objs.length + ' objectives');
+  if($('story-prog-bar')){
+    $('story-prog-bar').style.width = (doneAll ? 100 : (objs.length ? Math.round(doneN / objs.length * 100) : 0)) + '%';
+  }
+
+  const watch = $('btn-story-watch');
+  const claim = $('btn-story-claim');
+  if(watch){
+    const cid = doneAll ? 'finale' : ch.cutscene;
+    watch.textContent = storyCutsceneSeen(cid) ? 'Replay cutscene' : 'Watch cutscene';
+    watch.disabled = false;
+    watch.dataset.cut = cid;
+  }
+  if(claim){
+    if(doneAll){
+      claim.textContent = 'All chapters claimed';
+      claim.disabled = true;
+    } else {
+      const ready = storyChapterReady(ch);
+      claim.textContent = ready ? ('Claim · ' + (ch.reward.label || 'reward')) : 'Clear objectives';
+      claim.disabled = !ready;
+    }
+  }
+
+  const list = $('story-obj-list');
+  if(list){
+    list.innerHTML = '';
+    if(doneAll){
+      const el = document.createElement('div');
+      el.className = 'story-obj done';
+      el.innerHTML = '<div class="ico">OK</div><div class="txt"><div class="n">Tale complete</div><div class="h">every chapter claimed</div></div><div class="pay">done</div>';
+      list.appendChild(el);
+    } else {
+      for(const o of objs){
+        const at = Math.min(o.goal, stats.storyObjs[o.id]|0);
+        const done = at >= o.goal;
+        const el = document.createElement('div');
+        el.className = 'story-obj' + (done ? ' done' : '');
+        el.innerHTML =
+          '<div class="ico">' + (done ? 'OK' : 'GO') + '</div>' +
+          '<div class="txt"><div class="n"></div><div class="h"></div><div class="bar"><i></i></div></div>' +
+          '<div class="pay"></div>';
+        el.querySelector('.n').textContent = o.name;
+        el.querySelector('.h').textContent = done ? o.hint : (o.hint + ' — ' + at + '/' + o.goal);
+        el.querySelector('.bar i').style.width = Math.round(at / o.goal * 100) + '%';
+        el.querySelector('.pay').textContent = done ? 'done' : (at + '/' + o.goal);
+        list.appendChild(el);
+      }
+    }
+  }
+
+  const chapters = $('story-chapter-list');
+  if(chapters){
+    chapters.innerHTML = '';
+    STORY_CHAPTERS.forEach((c, i) => {
+      const el = document.createElement('div');
+      const cleared = (stats.storyDone||[]).includes(c.id) || (stats.storyClaimed||[]).includes(c.id);
+      const cur = !doneAll && i === (stats.storyChapter|0);
+      const locked = i > (stats.storyChapter|0) && !cleared;
+      el.className = 'story-chapter' + (cur ? ' cur' : '') + (cleared ? ' done' : '') + (locked ? ' locked' : '');
+      el.innerHTML = '<div class="num"></div><div class="txt"><div class="n"></div><div class="h"></div></div>';
+      el.querySelector('.num').textContent = String(i + 1);
+      el.querySelector('.n').textContent = c.title;
+      el.querySelector('.h').textContent = cleared ? ('claimed · ' + (c.reward.label || 'reward'))
+        : cur ? 'in progress' : locked ? 'locked' : 'ready';
+      chapters.appendChild(el);
+    });
+  }
+}
+
+function pulseStoryMenu(){
+  ensureStoryState();
+  const ready = !storyAllComplete() && storyChapterReady(currentStoryChapter());
+  const unread = !storyAllComplete() && currentStoryChapter() && !storyCutsceneSeen(currentStoryChapter().cutscene);
+  const intro = ((stats.storyChapter|0) === 0 && !storyCutsceneSeen('prologue'));
+  const hot = ready || unread || intro;
+  for(const id of ['btn-story', 'btn-story2']){
+    const el = $(id);
+    if(!el) continue;
+    el.classList.toggle('hot', !!hot);
+    if(ready) el.textContent = 'Story · claim';
+    else if(unread || intro) el.textContent = 'Story · new';
+    else el.textContent = 'Story';
+  }
+}
+
+function refreshStoryChip(){
+  ensureStoryState();
+  const chip = $('storychip');
+  if(!chip) return;
+  const doneAll = storyAllComplete();
+  chip.classList.add('show');
+  const ch = doneAll ? null : currentStoryChapter();
+  if($('storychip-k')) $('storychip-k').textContent = doneAll ? 'story complete' : ('story · ch ' + ((stats.storyChapter|0) + 1));
+  if($('storychip-n')){
+    if(doneAll) $('storychip-n').textContent = 'Replay The Endless Crossing';
+    else if(storyChapterReady(ch)) $('storychip-n').textContent = 'Claim · ' + ch.title;
+    else $('storychip-n').textContent = ch.title;
+  }
+}
+
+function wireStoryUi(){
+  const watch = $('btn-story-watch');
+  if(watch && !watch.dataset.wired){
+    watch.dataset.wired = '1';
+    watch.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click();
+      const id = watch.dataset.cut || (currentStoryChapter() && currentStoryChapter().cutscene) || 'prologue';
+      playStoryCutscene(id, { replay: true });
+    });
+  }
+  const claim = $('btn-story-claim');
+  if(claim && !claim.dataset.wired){
+    claim.dataset.wired = '1';
+    claim.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click();
+      claimStoryChapter();
+    });
+  }
+  const play = $('btn-story-play');
+  if(play && !play.dataset.wired){
+    play.dataset.wired = '1';
+    play.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click();
+      closePanel(); startGame();
+    });
+  }
+  const chip = $('storychip');
+  if(chip && !chip.dataset.wired){
+    chip.dataset.wired = '1';
+    chip.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click(); openPanel('story');
+    });
+  }
+  const skip = $('sc-skip');
+  if(skip && !skip.dataset.wired){
+    skip.dataset.wired = '1';
+    skip.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); endStoryCutscene(); });
+  }
+  const cont = $('sc-cont');
+  if(cont && !cont.dataset.wired){
+    cont.dataset.wired = '1';
+    cont.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); endStoryCutscene(); });
+  }
+}
+wireStoryUi();
+
+function adminCompleteStoryChapter(){
+  ensureStoryState();
+  if(storyAllComplete()){ badge('Admin', 'story already complete'); return; }
+  const ch = currentStoryChapter();
+  for(const o of ch.objectives) stats.storyObjs[o.id] = o.goal;
+  save();
+  claimStoryChapter();
+  renderAdminPanel();
+}
+function adminResetStory(){
+  stats.storyChapter = 0;
+  stats.storyObjs = {};
+  stats.storyDone = [];
+  stats.storySeen = [];
+  stats.storyClaimed = [];
+  stats._storyRunMark = 0;
+  save();
+  badge('Admin', 'story reset');
+  pulseStoryMenu();
+  refreshStoryChip();
+  if(state.panel === 'story') renderStory();
+  renderAdminPanel();
+}
+
 function addictionOnBoot(){
   mergeExtraCritters();
   if(!stats.level) stats.level = 1;
@@ -119334,6 +120207,9 @@ function addictionOnBoot(){
   refreshRival();
   refreshSniperFeed();
   refreshChipBank();
+  ensureStoryState();
+  pulseStoryMenu();
+  refreshStoryChip();
   hudMeta();
 }
 
@@ -119364,6 +120240,7 @@ function addictionOnProgress(){
   tickWagerOnProgress();
   updateRivalBan();
   petLuckTick();
+  tickStoryObjectives();
   if(hasPower("golden")){
     const pay = Math.max(1, run.coinMult||1);
     addCoins(pay); run.coins += pay;
@@ -119417,6 +120294,10 @@ function addictionOnGameOver(){
   const fuseEl = $('dopafuse'); if(fuseEl) fuseEl.classList.remove('on','hot');
   const wagerEl = $('wagerchip'); if(wagerEl) wagerEl.classList.remove('show','active');
   hideRivalBan();
+  if((currentStoryChapter()||{}).id === 'home'){
+    stats._storyRunMark = (stats._storyRunMark|0) + 1;
+  }
+  tickStoryObjectives();
   const stars = journeyStarsFromRun();
   addJourneyStars(stars);
   // Streak vault — bank soft coins from the heat you just lost, cash later.
@@ -119544,6 +120425,11 @@ function addictionLoad(raw){
   stats.comebackChips = raw.comebackChips|0;
   stats.seasonId = raw.seasonId || 'classic';
   stats.adminSeasonForce = raw.adminSeasonForce || '';
+  stats.storyChapter = raw.storyChapter|0;
+  stats.storyObjs = (raw.storyObjs && typeof raw.storyObjs === 'object') ? raw.storyObjs : {};
+  stats.storyDone = Array.isArray(raw.storyDone) ? raw.storyDone : [];
+  stats.storySeen = Array.isArray(raw.storySeen) ? raw.storySeen : [];
+  stats.storyClaimed = Array.isArray(raw.storyClaimed) ? raw.storyClaimed : [];
 }
 
 function addictionSaveFields(){
@@ -119576,6 +120462,11 @@ function addictionSaveFields(){
     nestAt: Number(stats.nestAt) || 0, comebackChips: stats.comebackChips|0,
     seasonId: stats.seasonId || 'classic',
     adminSeasonForce: stats.adminSeasonForce || '',
+    storyChapter: stats.storyChapter|0,
+    storyObjs: stats.storyObjs || {},
+    storyDone: stats.storyDone || [],
+    storySeen: stats.storySeen || [],
+    storyClaimed: stats.storyClaimed || [],
   };
 }
 
@@ -121622,6 +122513,13 @@ function wireAdminButtons(){
       badge('Admin', 'VIP granted'); renderAdminPanel();
       if(state.panel === 'journey') renderJourney();
     }],
+    ['admin-story-next', () => adminCompleteStoryChapter()],
+    ['admin-story-cut', () => {
+      const ch = currentStoryChapter();
+      const id = storyAllComplete() ? 'finale' : (ch && ch.cutscene) || 'prologue';
+      playStoryCutscene(id, { replay: true, force: true });
+    }],
+    ['admin-story-reset', () => adminResetStory()],
   ];
   for(const [id, fn] of map){
     const el = $(id);
@@ -121635,6 +122533,13 @@ wireAdminButtons();
 
 function addictionOpenPanel(name){
   if(name === "journey"){ hideJourneyUpsell(); hideJourneyReveal(); renderJourney(); }
+  else if(name === "story"){
+    renderStory();
+    ensureStoryState();
+    if(!storyCutsceneSeen('prologue')){
+      setTimeout(() => playStoryCutscene('prologue'), 280);
+    }
+  }
   else if(name === "spin") renderSpin();
   else if(name === "pets") renderPets();
   else if(name === "titles") renderTitles();
@@ -122800,6 +123705,8 @@ window.HOP = {
   openEchoNest, acceptWager, doComebackRevive, detonateFuse, startClutchSalvage, tapClutch,
   rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
   JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
+  STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
+  adminCompleteStoryChapter, adminResetStory, endStoryCutscene,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };
