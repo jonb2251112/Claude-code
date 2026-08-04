@@ -4,22 +4,22 @@ A voxel road-crossing game in 3D, built mobile-first. Twenty critters, a
 fever ladder, journey track, lucky spins, pets, power-ups — and an eagle with
 no patience.
 
-Everything lives in a single [`index.html`](index.html) (~120k lines), including
-an inlined soft-currency retention library (tips, death flavor, missions, loot
-curves, seasons, achievements, callouts, balance). There are no image/model/audio
-asset files: meshes are assembled from boxes and cylinders, textures are painted
-into `<canvas>`, and every sound is synthesised with the Web Audio API. The only
-CDN dependency is three.js.
+Everything lives in a single [`index.html`](index.html) (~128k lines / ~10 MB),
+including inlined Three.js, CSS, game logic, and a soft-currency retention
+library (tips, death flavor, missions, loot curves, seasons, achievements,
+callouts, balance). There are no image/model/audio asset files and no CDN
+dependencies: meshes are assembled from boxes and cylinders, textures are
+painted into `<canvas>`, and every sound is synthesised with the Web Audio API.
 
 ## Play
 
-Open `index.html` over HTTP — an import map needs a real origin, so `file://`
-will not do:
+Open `index.html` directly, or serve it over HTTP:
 
 ```bash
 cd crossy-hop
 python3 -m http.server 8000
 # then visit http://localhost:8000/
+# or open index.html in a browser
 ```
 
 ### Controls
