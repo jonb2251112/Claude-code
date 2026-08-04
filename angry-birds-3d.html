@@ -428,10 +428,10 @@ renderer.toneMappingExposure = 1.15;
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x87ceeb, 40, 95);
 
-const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
 // Classic side-view: slingshot left, fortress right — both in frame
-camera.position.set(1, 5.2, 14.5);
-camera.lookAt(1.5, 2.2, 0);
+camera.position.set(-0.8, 4.6, 13.2);
+camera.lookAt(0.8, 2.0, 0);
 
 /* ---------- Lighting ---------- */
 const hemi = new THREE.HemisphereLight(0xb1e1ff, 0x6bbf4a, 0.7);
@@ -509,9 +509,11 @@ let particles = [];
 let entities = []; // { mesh, body, type, hp, broken }
 let pigsAlive = 0;
 let hintShown = true;
-let cameraBase = new THREE.Vector3(1, 5.2, 14.5);
-let cameraLook = new THREE.Vector3(1.5, 2.2, 0);
+let cameraBase = new THREE.Vector3(-0.8, 4.6, 13.2);
+let cameraLook = new THREE.Vector3(0.8, 2.0, 0);
 let camShake = 0;
+let levelReady = false;
+let levelAge = 0;
 
 /* ---------- Materials (visual) ---------- */
 const matWood = new THREE.MeshStandardMaterial({
@@ -933,12 +935,15 @@ function addPig(x, y, z) {
     mass: 0.9,
     shape: new CANNON.Sphere(0.45),
     material: materials.pig,
-    linearDamping: 0.15,
-    angularDamping: 0.3,
+    linearDamping: 0.25,
+    angularDamping: 0.4,
   });
   body.position.set(x, y, z);
-  body.sleepSpeedLimit = 0.3;
+  body.allowSleep = true;
+  body.sleepSpeedLimit = 0.15;
+  body.sleepTimeLimit = 0.5;
   world.addBody(body);
+  body.sleep();
 
   const ent = { mesh, body, type: 'pig', hp: 28, broken: false };
   entities.push(ent);
@@ -989,13 +994,16 @@ function addBlock(type, x, y, z, w, h, d, rotY = 0) {
     mass,
     shape: new CANNON.Box(new CANNON.Vec3(w / 2, h / 2, d / 2)),
     material: def.phys,
-    linearDamping: 0.12,
-    angularDamping: 0.25,
+    linearDamping: 0.2,
+    angularDamping: 0.35,
   });
   body.position.set(x, y, z);
   body.quaternion.setFromEuler(0, rotY, 0);
-  body.sleepSpeedLimit = 0.25;
+  body.allowSleep = true;
+  body.sleepSpeedLimit = 0.12;
+  body.sleepTimeLimit = 0.4;
   world.addBody(body);
+  body.sleep();
 
   const ent = {
     mesh, body, type: 'block', blockType: type, hp: def.hp, maxHp: def.hp, broken: false,
@@ -1011,13 +1019,18 @@ const LEVELS = [
     name: 'Poached Eggs — 1-1',
     birds: 3,
     build() {
-      // Classic small tower — close enough to read with slingshot
-      addBlock('wood', 5.2, 0.55, 0, 0.45, 1.1, 0.45);
-      addBlock('wood', 7.0, 0.55, 0, 0.45, 1.1, 0.45);
-      addBlock('wood', 6.1, 1.3, 0, 2.3, 0.35, 0.55);
-      addBlock('wood', 5.4, 2.0, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 6.8, 2.0, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 6.1, 2.7, 0, 2.0, 0.35, 0.5);
+      // Stable classic tower — slight gaps avoided; resting on ground
+      // Pillars sit on y = half-height
+      addBlock('wood', 5.0, 0.6, 0, 0.5, 1.2, 0.5);
+      addBlock('wood', 7.2, 0.6, 0, 0.5, 1.2, 0.5);
+      // Beam resting on top of pillars (pillar top = 1.2)
+      addBlock('wood', 6.1, 1.375, 0, 2.6, 0.35, 0.55);
+      // Upper posts
+      addBlock('wood', 5.3, 2.05, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 6.9, 2.05, 0, 0.4, 1.0, 0.4);
+      // Roof
+      addBlock('wood', 6.1, 2.725, 0, 2.2, 0.35, 0.5);
+      // Pig on roof
       addPig(6.1, 3.35, 0);
     },
   },
@@ -1025,15 +1038,15 @@ const LEVELS = [
     name: 'Poached Eggs — 1-2',
     birds: 3,
     build() {
-      addBlock('wood', 4.5, 0.6, 0, 0.45, 1.2, 0.45);
-      addBlock('wood', 8.0, 0.6, 0, 0.45, 1.2, 0.45);
-      addBlock('wood', 6.25, 1.4, 0, 4.0, 0.35, 0.55);
-      addBlock('glass', 5.3, 2.1, 0, 0.4, 1.0, 0.4);
-      addBlock('glass', 7.2, 2.1, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 6.25, 2.8, 0, 2.8, 0.35, 0.5);
-      addPig(5.3, 1.95, 0);
-      addPig(7.2, 3.4, 0);
-      addBlock('stone', 6.25, 0.35, 0, 1.1, 0.7, 0.7);
+      addBlock('stone', 6.25, 0.35, 0, 1.2, 0.7, 0.7);
+      addBlock('wood', 4.4, 0.65, 0, 0.5, 1.3, 0.5);
+      addBlock('wood', 8.1, 0.65, 0, 0.5, 1.3, 0.5);
+      addBlock('wood', 6.25, 1.475, 0, 4.2, 0.35, 0.55);
+      addPig(5.2, 2.05, 0);
+      addBlock('glass', 5.2, 2.85, 0, 0.45, 0.9, 0.45);
+      addBlock('glass', 7.3, 2.15, 0, 0.45, 1.0, 0.45);
+      addBlock('wood', 6.25, 2.85, 0, 3.0, 0.35, 0.5);
+      addPig(7.3, 3.5, 0);
     },
   },
   {
@@ -1041,25 +1054,25 @@ const LEVELS = [
     birds: 4,
     build() {
       const baseX = 7;
-      addBlock('stone', baseX - 2.8, 0.5, 0, 0.7, 1.0, 0.7);
-      addBlock('wood', baseX - 2.8, 1.4, 0, 0.45, 0.8, 0.45);
-      addBlock('wood', baseX - 2.8, 2.1, 0, 1.2, 0.3, 0.5);
-      addPig(baseX - 2.8, 2.7, 0);
+      addBlock('stone', baseX - 2.8, 0.5, 0, 0.75, 1.0, 0.75);
+      addBlock('wood', baseX - 2.8, 1.4, 0, 0.5, 0.8, 0.5);
+      addBlock('wood', baseX - 2.8, 2.0, 0, 1.3, 0.35, 0.55);
+      addPig(baseX - 2.8, 2.65, 0);
 
-      addBlock('wood', baseX, 0.5, -0.55, 0.4, 1.0, 0.4);
-      addBlock('wood', baseX, 0.5, 0.55, 0.4, 1.0, 0.4);
-      addBlock('glass', baseX - 1.1, 0.5, 0, 0.35, 1.0, 0.35);
-      addBlock('glass', baseX + 1.1, 0.5, 0, 0.35, 1.0, 0.35);
-      addBlock('wood', baseX, 1.2, 0, 3.0, 0.35, 1.5);
-      addPig(baseX, 1.85, 0);
-      addBlock('wood', baseX - 1.1, 2.0, 0, 0.35, 1.2, 0.35);
-      addBlock('wood', baseX + 1.1, 2.0, 0, 0.35, 1.2, 0.35);
-      addBlock('stone', baseX, 2.8, 0, 2.6, 0.4, 0.7);
-      addPig(baseX, 3.45, 0);
+      addBlock('wood', baseX, 0.55, -0.55, 0.45, 1.1, 0.45);
+      addBlock('wood', baseX, 0.55, 0.55, 0.45, 1.1, 0.45);
+      addBlock('glass', baseX - 1.15, 0.55, 0, 0.4, 1.1, 0.4);
+      addBlock('glass', baseX + 1.15, 0.55, 0, 0.4, 1.1, 0.4);
+      addBlock('wood', baseX, 1.3, 0, 3.2, 0.4, 1.55);
+      addPig(baseX, 1.95, 0);
+      addBlock('wood', baseX - 1.15, 2.15, 0, 0.4, 1.3, 0.4);
+      addBlock('wood', baseX + 1.15, 2.15, 0, 0.4, 1.3, 0.4);
+      addBlock('stone', baseX, 3.0, 0, 2.8, 0.4, 0.75);
+      addPig(baseX, 3.65, 0);
 
-      addBlock('stone', baseX + 3.2, 0.5, 0, 0.7, 1.0, 0.7);
-      addBlock('wood', baseX + 3.2, 1.4, 0, 0.5, 0.8, 0.5);
-      addBlock('glass', baseX + 3.2, 2.2, 0, 1.0, 0.3, 0.5);
+      addBlock('stone', baseX + 3.2, 0.5, 0, 0.75, 1.0, 0.75);
+      addBlock('wood', baseX + 3.2, 1.4, 0, 0.55, 0.8, 0.55);
+      addBlock('glass', baseX + 3.2, 2.05, 0, 1.1, 0.35, 0.55);
     },
   },
   {
@@ -1069,19 +1082,19 @@ const LEVELS = [
       const bx = 7.5;
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 3 - row; col++) {
-          const x = bx + (col - (2 - row) / 2) * 1.25;
-          const y = 0.4 + row * 1.1;
+          const x = bx + (col - (2 - row) / 2) * 1.3;
+          const y = 0.5 + row * 1.05;
           const t = row === 2 ? 'glass' : (col === 1 && row === 0 ? 'stone' : 'wood');
-          addBlock(t, x, y, 0, 1.05, 0.95, 0.65);
+          addBlock(t, x, y, 0, 1.1, 0.95, 0.7);
         }
       }
-      addPig(bx, 0.5 + 3 * 1.1, 0);
-      addPig(bx - 1.25, 1.5, 0);
-      addPig(bx + 1.25, 1.5, 0);
+      addPig(bx, 3.7, 0);
+      addPig(bx - 1.3, 1.55, 0);
+      addPig(bx + 1.3, 1.55, 0);
 
-      addBlock('wood', bx - 3.6, 0.7, 0, 0.4, 1.4, 0.4);
-      addBlock('wood', bx - 3.6, 1.6, 0, 1.4, 0.3, 0.4);
-      addPig(bx - 3.6, 2.2, 0);
+      addBlock('wood', bx - 3.8, 0.75, 0, 0.45, 1.5, 0.45);
+      addBlock('wood', bx - 3.8, 1.7, 0, 1.5, 0.35, 0.45);
+      addPig(bx - 3.8, 2.35, 0);
     },
   },
 ];
@@ -1203,6 +1216,8 @@ function findEnt(body) {
 function applyImpact(ent, other, speed, event) {
   if (!ent || ent.broken) return;
   if (ent.type === 'bird') return;
+  // Ignore settling jitter before the first shot
+  if (!levelReady || (!launched && levelAge < 1.5)) return;
 
   const now = performance.now();
   const last = impactCooldown.get(ent) || 0;
@@ -1224,7 +1239,6 @@ function applyImpact(ent, other, speed, event) {
   if (ent.hp <= 0) {
     destroyEntity(ent);
   } else if (ent.type === 'block' && ent.blockType === 'wood' && ent.hp < ent.maxHp * 0.45) {
-    // Darken damaged wood
     ent.mesh.traverse?.(c => {
       if (c.isMesh && c.material && c.material.color) {
         c.material.color.offsetHSL(0, 0, -0.05);
@@ -1330,17 +1344,24 @@ function loadLevel(idx) {
   score = 0;
   scoreEl.textContent = '0';
   birdsLeft = lvl.birds;
+  levelReady = false;
+  levelAge = 0;
   lvl.build();
   spawnBirdOnSling();
   camera.position.copy(cameraBase);
+  camera.lookAt(cameraLook);
   gameActive = true;
   launched = false;
   aiming = false;
   updateBirdIcons();
+  // Brief settle, then freeze sleeping bodies
+  setTimeout(() => { levelReady = true; }, 400);
 }
 
 function checkLevelEnd() {
-  if (levelComplete || !gameActive) return;
+  if (levelComplete || !gameActive || !levelReady) return;
+  // Don't auto-win from spawn jitter
+  if (!launched && levelAge < 1.0) return;
 
   if (pigsAlive <= 0) {
     levelComplete = true;
@@ -1513,9 +1534,14 @@ function launchBird() {
   currentBird.flying = true;
   currentBird.body.type = CANNON.Body.DYNAMIC;
   currentBird.body.velocity.set(vel.x, vel.y, vel.z);
-  // Spin
   currentBird.body.angularVelocity.set(0, 0, -8 - Math.random() * 4);
   currentBird.body.wakeUp();
+
+  // Wake the fortress so impacts can topple it
+  for (const e of entities) {
+    if (e.broken || e.type === 'bird') continue;
+    e.body.wakeUp();
+  }
 
   birdsLeft--;
   updateBirdIcons();
@@ -1524,8 +1550,6 @@ function launchBird() {
 
   waitingSettle = true;
   settledTimer = 0;
-
-  // Elastic band snap visual — briefly pull pouch
   camShake = 0.12;
 }
 
@@ -1692,22 +1716,25 @@ function animate() {
       updateBands(currentBird.mesh.position);
     }
 
-    // Damage pigs from high speed / crushing
-    for (const e of entities) {
-      if (e.broken || e.type !== 'pig') continue;
-      const speed = e.body.velocity.length();
-      if (speed > 10) {
-        e.hp -= (speed - 10) * 0.5;
-        if (e.hp <= 0) destroyEntity(e);
-      }
-      // Upside down / tumbled a lot
-      const up = new CANNON.Vec3(0, 1, 0);
-      e.body.quaternion.vmult(up, up);
-      if (up.y < -0.3 && speed > 1.5) {
-        e.hp -= 8 * dt;
-        if (e.hp <= 0) destroyEntity(e);
+    // Damage pigs from high speed / crushing (only after a real shot)
+    if (launched || levelAge > 2) {
+      for (const e of entities) {
+        if (e.broken || e.type !== 'pig') continue;
+        const speed = e.body.velocity.length();
+        if (speed > 10) {
+          e.hp -= (speed - 10) * 0.5;
+          if (e.hp <= 0) destroyEntity(e);
+        }
+        const up = new CANNON.Vec3(0, 1, 0);
+        e.body.quaternion.vmult(up, up);
+        if (up.y < -0.3 && speed > 1.5) {
+          e.hp -= 8 * dt;
+          if (e.hp <= 0) destroyEntity(e);
+        }
       }
     }
+
+    levelAge += dt;
 
     if (waitingSettle && launched) {
       settledTimer += dt;
@@ -1732,8 +1759,8 @@ function animate() {
   // Idle camera sway on title
   if (!gameActive && !titleScreen.classList.contains('hidden')) {
     const t = clock.elapsedTime;
-    camera.position.set(1 + Math.sin(t * 0.35) * 1.2, 5.2 + Math.sin(t * 0.45) * 0.35, 14.5);
-    camera.lookAt(1.5, 2.2, 0);
+    camera.position.set(-0.8 + Math.sin(t * 0.35) * 1.0, 4.6 + Math.sin(t * 0.45) * 0.3, 13.2);
+    camera.lookAt(0.8, 2.0, 0);
   }
 
   renderer.render(scene, camera);
