@@ -1978,6 +1978,156 @@ kbd{
   #storycut .sc-caption{padding:12px 14px;}
 }
 
+/* --- Easy menus: roomy, one itch, clear Play ----------------------------- */
+.sr-only{
+  position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+#slimmeta{
+  display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;align-items:center;
+  font-size:clamp(12px,3.2vw,14px);letter-spacing:.14em;text-transform:uppercase;
+  color:#fff;opacity:.95;text-shadow:0 2px 0 rgba(18,52,80,.35);
+}
+#slimmeta b{color:var(--gold);font-size:1.15em;}
+#slimmeta .soft{opacity:.8;letter-spacing:.1em;font-size:.92em;}
+#xpbar.slim{width:min(72vw,260px);height:7px;margin:2px auto 0;}
+#banners{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:0;}
+#start{
+  gap:clamp(10px,2.2vh,18px);
+  padding-top:calc(var(--safe-t) + 4vh);
+  justify-content:flex-start;
+}
+#start #tagline{
+  font-size:clamp(12px,3.4vw,15px);letter-spacing:.28em;margin:0;
+  opacity:.92;
+}
+#start #looprail{
+  display:flex;flex-direction:column;gap:10px;
+  width:min(92vw,400px);align-items:stretch;margin:4px 0 0;
+}
+/* Home: only the featured itch is visible */
+#start #looprail > :not(.featured){display:none!important;}
+#start #looprail > .featured.show,
+#start #looprail > .featured.soft{display:flex!important;}
+#start #looprail > .featured{
+  transform:scale(1.02);
+  box-shadow:0 6px 0 rgba(18,52,80,.28), 0 14px 28px rgba(18,52,80,.28);
+  animation:jmenupulse 1.35s ease-in-out infinite;
+}
+#btn-more-drops{
+  border:0;background:transparent;color:#fff;opacity:.85;cursor:pointer;
+  font-family:inherit;font-weight:800;font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;text-shadow:0 2px 0 rgba(18,52,80,.3);
+  padding:4px 8px;min-height:36px;
+}
+#btn-more-drops.hidden{display:none;}
+#btn-more-drops:active{opacity:1;transform:translateY(1px);}
+#playdock{
+  width:min(92vw,400px);display:flex;flex-direction:column;align-items:center;gap:6px;
+  position:relative;z-index:6;padding:6px 0 2px;
+  background:none;
+}
+#playdock #btn-play{
+  width:min(92vw,360px);min-height:56px;font-size:clamp(18px,5.2vw,24px);
+  border-radius:22px;
+}
+#playdock .playhint{
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;opacity:.8;
+  text-shadow:0 2px 0 rgba(18,52,80,.3);font-weight:700;
+}
+#hotbar, #hotbar2{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  width:min(92vw,400px);
+}
+#hotbar .btn.ghost, #hotbar2 .btn.ghost{
+  min-width:0;max-width:none;width:100%;
+  min-height:48px;padding:12px 6px;font-size:clamp(12px,3.2vw,14px);
+  border-radius:16px;
+}
+.morebtn{
+  width:min(92vw,400px)!important;min-height:46px!important;
+  font-size:14px!important;letter-spacing:.14em;
+  background:rgba(255,253,246,.78)!important;
+}
+#tapcue, #tapcue2{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;opacity:.7;
+  text-shadow:0 2px 0 rgba(18,52,80,.3);margin-top:2px;
+}
+#over{gap:clamp(10px,2vh,16px);}
+#over > .card{max-width:min(92vw,400px);}
+#retrydock{width:min(92vw,400px);}
+#retrydock #btn-retry{width:100%;min-height:56px;font-size:clamp(18px,5vw,22px);}
+
+/* More sheet */
+#more.sheet .body{display:flex;flex-direction:column;gap:8px;}
+#more .moregrid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;
+}
+#more .moregrid .btn.ghost{
+  width:100%;min-width:0;max-width:none;min-height:48px;font-size:13px;padding:12px 10px;
+}
+#more .moredrops{
+  display:flex;flex-direction:column;gap:8px;width:100%;
+}
+#more .moredrops #looprail{
+  display:flex;flex-direction:column;gap:8px;width:100%;
+}
+#more .moredrops #looprail > .show,
+#more .moredrops #looprail > .soft{display:flex!important;}
+#more .moredrops #looprail > :not(.show):not(.soft){display:none!important;}
+#more .moredrops #looprail > .featured{animation:none;transform:none;}
+#more .morenote{
+  font-size:11px;letter-spacing:.04em;color:#fff;opacity:.8;line-height:1.4;
+  text-shadow:0 2px 0 rgba(18,52,80,.3);margin:6px 2px 10px;font-weight:700;
+}
+#more .subhead{margin-top:6px;}
+
+@media (max-width:520px){
+  #start{
+    gap:10px;
+    padding:
+      calc(var(--safe-t) + 12px)
+      max(14px, var(--safe-r))
+      calc(var(--safe-b) + 14px)
+      max(14px, var(--safe-l));
+  }
+  #title{font-size:clamp(40px,12vw,58px);}
+  #start #looprail{
+    display:flex;flex-direction:column;
+    width:min(100%,400px);gap:10px;
+  }
+  #start #looprail > :not(.featured){display:none!important;}
+  #playdock{
+    position:sticky;bottom:0;
+    padding:10px 0 max(6px, env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, transparent, rgba(12,38,62,.5) 35%, rgba(12,38,62,.78));
+    width:min(100%,400px);
+  }
+  #playdock #btn-play{width:100%;}
+  #hotbar,#hotbar2{width:min(100%,400px);gap:7px;}
+  #hotbar .btn.ghost, #hotbar2 .btn.ghost{min-height:46px;font-size:12px;padding:10px 4px;}
+  .morebtn{width:min(100%,400px)!important;}
+  #more.sheet .head{width:100%;max-width:none;border-radius:18px 18px 0 0;padding:12px 14px 8px;}
+  #more.sheet > .body{
+    width:100%;max-width:none;flex:1 1 auto;
+    max-height:none;padding:8px 14px calc(18px + env(safe-area-inset-bottom,0px));
+  }
+}
+@media (max-width:520px) and (max-height:720px){
+  #start #tagline{display:none;}
+  #tapcue,#tapcue2{display:none;}
+  #playdock .playhint{display:none;}
+  #slimmeta{font-size:11px;gap:6px 10px;}
+  #start{gap:8px;padding-top:calc(var(--safe-t) + 8px);}
+  #hotbar .btn.ghost, #hotbar2 .btn.ghost{min-height:44px;font-size:11px;}
+}
+@media (orientation:landscape) and (max-height:480px){
+  #start #looprail,#btn-more-drops,#hotbar,#hotbar2,#banners{display:none!important;}
+  #playdock{position:static;background:none;padding:0;}
+  .morebtn{width:auto!important;min-width:120px!important;}
+}
+
+
 /* --- mobile-first compaction --------------------------------------------- */
 #retrydock{width:min(92vw,420px);display:flex;justify-content:center;}
 #retrydock #btn-retry{width:min(92vw,360px);}
@@ -2002,15 +2152,9 @@ kbd{
   #startstats{font-size:10px;letter-spacing:.14em;}
   #metarow{font-size:10px;letter-spacing:.1em;flex-wrap:wrap;justify-content:center;}
   #xpbar{width:min(92vw,320px);height:8px;}
-  #looprail{
-    display:grid;grid-template-columns:1fr 1fr;gap:6px;
-    width:min(100%,420px);flex:0 0 auto;margin:2px 0;align-items:stretch;
-  }
   #hourlycrate, #mysterydeal, #streakvaultchip, #echonest{
-    padding:8px 10px;border-radius:12px;gap:8px;min-width:0;
+    padding:10px 12px;border-radius:14px;gap:10px;min-width:0;
   }
-  #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{display:none;}
-  #sniperfeed, #chipbank, #storychip{grid-column:1 / -1;}
   #hourlycrate .ico, #mysterydeal .ico, #streakvaultchip .ico, #echonest .ico{
     width:34px;height:34px;font-size:8px;border-radius:10px;flex-shrink:0;
   }
@@ -2211,7 +2355,7 @@ kbd{
     padding:8px max(12px, var(--safe-r)) 8px max(12px, var(--safe-l));
   }
   #title{font-size:28px;width:100%;}
-  #tagline,#start > .card,#gametip,#tapcue,#tapcue2,#looprail{display:none !important;}
+  #tagline,#start > .card,#gametip,#tapcue,#tapcue2,#looprail,#btn-more-drops,#hotbar,#hotbar2{display:none !important;}
   #playdock,#retrydock{position:static;background:none;padding:0;width:auto;}
   #playdock #btn-play,#retrydock #btn-retry{width:auto;min-width:150px;min-height:44px;font-size:14px;}
   #menustack,#menustack2{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;}
@@ -2306,87 +2450,80 @@ kbd{
   <!-- ===================== START ===================== -->
   <div id="start" class="screen">
     <h1 id="title"><span class="one">CROSSY</span><span class="two">HOP</span></h1>
-    <div id="tagline">how far can one chicken get? · one more hop</div>
-    <div class="card">
-      <div class="hint">
-        <div class="row"><b>Swipe</b> or <b>tap</b> to hop &nbsp;·&nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
-        <div class="row">Dodge traffic · ride the logs · don't dawdle</div>
-      </div>
+    <div id="tagline">one more hop</div>
+    <div id="slimmeta">
+      <span>best <b id="s-best">0</b></span>
+      <span>coins <b id="s-coins">0</b></span>
+      <span>lv <b id="s-level">1</b></span>
+      <span class="soft"><span id="s-rank">Hatchling</span></span>
     </div>
-    <div id="startstats">best <b id="s-best">0</b> &nbsp;·&nbsp; coins <b id="s-coins">0</b> &nbsp;·&nbsp; awards <b id="s-awards">0</b></div>
-    <div id="metarow">lv <b id="s-level">1</b> &nbsp;·&nbsp; <span id="s-rank">Hatchling</span> &nbsp;·&nbsp; <span id="s-title">Rookie</span> &nbsp;·&nbsp; spins <b id="s-spins">0</b></div>
-    <div id="xpbar"><i></i></div>
-    <div id="gift" class="hidden">daily gift +20 coins</div>
-    <div id="loginstreak" class="hidden">day 1 streak</div>
-    <div id="restbonus" class="hidden">welcome back</div>
-    <div id="looprail">
-    <button type="button" id="hourlycrate" aria-label="Claim hourly crate">
-      <span class="ico">CRATE</span>
-      <span class="copy">
-        <span class="k" id="crate-k">hourly drop</span>
-        <span class="n" id="crate-n">Crate ready</span>
-        <span class="h" id="crate-h">tap to rip it open</span>
-      </span>
-    </button>
-    <button type="button" id="mysterydeal" aria-label="Mystery deal">
-      <span class="ico">DEAL</span>
-      <span class="copy">
-        <span class="k" id="deal-k">mystery deal · ends soon</span>
-        <span class="n" id="deal-n">??? for cheap</span>
-        <span class="h" id="deal-h">one tap · soft currency</span>
-      </span>
-    </button>
-    <button type="button" id="streakvaultchip" aria-label="Streak vault">
-      <span class="ico">VAULT</span>
-      <span class="copy">
-        <span class="k">streak vault</span>
-        <span class="n" id="vault-n">0 coins banked</span>
-        <span class="h" id="vault-h">survive streaks to fill it</span>
-      </span>
-    </button>
-    <button type="button" id="echonest" aria-label="Echo nest">
-      <span class="ico">NEST</span>
-      <span class="copy">
-        <span class="k" id="nest-k">echo nest · incubating</span>
-        <span class="n" id="nest-n">Something is hatching</span>
-        <span class="h" id="nest-h">come back when it cracks</span>
-        <span class="bar"><i id="nest-bar" style="width:0%"></i></span>
-      </span>
-    </button>
-    <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
-    <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
-    <button type="button" id="storychip" aria-label="Open story mode">
-      <span class="ico">STORY</span>
-      <span class="copy">
-        <span class="k" id="storychip-k">story mode</span>
-        <span class="n" id="storychip-n">The Endless Crossing</span>
-      </span>
-    </button>
+    <div id="xpbar" class="slim"><i></i></div>
+    <!-- kept for JS writers; visually folded into slimmeta -->
+    <div id="startstats" class="sr-only" aria-hidden="true">awards <b id="s-awards">0</b></div>
+    <div id="metarow" class="sr-only" aria-hidden="true"><span id="s-title">Rookie</span> · spins <b id="s-spins">0</b></div>
+    <div id="banners">
+      <div id="gift" class="hidden">daily gift +20 coins</div>
+      <div id="loginstreak" class="hidden">day 1 streak</div>
+      <div id="restbonus" class="hidden">welcome back</div>
     </div>
+    <div id="looprail" aria-label="Featured reward">
+      <button type="button" id="hourlycrate" aria-label="Claim hourly crate">
+        <span class="ico">CRATE</span>
+        <span class="copy">
+          <span class="k" id="crate-k">hourly drop</span>
+          <span class="n" id="crate-n">Crate ready</span>
+          <span class="h" id="crate-h">tap to rip it open</span>
+        </span>
+      </button>
+      <button type="button" id="mysterydeal" aria-label="Mystery deal">
+        <span class="ico">DEAL</span>
+        <span class="copy">
+          <span class="k" id="deal-k">mystery deal · ends soon</span>
+          <span class="n" id="deal-n">??? for cheap</span>
+          <span class="h" id="deal-h">one tap · soft currency</span>
+        </span>
+      </button>
+      <button type="button" id="streakvaultchip" aria-label="Streak vault">
+        <span class="ico">VAULT</span>
+        <span class="copy">
+          <span class="k">streak vault</span>
+          <span class="n" id="vault-n">0 coins banked</span>
+          <span class="h" id="vault-h">survive streaks to fill it</span>
+        </span>
+      </button>
+      <button type="button" id="echonest" aria-label="Echo nest">
+        <span class="ico">NEST</span>
+        <span class="copy">
+          <span class="k" id="nest-k">echo nest · incubating</span>
+          <span class="n" id="nest-n">Something is hatching</span>
+          <span class="h" id="nest-h">come back when it cracks</span>
+          <span class="bar"><i id="nest-bar" style="width:0%"></i></span>
+        </span>
+      </button>
+      <button type="button" id="storychip" aria-label="Open story mode">
+        <span class="ico">STORY</span>
+        <span class="copy">
+          <span class="k" id="storychip-k">story mode</span>
+          <span class="n" id="storychip-n">The Endless Crossing</span>
+        </span>
+      </button>
+      <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
+      <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
+    </div>
+    <button type="button" id="btn-more-drops" class="linkish hidden">More rewards</button>
     <div id="playdock">
-    <button id="btn-play" class="btn">Play</button>
+      <button id="btn-play" class="btn">Play</button>
+      <div class="playhint">swipe or tap to hop · dodge · ride logs</div>
     </div>
-    <div id="menustack">
-    <div id="menurow" class="menugrid">
-      <button id="btn-chars"  class="btn ghost">Characters</button>
+    <div id="hotbar">
       <button id="btn-quests" class="btn ghost">Today</button>
       <button id="btn-journey" class="btn ghost">Journey</button>
       <button id="btn-story" class="btn ghost">Story</button>
       <button id="btn-spin" class="btn ghost">Spin</button>
-      <button id="btn-pets" class="btn ghost">Pets</button>
-      <button id="btn-awards" class="btn ghost">Awards</button>
     </div>
-    <div id="menurow3" class="menugrid" style="margin-top:2px;">
-      <button id="btn-weekly" class="btn ghost">Weekly</button>
-      <button id="btn-titles" class="btn ghost">Titles</button>
-      <button id="btn-shop" class="btn ghost">Shop</button>
-      <button id="btn-bank" class="btn ghost">Bank</button>
-      <button id="btn-encyc" class="btn ghost">Stats</button>
-      <button id="btn-admin" class="btn ghost">Admin</button>
-    </div>
-    <div id="gametip">One more hop is always justified.</div>
-    </div>
-    <div id="tapcue">tap anywhere to start</div>
+    <button type="button" id="btn-more" class="btn ghost morebtn">More</button>
+    <div id="gametip" class="sr-only">One more hop is always justified.</div>
+    <div id="tapcue">or tap anywhere</div>
   </div>
 
   <!-- ===================== GAME OVER ===================== -->
@@ -2421,19 +2558,48 @@ kbd{
     </div>
     <button type="button" id="btn-comeback">Comeback revive<span class="sub" id="comeback-sub">3 chips · free soft revive</span></button>
     <div id="retrydock">
-    <button id="btn-retry" class="btn">Retry</button>
+      <button id="btn-retry" class="btn">Retry</button>
     </div>
-    <div id="menustack2">
-    <div id="menurow2" class="menugrid">
-      <button id="btn-chars2"  class="btn ghost">Characters</button>
+    <div id="hotbar2">
       <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-journey2" class="btn ghost">Journey</button>
       <button id="btn-story2" class="btn ghost">Story</button>
       <button id="btn-spin2" class="btn ghost">Spin</button>
-      <button id="btn-awards2" class="btn ghost">Awards</button>
     </div>
+    <button type="button" id="btn-more2" class="btn ghost morebtn">More</button>
+    <div id="tapcue2">or tap anywhere to hop again</div>
+  </div>
+
+
+  <!-- ===================== MORE (secondary menus + parked rewards) ===================== -->
+  <div id="more" class="screen sheet hidden">
+    <div class="head">
+      <h2>More</h2>
+      <span class="count">everything else</span>
+      <button class="close-btn" data-close="more" aria-label="Close">✕</button>
     </div>
-    <div id="tapcue2" class="hint" style="color:#fff;opacity:.85;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">tap anywhere to hop again</div>
+    <div class="body">
+      <div class="subhead">Play loops</div>
+      <div class="moregrid">
+        <button id="btn-chars" class="btn ghost">Characters</button>
+        <button id="btn-pets" class="btn ghost">Pets</button>
+        <button id="btn-awards" class="btn ghost">Awards</button>
+        <button id="btn-weekly" class="btn ghost">Weekly</button>
+        <button id="btn-titles" class="btn ghost">Titles</button>
+      </div>
+      <div class="subhead">Shop &amp; bank</div>
+      <div class="moregrid">
+        <button id="btn-shop" class="btn ghost">Shop</button>
+        <button id="btn-bank" class="btn ghost">Bank</button>
+        <button id="btn-encyc" class="btn ghost">Stats</button>
+        <button id="btn-admin" class="btn ghost">Admin</button>
+      </div>
+      <div class="subhead">Other rewards</div>
+      <div id="more-drops" class="moredrops"></div>
+      <p class="morenote">Claimable drops also appear on the home screen one at a time — so the next tap is always obvious.</p>
+      <button id="btn-awards2" class="sr-only" tabindex="-1" aria-hidden="true">Awards</button>
+      <button id="btn-chars2" class="sr-only" tabindex="-1" aria-hidden="true">Characters</button>
+    </div>
   </div>
 
   <!-- ===================== CHARACTERS ===================== -->
@@ -115778,7 +115944,7 @@ const streakEl = $('streak'), streakVal = streakEl.querySelector('.val');
 const screens = {
   start: $('start'), over: $('over'), pause: $('pause'),
   chars: $('chars'), awards: $('awards'), quests: $('quests'),
-  journey: $('journey'), story: $('story'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
+  journey: $('journey'), story: $('story'), more: $('more'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
   weekly: $('weekly'), shop: $('shop'), bank: $('bank'), encyc: $('encyc'),
   admin: $('admin'),
 };
@@ -116125,6 +116291,8 @@ function renderQuests(){
 }
 
 function openPanel(name){
+  const prev = state.panel;
+  if(prev === 'more' && name !== 'more') parkLooprailInMore(false);
   state.panel = name;
   if(name === 'chars') renderChars();
   else if(name === 'quests') renderQuests();
@@ -116134,11 +116302,14 @@ function openPanel(name){
   applyChrome();
 }
 function closePanel(){
+  const leaving = state.panel;
   const back = state.mode === 'over' ? 'over' : state.mode === 'menu' ? 'start' : null;
   state.panel = null;
+  if(leaving === 'more') parkLooprailInMore(false);
   show(back);
   applyChrome();
   $('s-awards').textContent = awardsDone();
+  refreshFeaturedDrop();
 }
 
 /** Spin the machine: egg cracks open, critter hops out. */
@@ -116409,6 +116580,7 @@ for(const [id, panel] of [
   ['btn-weekly','weekly'], ['btn-shop','shop'],
   ['btn-bank','bank'], ['btn-encyc','encyc'],
   ['btn-admin','admin'],
+  ['btn-more','more'], ['btn-more2','more'],
 ]){
   const el = $(id);
   if(el) el.addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); openPanel(panel); });
@@ -119138,6 +119310,7 @@ function refreshHourlyCrate(){
     if(h) h.textContent = 'come back · free soft loot';
     el.querySelector('.ico') && (el.querySelector('.ico').textContent = 'WAIT');
   }
+  try{ refreshFeaturedDrop(); }catch(e){}
 }
 function openHourlyCrate(){
   if(!crateReady()){
@@ -119202,6 +119375,7 @@ function refreshMysteryDeal(){
   if(k) k.textContent = left < 60e3 ? 'mystery deal · LAST SECONDS' : ('mystery deal · ' + formatHMS(left).replace(/^00:/, ''));
   if(n) n.textContent = label + ' · ' + cost + ' coins';
   if(h) h.textContent = 'one tap · soft currency only';
+  try{ refreshFeaturedDrop(); }catch(e){}
 }
 function buyMysteryDeal(){
   ensureMysteryDeal();
@@ -119243,6 +119417,7 @@ function refreshStreakVaultChip(){
   const vh = $('vault-h');
   if(vn) vn.textContent = n + ' coins banked';
   if(vh) vh.textContent = n > 0 ? 'tap to cash in' : 'survive streaks to fill it';
+  try{ refreshFeaturedDrop(); }catch(e){}
 }
 function cashStreakVault(){
   const n = stats.streakVault|0;
@@ -119492,6 +119667,7 @@ function refreshEchoNest(){
     if(h) h.textContent = pct + '% · leave it cooking';
     if(ico) ico.textContent = 'NEST';
   }
+  try{ refreshFeaturedDrop(); }catch(e){}
 }
 function openEchoNest(){
   ensureEchoNest();
@@ -120114,6 +120290,7 @@ function refreshStoryChip(){
     else if(storyChapterReady(ch)) $('storychip-n').textContent = 'Claim · ' + ch.title;
     else $('storychip-n').textContent = ch.title;
   }
+  try{ refreshFeaturedDrop(); }catch(e){}
 }
 
 function wireStoryUi(){
@@ -120186,6 +120363,106 @@ function adminResetStory(){
   renderAdminPanel();
 }
 
+/* --- Easy menu: one featured itch + More sheet parking -------------------- */
+function crateIsReady(){
+  try{ return typeof crateReady === 'function' && crateReady(); }catch(e){ return false; }
+}
+function nestIsReady(){
+  const el = $('echonest');
+  return !!(el && el.classList.contains('show') && el.classList.contains('ready'));
+}
+function storyIsHot(){
+  try{
+    ensureStoryState();
+    if(storyAllComplete()) return false;
+    const ch = currentStoryChapter();
+    return storyChapterReady(ch) || !storyCutsceneSeen(ch.cutscene) || ((stats.storyChapter|0) === 0 && !storyCutsceneSeen('prologue'));
+  }catch(e){ return false; }
+}
+function refreshFeaturedDrop(){
+  const rail = $('looprail');
+  if(!rail) return;
+  // If the rail is parked inside More, don't collapse it to one chip.
+  if(rail.closest('#more-drops')){
+    for(const el of rail.children){
+      el.classList.remove('parked');
+    }
+    return;
+  }
+  const ids = ['hourlycrate','echonest','storychip','mysterydeal','streakvaultchip','sniperfeed','chipbank'];
+  for(const id of ids){
+    const el = $(id);
+    if(el){ el.classList.remove('featured','soft','parked'); }
+  }
+  let pick = null;
+  let soft = false;
+  const crate = $('hourlycrate');
+  const nest = $('echonest');
+  const story = $('storychip');
+  const deal = $('mysterydeal');
+  const vault = $('streakvaultchip');
+  if(crate && crate.classList.contains('show') && crateIsReady()) pick = crate;
+  else if(nest && nestIsReady()) pick = nest;
+  else if(story && story.classList.contains('show') && storyIsHot()) pick = story;
+  else if(deal && deal.classList.contains('show')) pick = deal;
+  else if(vault && vault.classList.contains('show')) pick = vault;
+  else if(story && story.classList.contains('show')){ pick = story; soft = true; }
+  else if(crate && crate.classList.contains('show')){ pick = crate; soft = true; }
+
+  if(pick){
+    pick.classList.add('featured');
+    if(soft) pick.classList.add('soft');
+  }
+  for(const id of ['sniperfeed','chipbank']){
+    const el = $(id);
+    if(el) el.classList.add('parked');
+  }
+  let extras = 0;
+  for(const id of ['hourlycrate','echonest','storychip','mysterydeal','streakvaultchip']){
+    const el = $(id);
+    if(!el || el === pick) continue;
+    if(el.classList.contains('show')) extras++;
+  }
+  const btn = $('btn-more-drops');
+  if(btn){
+    if(extras > 0){
+      btn.classList.remove('hidden');
+      btn.textContent = extras === 1 ? '1 more reward in More' : (extras + ' more rewards in More');
+    } else {
+      btn.classList.add('hidden');
+    }
+  }
+}
+function parkLooprailInMore(open){
+  const rail = $('looprail');
+  const host = $('more-drops');
+  const home = $('start');
+  if(!rail || !host || !home) return;
+  if(open){
+    host.appendChild(rail);
+    for(const el of rail.children) el.classList.remove('parked');
+  } else {
+    const dropsBtn = $('btn-more-drops');
+    if(dropsBtn && dropsBtn.parentElement === home) home.insertBefore(rail, dropsBtn);
+    else {
+      const play = $('playdock');
+      if(play) home.insertBefore(rail, play);
+      else home.appendChild(rail);
+    }
+    refreshFeaturedDrop();
+  }
+}
+function wireEasyMenus(){
+  const moreDrops = $('btn-more-drops');
+  if(moreDrops && !moreDrops.dataset.wired){
+    moreDrops.dataset.wired = '1';
+    moreDrops.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click(); openPanel('more');
+    });
+  }
+}
+wireEasyMenus();
+
 function addictionOnBoot(){
   mergeExtraCritters();
   if(!stats.level) stats.level = 1;
@@ -120210,6 +120487,7 @@ function addictionOnBoot(){
   ensureStoryState();
   pulseStoryMenu();
   refreshStoryChip();
+  refreshFeaturedDrop();
   hudMeta();
 }
 
@@ -122540,6 +122818,7 @@ function addictionOpenPanel(name){
       setTimeout(() => playStoryCutscene('prologue'), 280);
     }
   }
+  else if(name === "more"){ parkLooprailInMore(true); }
   else if(name === "spin") renderSpin();
   else if(name === "pets") renderPets();
   else if(name === "titles") renderTitles();
@@ -123706,6 +123985,7 @@ window.HOP = {
   rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
   JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
   STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
+  refreshFeaturedDrop, parkLooprailInMore,
   adminCompleteStoryChapter, adminResetStory, endStoryCutscene,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
