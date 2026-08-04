@@ -87,8 +87,9 @@ Soft-currency only — no real-money purchases. Everything spends coins you earn
   rewards pay coins, chests and titles up to 100.
 - **Ranks & titles.** Best-score ranks from Hatchling to Immortal. Twenty-five
   titles to unlock and wear on the menu.
-- **Journey track.** Forty nodes paid in journey stars from your runs — coins,
-  XP, chests and free spins.
+- **Journey Pass.** Dual FREE + VIP battle-pass tracks with a 4-day FOMO
+  timer, VIP unlock (soft currency), tier skips, star packs, 2× star boosters,
+  claimable rewards, exclusive VIP loot, and death-screen upsells. No real money.
 - **Lucky Spin.** One free ticket a day (or 30 coins). Jackpots, chests, banked
   shields/magnets, XP.
 - **Power-ups.** Shield, Magnet, Turbo, Midas, Chill and Fury spawn on grass.
