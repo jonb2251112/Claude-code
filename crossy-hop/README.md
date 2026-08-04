@@ -1,14 +1,15 @@
 # CROSSY HOP
 
-A voxel road-crossing game in 3D, built mobile-first. Twelve critters, endless
-traffic, and an eagle with no patience.
+A voxel road-crossing game in 3D, built mobile-first. Twenty critters, a
+fever ladder, journey track, lucky spins, pets, power-ups — and an eagle with
+no patience.
 
-Everything lives in a single [`index.html`](index.html). There are no images,
-models, fonts or audio files: the cars, critters, trees, logs and trains are
-assembled from boxes and cylinders at load time, the sky, lane markings and
-river ripples are painted into a `<canvas>`, and every sound is synthesised with
-the Web Audio API. The only external dependency is three.js, pulled from a CDN
-through an import map.
+Everything lives in a single [`index.html`](index.html) (~120k lines), including
+an inlined soft-currency retention library (tips, death flavor, missions, loot
+curves, seasons, achievements, callouts, balance). There are no image/model/audio
+asset files: meshes are assembled from boxes and cylinders, textures are painted
+into `<canvas>`, and every sound is synthesised with the Web Audio API. The only
+CDN dependency is three.js.
 
 ## Play
 
@@ -38,26 +39,106 @@ persist in `localStorage`.
 
 ## Things to chase
 
-- **Characters.** Twelve critters — chicken, duck, pigeon, cat, bunny, penguin,
-  parrot, frog, panda, dino, robot, ghost — built by one parameterised voxel
-  function from a table of spec objects. Each retunes the hop blip, and a few
-  change how a run feels: the frog hops higher, the ghost has no legs and floats.
+- **Characters.** Twenty critters (fox, owl, pig, sheep, raccoon, wolf, unicorn,
+  alien joined the roster) built by one parameterised voxel function. Each
+  retunes the hop blip; frog hops higher, ghost floats, robot beeps.
 - **Prize machine.** 40 coins for a random critter you do not own, weighted by
   rarity, revealed with a sunburst and worn immediately. The character sheet
   shows portraits rendered off-screen from the real geometry, viewed from the
   front — the only place in the game you get to see a critter's face.
-- **Awards.** Twenty of them, tracking distance, coins, log rows, railways,
-  near misses, streaks, hops, runs, the size of your collection and the number of
-  distinct ways you have died. Each announces itself as it lands, and the score
-  card dangles whichever one you are closest to.
+- **Awards.** Twenty-nine of them, tracking distance, coins, log rows, railways,
+  near misses, streaks, hops, runs, the size of your collection, the number of
+  distinct ways you have died, revives, every fever tier, daily challenges and
+  login streaks. Each announces itself as it lands, and the score card dangles
+  whichever one you are closest to.
 - **Streaks.** Hops that land within 1.15 s of the last one chain; every tenth
   link pays a coin. The chip under the score turns red at ten.
+- **Fever ladder.** Six heat levels climb with your streak:
+  - **Warm Up** (5) — the chip catches fire
+  - **Fever** (10) — ×2 coins, magnet pulls adjacent coins
+  - **Super Fever** (18) — ×3, traffic eases, snappier hops
+  - **Mega Fever** (28) — ×4, magnet range 2, coin rain
+  - **Ultra Fever** (40) — ×5, deeper slow-mo, lucky free coins
+  - **Overdrive** (55) — ×7, magnet 3, rainbow chaos
+  Each upgrade flashes, rains confetti, and pays a heat bonus. Break the chain
+  and the heat dies.
+- **Second chance.** Die with at least 25 coins and the score card offers one
+  revive per run. You keep your score, blink back onto safe grass with a short
+  free pass, and hop on.
+- **Daily challenges.** Three seeded goals every calendar day — reach a score,
+  pocket coins, ride rivers, cross rails, survive near misses, catch a fever.
+  Finish one for a coin payout and a badge. Open them from **Today** on the
+  title screen or the score card.
+- **Login streak.** Come back tomorrow and the daily gift grows (capped at 50).
+  Miss a day and it resets.
+- **Hourly crate / mystery deal / streak vault.** Soft-currency only loops on the
+  title screen — a free hourly crate, a rotating mystery deal, and a streak vault
+  that banks coins from heat you lose on death so you can cash them later.
+- **Spin pity meter.** Dry spins fill a pity bar; after enough misses the wheel
+  forces a juicy hit so the itch never goes cold.
+- **Journey amp.** VIP value meter, loot marquee, jackpot odds tags, claim heat,
+  and a star vault you cash into tiers — FOMO chrome dialed up, still no real IAP.
+- **Seasonal Journey Passes.** Classic Pass rolls into **Summer Splash** when the
+  4-day season ends — new rewards, summer journey chrome, sunglasses chicken VIP
+  ticket, and a beach world (sand, palms, lagoons). Admin panel can force seasons
+  for testing.
+- **Never-before loops.** Dopamine Fuse detonates mid-run; Whisper Wagers let you
+  soft-bet on surviving the next rows; Clutch Salvage is a post-death mash for
+  coins; Echo Nest incubates real-time loot; Rival Sniper taunts your best; and
+  Comeback Chips bank into a free soft revive.
 - **Near misses.** A vehicle that passes within a whisker prints `close!` and
   counts towards an award.
-- **Milestones and the record gate.** Every 25th row pays a coin, and your
-  previous best is drawn across the world as a gold stripe with flags either
-  side. Cross it and the run announces itself.
+- **Milestones and the record gate.** Every 25th row pays a coin (multiplied in
+  fever), and your previous best is drawn across the world as a gold stripe with
+  flags either side. Cross it and the run announces itself.
 - **Daily gift.** A handful of coins the first time you play on a given day.
+
+
+## Retention systems (the "one more hop" engine)
+
+Soft-currency only — no real-money purchases. Everything spends coins you earn.
+
+- **XP & levels.** Every hop, coin, perfect and run feeds a level curve. Level
+  rewards pay coins, chests and titles up to 100.
+- **Ranks & titles.** Best-score ranks from Hatchling to Immortal. Twenty-five
+  titles to unlock and wear on the menu.
+- **Journey Pass.** Dual FREE + VIP battle-pass tracks engineered for "one more
+  claim": 4-day FOMO clock, jackpot dangles, near-miss star bar, claim-heat
+  streaks, fake live loot feed, pulsing unclaimed counters, VIP chicken ticket,
+  tier skips / star packs / 2× boosters. Soft currency only — no real money.
+- **Lucky Spin.** Real animated prize wheel with peg-tick SFX and a hard stop.
+  One free ticket a day (or 30 coins). Jackpots, chests, banked shields/magnets, XP.
+- **Prize Machine & pet eggs.** Characters and pets crack out of animated eggs
+  with shake → crack → reveal juice.
+- **Power-ups.** Shield, Magnet, Turbo, Midas, Chill and Fury spawn on grass.
+  Bank shields/magnets from the spin and arm them before a run.
+- **Run events.** Golden Road, Coin Storm, Stampede, Quiet Town, Fever Spark,
+  Treasure Row and more — they interrupt the grind with a new rule for a stretch.
+- **Chests.** Bronze / silver / gold loot tables from levels, journey and spins.
+- **Pets.** Hatch companions that occasionally find spare coins.
+- **Weekly goals.** Three seeded goals that reset each week.
+- **Shop trails.** Cosmetic hop trails bought with coins.
+- **Rest bonus.** Come back after four hours for a welcome-back pouch.
+- **Inlined retention library.** ~110k lines inside `index.html`: tip banks, death
+  flavor, mission templates, loot/pity curves, FOMO seasons, achievement trees,
+  combo/near-miss/claim callouts, difficulty drip. Wired into tips, death copy,
+  combos, claims, login pouches. No real money.
+
+## Feel
+
+Every hop is tuned to land with a little dopamine hit:
+
+- **Land squash** and expanding **rings** underfoot, with a soft thump.
+- **Perfect** hops (forward, tight on the last) flash mint, sparkle, and pay a
+  bonus coin every fifth one.
+- **Combo banner** grows in the centre of the screen as the streak climbs.
+- **Coins fly** into the purse; the chip spins and the score punches.
+- **Camera kick** on milestones, fever, near misses and revives — a brief zoom
+  punch, not a shake.
+- **Confetti and colour flashes** when fever ignites, awards unlock, challenges
+  clear, or you take a second chance.
+- **Buttons shimmer**, sheets slide in, the title bobs, and every menu tap has
+  weight.
 
 ## Rules of the road
 
@@ -115,16 +196,18 @@ antialiasing and halves the shadow map on low-core touch hardware. Pausing on
 
 Every knob worth turning is in the `CFG` block at the top of the script: hop
 timing, vehicle and train speeds, the minimum crossing gap, the eagle's patience,
-camera framing and fog distance. The roster lives in `CRITTERS` and the awards in
-`AWARDS`, both plain tables — a new character is a spec object, a new award is a
-name, a goal and a getter.
+camera framing, fog distance, revive cost and fever thresholds. The roster lives
+in `CRITTERS`, the awards in `AWARDS` and the daily challenge pool in
+`QUEST_POOL` — a new character is a spec object, a new award is a name, a goal
+and a getter, a new challenge is the same shape plus a coin reward.
 
 `window.HOP` exposes the state, the world, the player, the progression systems
 and `HOP.move('up' | 'down' | 'left' | 'right')` for poking at a live game from
 the console. Useful while tinkering:
 
 ```js
-HOP.stats.coins = 500; HOP.save();   // fund the prize machine
+HOP.stats.coins = 500; HOP.save();   // fund the prize machine / second chance
 HOP.equip('robot');                  // wear something else
-HOP.openPanel('awards');             // open a sheet
+HOP.openPanel('quests');             // open today's challenges
+HOP.doRevive();                      // take the second chance if offered
 ```
