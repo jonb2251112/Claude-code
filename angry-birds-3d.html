@@ -498,6 +498,7 @@ let birdsLeft = 0;
 let currentBird = null;
 let aiming = false;
 let launched = false;
+let dragMoved = false;
 let settledTimer = 0;
 let waitingSettle = false;
 let gameActive = false;
@@ -1413,39 +1414,24 @@ function pointerOnBird() {
 
 function getPullPoint() {
   raycaster.setFromCamera(pointer, camera);
-  const hit = new THREE.Vector3();
-  dragPlane.constant = 0; // z=0 plane
-  // Plane: z = 0 → normal (0,0,1), constant 0
+  // Plane through slingshot, facing the camera (approx z-constant)
   const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  raycaster.ray.intersectPlane(plane, hit);
-  if (!hit) return SLING_ORIGIN.clone();
+  const hit = new THREE.Vector3();
+  if (!raycaster.ray.intersectPlane(plane, hit)) {
+    return SLING_ORIGIN.clone().add(pullOffset);
+  }
 
   const offset = hit.clone().sub(SLING_ORIGIN);
-  // Prefer pulling left/back
-  if (offset.x > 0.3) offset.x = 0.3;
-  offset.y = Math.max(-1.5, Math.min(1.8, offset.y));
-  offset.z = Math.max(-1.2, Math.min(1.2, offset.z));
+  // Prefer pulling left / back (classic slingshot)
+  offset.x = Math.min(0.15, offset.x);
+  offset.y = Math.max(-1.4, Math.min(1.6, offset.y));
+  offset.z = Math.max(-1.0, Math.min(1.0, offset.z));
 
   if (offset.length() > MAX_PULL) offset.setLength(MAX_PULL);
   return SLING_ORIGIN.clone().add(offset);
 }
 
-function onPointerDown(e) {
-  if (!gameActive || !currentBird || launched || levelComplete) return;
-  e.preventDefault();
-  getPointerPos(e);
-  if (!pointerOnBird()) return;
-  aiming = true;
-  canvas.classList.add('aiming');
-  hideHint();
-  powerWrap.classList.add('visible');
-}
-
-function onPointerMove(e) {
-  if (!aiming || !currentBird) return;
-  e.preventDefault();
-  getPointerPos(e);
-  const pos = getPullPoint();
+function applyAimPose(pos) {
   pullOffset.copy(pos).sub(SLING_ORIGIN);
   currentBird.mesh.position.copy(pos);
   currentBird.body.position.set(pos.x, pos.y, pos.z);
@@ -1454,21 +1440,43 @@ function onPointerMove(e) {
   const power = pullOffset.length() / MAX_PULL;
   powerBar.style.height = `${power * 100}%`;
 
-  // Trajectory
   const vel = getLaunchVelocity();
-  updateTrajectory(pos, vel);
+  if (vel.length() > 0.5) {
+    updateTrajectory(pos, vel);
+    const dir = vel.clone().normalize();
+    const look = pos.clone().add(dir);
+    currentBird.mesh.lookAt(look);
+    currentBird.mesh.rotateY(Math.PI / 2);
+  }
+}
 
-  // Aim bird face along launch direction
-  const dir = vel.clone().normalize();
-  currentBird.mesh.lookAt(pos.clone().add(dir));
-  currentBird.mesh.rotateY(Math.PI / 2);
+function onPointerDown(e) {
+  if (!gameActive || !currentBird || launched || levelComplete) return;
+  e.preventDefault();
+  getPointerPos(e);
+  if (!pointerOnBird()) return;
+  aiming = true;
+  dragMoved = false;
+  canvas.classList.add('aiming');
+  hideHint();
+  powerWrap.classList.add('visible');
+  // Don't yank the bird on the initial click — wait for real drag
+}
+
+function onPointerMove(e) {
+  if (!aiming || !currentBird) return;
+  e.preventDefault();
+  getPointerPos(e);
+  const pos = getPullPoint();
+  const pull = pos.distanceTo(SLING_ORIGIN);
+  if (pull > 0.25) dragMoved = true;
+  if (dragMoved) applyAimPose(pos);
 }
 
 function getLaunchVelocity() {
   const pull = pullOffset.length();
   if (pull < 0.15) return new THREE.Vector3();
   const dir = pullOffset.clone().multiplyScalar(-1).normalize();
-  // Bias upward a bit for classic feel
   dir.y += 0.12;
   dir.normalize();
   const power = Math.min(pull / MAX_PULL, 1) * LAUNCH_POWER;
@@ -1484,16 +1492,19 @@ function onPointerUp(e) {
   if (trajectoryLine) trajectoryLine.visible = false;
 
   const pull = pullOffset.length();
-  if (pull < 0.4) {
-    // Snap back
+  // Require a real drag + enough pull — taps must not launch
+  if (!dragMoved || pull < 0.55) {
     currentBird.mesh.position.copy(SLING_ORIGIN);
+    currentBird.mesh.rotation.set(0, -0.15, 0);
     currentBird.body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
     updateBands(SLING_ORIGIN);
     pullOffset.set(0, 0, 0);
+    dragMoved = false;
     return;
   }
 
   launchBird();
+  dragMoved = false;
 }
 
 function launchBird() {
