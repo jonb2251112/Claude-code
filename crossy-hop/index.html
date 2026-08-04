@@ -119912,11 +119912,11 @@ function claimStoryChapter(){
   pulseStoryMenu();
   refreshStoryChip();
   renderStory();
-  const next = currentStoryChapter();
-  if(!storyAllComplete() && next && !storyCutsceneSeen(next.cutscene)){
-    setTimeout(() => playStoryCutscene(next.cutscene, { fromClaim: true }), 450);
-  } else if(storyAllComplete()){
-    setTimeout(() => playStoryCutscene('finale', { fromClaim: true, force: true }), 450);
+  if(!storyAllComplete()){
+    const next = currentStoryChapter();
+    if(next && !storyCutsceneSeen(next.cutscene)){
+      setTimeout(() => playStoryCutscene(next.cutscene, { fromClaim: true }), 450);
+    }
   }
   return true;
 }
@@ -123706,6 +123706,7 @@ window.HOP = {
   rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
   JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
   STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
+  adminCompleteStoryChapter, adminResetStory, endStoryCutscene,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };
