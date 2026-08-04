@@ -78,6 +78,10 @@ persist in `localStorage`.
   forces a juicy hit so the itch never goes cold.
 - **Journey amp.** VIP value meter, loot marquee, jackpot odds tags, claim heat,
   and a star vault you cash into tiers — FOMO chrome dialed up, still no real IAP.
+- **Seasonal Journey Passes.** Classic Pass rolls into **Summer Splash** when the
+  4-day season ends — new rewards, summer journey chrome, sunglasses chicken VIP
+  ticket, and a beach world (sand, palms, lagoons). Admin panel can force seasons
+  for testing.
 - **Never-before loops.** Dopamine Fuse detonates mid-run; Whisper Wagers let you
   soft-bet on surviving the next rows; Clutch Salvage is a post-death mash for
   coins; Echo Nest incubates real-time loot; Rival Sniper taunts your best; and

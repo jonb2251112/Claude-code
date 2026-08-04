@@ -1441,6 +1441,101 @@ kbd{
 }
 #boostchip.on{display:flex;animation:streakpop .35s ease;}
 
+/* --- Season themes: Summer Splash ---------------------------------------- */
+#journey.season-summer #j-hero{
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(255,224,122,.45),transparent 55%),
+    radial-gradient(90% 70% at 0% 40%,rgba(46,196,182,.35),transparent 50%),
+    radial-gradient(90% 70% at 100% 30%,rgba(255,154,60,.3),transparent 50%),
+    linear-gradient(180deg,#0c4a6e 0%,#0284c7 40%,#38bdf8 100%);
+}
+#journey.season-summer #j-fomo{
+  background:linear-gradient(90deg,#fb923c,#f59e0b,#fbbf24);
+  box-shadow:0 0 0 1px rgba(255,201,60,.5), 0 8px 24px rgba(251,146,60,.35);
+}
+#journey.season-summer #j-value{
+  background:linear-gradient(105deg,#0e7490,#06b6d4 50%,#f59e0b);
+  box-shadow:0 5px 0 #155e75, 0 0 20px rgba(6,182,212,.4);
+}
+#journey.season-summer #j-dangle{
+  background:linear-gradient(105deg,#164e63 0%,#0e7490 45%,#f59e0b 100%);
+  box-shadow:0 5px 0 #155e75, 0 0 24px rgba(245,158,11,.35);
+}
+#journey.season-summer #j-mascot{
+  background:linear-gradient(135deg,rgba(255,253,246,.97),rgba(186,230,253,.92));
+}
+#journey.season-summer #j-mascot .ticket{
+  background:linear-gradient(135deg,#fb923c 0%,#f59e0b 55%,#ea580c 100%);
+  box-shadow:0 3px 0 #c2410c, 0 6px 12px rgba(234,88,12,.35);
+}
+#journey.season-summer #j-lanes .vip{color:#fde68a;}
+#journey.season-summer #j-lanes .free{color:#a5f3fc;}
+#journey.season-summer .jtier.jackpot{
+  background:linear-gradient(90deg,rgba(251,146,60,.4),rgba(6,182,212,.4));
+  box-shadow:0 0 0 2px #fde68a, 0 0 26px rgba(251,146,60,.5);
+}
+#journey.season-summer #j-drops .drop.vip{
+  background:linear-gradient(#fde68a,#f59e0b);color:#78350f;box-shadow:0 2px 0 #b45309;
+}
+#journey.season-summer #j-drops .drop.hot{
+  background:linear-gradient(#22d3ee,#0891b2);color:#fff;box-shadow:0 2px 0 #0e7490;
+}
+#j-seasonchip{
+  display:inline-flex;align-items:center;gap:6px;margin-left:8px;
+  padding:3px 8px;border-radius:999px;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;background:rgba(255,253,246,.2);color:#fff;
+}
+#journey.season-summer #j-seasonchip{
+  background:linear-gradient(#fde68a,#fb923c);color:#78350f;box-shadow:0 2px 0 #c2410c;
+}
+/* Summer sunglasses on VIP chicken */
+#j-mascot .shades{
+  display:none;position:absolute;left:16px;bottom:51px;width:28px;height:10px;z-index:4;
+  transform-origin:50% 50%;
+  animation:jhead 2.2s cubic-bezier(.45,.05,.55,.95) infinite;
+}
+#journey.season-summer #j-mascot .shades{display:block;}
+#j-mascot .shades .lens{
+  position:absolute;top:0;width:11px;height:9px;border-radius:3px;
+  background:linear-gradient(160deg,#0f172a 20%,#22d3ee 100%);
+  box-shadow:inset 0 0 0 1.5px #1e293b, 0 2px 0 rgba(0,0,0,.15);
+}
+#j-mascot .shades .lens.l{left:0;}
+#j-mascot .shades .lens.r{right:0;}
+#j-mascot .shades .bridge{
+  position:absolute;left:10px;top:3px;width:8px;height:2px;background:#1e293b;border-radius:1px;
+}
+#j-mascot .shades .arm{
+  position:absolute;top:2px;width:8px;height:2px;background:#1e293b;border-radius:1px;
+}
+#j-mascot .shades .arm.l{left:-6px;transform:rotate(12deg);}
+#j-mascot .shades .arm.r{right:-6px;transform:rotate(-12deg);}
+#journey.season-summer #j-mascot .eye{opacity:0;} /* shades cover eyes */
+#journey.season-summer #j-mascot .spark{
+  background:#67e8f9;box-shadow:0 0 8px #22d3ee;
+}
+
+/* Admin panel */
+#admin.screen.sheet .body{padding:12px;display:flex;flex-direction:column;gap:10px;}
+#admin .rowcard{
+  background:rgba(255,253,246,.94);border-radius:14px;padding:12px;
+  box-shadow:0 3px 0 rgba(18,52,80,.16);display:flex;flex-direction:column;gap:8px;
+}
+#admin .rowcard .t{font-size:13px;color:var(--ink);font-weight:800;}
+#admin .rowcard .s{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+#admin .btns{display:flex;flex-wrap:wrap;gap:8px;}
+#admin .btns .btn{flex:1 1 120px;min-width:0;}
+#admin .btn.on{
+  background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;box-shadow:0 5px 0 #0e7490;
+}
+#admin .btn.warn{
+  background:linear-gradient(#fb923c,#ea580c);color:#fff;box-shadow:0 5px 0 #9a3412;
+}
+#admin #admin-status{
+  font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);
+  background:rgba(12,38,62,.08);border-radius:10px;padding:8px 10px;line-height:1.5;
+}
+
 /* --- Never-before addiction chrome ---------------------------------------- */
 #dopafuse{
   position:absolute;left:50%;bottom:calc(var(--safe-b) + 96px);transform:translateX(-50%);
@@ -1570,6 +1665,7 @@ kbd{
   #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,
   #j-drops .track,#j-vault.ready .go,#hourlycrate .ico,#mysterydeal .ico,.jtier.jackpot,
   #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
+  #j-mascot .shades,
   #start:not(.hidden) #title .one,#start:not(.hidden) #title .two,
   .screen.sheet:not(.hidden),#reveal::before,#hatch::before{animation:none!important;transition:none!important;}
 }
@@ -1693,6 +1789,7 @@ kbd{
       <button id="btn-shop" class="btn ghost">Shop</button>
       <button id="btn-bank" class="btn ghost">Bank</button>
       <button id="btn-encyc" class="btn ghost">Stats</button>
+      <button id="btn-admin" class="btn ghost">Admin</button>
     </div>
     <div id="gametip">One more hop is always justified.</div>
     <div id="tapcue">tap anywhere to start</div>
@@ -1804,8 +1901,9 @@ kbd{
   <!-- ===================== JOURNEY (VIP BATTLE PASS) ===================== -->
   <div id="journey" class="screen sheet hidden">
     <div class="head">
-      <h2>Journey Pass</h2>
+      <h2 id="j-title">Journey Pass</h2>
       <span class="count" id="j-count">0 / 40</span>
+      <span id="j-seasonchip">CLASSIC</span>
       <button class="close-btn" data-close="journey" aria-label="Close">✕</button>
     </div>
     <div id="j-hero">
@@ -1820,6 +1918,11 @@ kbd{
             <div class="comb"></div>
             <div class="head"></div>
             <div class="eye"></div>
+            <div class="shades" aria-hidden="true">
+              <span class="arm l"></span><span class="lens l"></span>
+              <span class="bridge"></span>
+              <span class="lens r"></span><span class="arm r"></span>
+            </div>
             <div class="beak"></div>
             <div class="body"></div>
             <div class="belly"></div>
@@ -2023,6 +2126,45 @@ kbd{
       <button class="close-btn" data-close="encyc" aria-label="Close">✕</button>
     </div>
     <div class="body"><div class="awards" id="enc-list"></div></div>
+  </div>
+
+  <!-- ===================== ADMIN (season / theme testing) ===================== -->
+  <div id="admin" class="screen sheet hidden">
+    <div class="head">
+      <h2>Admin</h2>
+      <span class="count">dev tools</span>
+      <button class="close-btn" data-close="admin" aria-label="Close">✕</button>
+    </div>
+    <div class="body">
+      <div id="admin-status">season · classic</div>
+      <div class="rowcard">
+        <div class="t">Season force</div>
+        <div class="s">lock a themed journey + map for testing</div>
+        <div class="btns">
+          <button type="button" class="btn ghost" id="admin-auto">Auto rotate</button>
+          <button type="button" class="btn ghost" id="admin-classic">Classic</button>
+          <button type="button" class="btn ghost" id="admin-summer">Summer</button>
+        </div>
+      </div>
+      <div class="rowcard">
+        <div class="t">Season tools</div>
+        <div class="s">soft currency only · no real IAP</div>
+        <div class="btns">
+          <button type="button" class="btn warn" id="admin-end-season">End season now</button>
+          <button type="button" class="btn ghost" id="admin-reset-pass">Reset pass progress</button>
+          <button type="button" class="btn ghost" id="admin-rebuild">Rebuild map</button>
+        </div>
+      </div>
+      <div class="rowcard">
+        <div class="t">Quick cheats</div>
+        <div class="s">speed up testing the itch</div>
+        <div class="btns">
+          <button type="button" class="btn ghost" id="admin-grant-coins">+200 coins</button>
+          <button type="button" class="btn ghost" id="admin-grant-stars">+20 stars</button>
+          <button type="button" class="btn ghost" id="admin-grant-vip">Grant VIP</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== PAUSE ===================== -->
@@ -112592,6 +112734,7 @@ function canvasTex(w, h, draw){
  * ratio — it meets a matching blue. FOG_SKY is that blue.
  */
 const FOG_SKY = 0xabdff8;
+const FOG_SKY_SUMMER = 0xffe0a8;
 const TEX_SKY = canvasTex(256, 256, (g,w,h)=>{
   const grd = g.createLinearGradient(0,0,0,h);
   grd.addColorStop(0.00, '#9ed8f6');
@@ -112608,6 +112751,26 @@ const TEX_SKY = canvasTex(256, 256, (g,w,h)=>{
     for(let b=0;b<6;b++){
       g.beginPath();
       g.ellipse(cx + randf(-s, s), cy + randf(-s*0.25, s*0.25), randf(s*0.5, s), randf(s*0.22, s*0.4), 0, 0, 6.3);
+      g.fill();
+    }
+  }
+  g.globalAlpha = 1;
+});
+/** Beach-season sky — warm horizon, tropical haze. */
+const TEX_SKY_SUMMER = canvasTex(256, 256, (g,w,h)=>{
+  const grd = g.createLinearGradient(0,0,0,h);
+  grd.addColorStop(0.00, '#7dd3fc');
+  grd.addColorStop(0.35, '#bae6fd');
+  grd.addColorStop(0.62, '#fde68a');
+  grd.addColorStop(1.00, '#fdba74');
+  g.fillStyle = grd; g.fillRect(0,0,w,h);
+  for(let i=0;i<5;i++){
+    const cx = Math.random()*w, cy = randf(h*0.08, h*0.35), s = randf(16, 36);
+    g.globalAlpha = randf(0.25, 0.55);
+    g.fillStyle = '#fff7ed';
+    for(let b=0;b<5;b++){
+      g.beginPath();
+      g.ellipse(cx + randf(-s, s), cy + randf(-s*0.2, s*0.2), randf(s*0.5, s), randf(s*0.2, s*0.35), 0, 0, 6.3);
       g.fill();
     }
   }
@@ -112739,6 +112902,62 @@ const PAL = {
   eagle:     C(0x4b3728),
   eagleLite: C(0xdfd6c6),
 };
+
+/** Snapshot + beach remap for seasonal world theming. */
+const PAL_HEX_CLASSIC = {
+  grass: [0x7ec850, 0x71bb46],
+  grassTint: [0x8ad25b, 0x69b040, 0x86cf57],
+  road: [0x4c4e59, 0x53555f],
+  railBed: 0x6e6862, railTie: 0x5b432f, railSteel: 0xc3cad1,
+  water: 0x3b8ccb, waterDeep: 0x2f7bb6,
+  trunk: [0x7d5432, 0x6b472a],
+  leaf: [0x2f9a4d, 0x37ab58, 0x25823f, 0x43b862],
+  rock: [0x9aa3a3, 0x8a9490, 0xa5aca6],
+  bush: [0x3aa356, 0x2f8c48],
+  log: [0x7a4f2a, 0x6a4324], logEnd: 0xb98a55, pad: 0x36a05c,
+};
+const PAL_HEX_SUMMER = {
+  grass: [0xe8d5a3, 0xdcc48a],          // sand
+  grassTint: [0xf5e6c0, 0xd4b87a, 0xf0e0b0],
+  road: [0xc4a574, 0xb8956a],           // boardwalk planks
+  railBed: 0xa8845a, railTie: 0x6b4423, railSteel: 0xe7e5e4,
+  water: 0x2ec4b6, waterDeep: 0x0e7490, // tropical lagoon
+  trunk: [0x8b5a2b, 0x6b4423],
+  leaf: [0x15803d, 0x16a34a, 0x166534, 0x22c55e],
+  rock: [0xd6d3d1, 0xa8a29e, 0xf5f5f4],
+  bush: [0x4ade80, 0x22c55e],
+  log: [0xa16207, 0x854d0e], logEnd: 0xfde68a, pad: 0x2dd4bf,
+};
+let worldThemeId = 'classic';
+function isSummerWorld(){ return worldThemeId === 'summer'; }
+function applyPalHex(src){
+  PAL.grass[0].setHex(src.grass[0]); PAL.grass[1].setHex(src.grass[1]);
+  for(let i=0;i<PAL.grassTint.length;i++) PAL.grassTint[i].setHex(src.grassTint[i % src.grassTint.length]);
+  PAL.road[0].setHex(src.road[0]); PAL.road[1].setHex(src.road[1]);
+  PAL.railBed.setHex(src.railBed); PAL.railTie.setHex(src.railTie); PAL.railSteel.setHex(src.railSteel);
+  PAL.water.setHex(src.water); PAL.waterDeep.setHex(src.waterDeep);
+  PAL.trunk[0].setHex(src.trunk[0]); PAL.trunk[1].setHex(src.trunk[1]);
+  for(let i=0;i<PAL.leaf.length;i++) PAL.leaf[i].setHex(src.leaf[i % src.leaf.length]);
+  for(let i=0;i<PAL.rock.length;i++) PAL.rock[i].setHex(src.rock[i % src.rock.length]);
+  PAL.bush[0].setHex(src.bush[0]); PAL.bush[1].setHex(src.bush[1]);
+  PAL.log[0].setHex(src.log[0]); PAL.log[1].setHex(src.log[1]);
+  PAL.logEnd.setHex(src.logEnd); PAL.pad.setHex(src.pad);
+}
+function applyWorldTheme(id){
+  worldThemeId = (id === 'summer') ? 'summer' : 'classic';
+  applyPalHex(worldThemeId === 'summer' ? PAL_HEX_SUMMER : PAL_HEX_CLASSIC);
+  try{
+    scene.background = worldThemeId === 'summer' ? TEX_SKY_SUMMER : TEX_SKY;
+    scene.fog.color.setHex(worldThemeId === 'summer' ? FOG_SKY_SUMMER : FOG_SKY);
+    if(worldThemeId === 'summer'){
+      sun.color.setHex(0xffe7b8);
+      sun.intensity = 2.25;
+    } else {
+      sun.color.setHex(0xfff6e2);
+      sun.intensity = 2.0;
+    }
+  }catch(e){}
+}
 
 /* --- model library -------------------------------------------------------- */
 /**
@@ -113255,10 +113474,11 @@ function planSection(){
 
   const roll = Math.random();
   let type = 'road';
+  const summer = isSummerWorld();
   if(at < 5)                       type = 'road';
-  else if(roll < 0.50)             type = 'road';
-  else if(roll < 0.74 && at > 9)   type = 'water';
-  else if(roll < 0.88 && at > 16)  type = 'rail';
+  else if(roll < (summer ? 0.42 : 0.50))             type = 'road';
+  else if(roll < (summer ? 0.82 : 0.74) && at > (summer ? 6 : 9))   type = 'water';
+  else if(roll < 0.90 && at > 16)  type = 'rail';
   else                             type = 'grass';
 
   if(type === 'grass'){
@@ -113321,7 +113541,47 @@ function planSection(){
 }
 
 /* --- scenery pieces ------------------------------------------------------- */
+function addPalm(row, x, z, scale = 1){
+  const top = row.top;
+  const trunkH = randf(0.85, 1.35) * scale;
+  const trunk = pick(PAL.trunk);
+  row.boxes.push({ x, y: top + trunkH/2, z, sx:0.22*scale, sy:trunkH, sz:0.22*scale, color:trunk, ry:randf(-0.1,0.1) });
+  const leaf = pick(PAL.leaf);
+  const crownY = top + trunkH;
+  for(let i=0;i<5;i++){
+    const a = (i / 5) * Math.PI * 2 + randf(-0.2, 0.2);
+    const len = randf(0.55, 0.85) * scale;
+    row.boxes.push({
+      x: x + Math.cos(a) * len * 0.35,
+      y: crownY + 0.08 * scale,
+      z: z + Math.sin(a) * len * 0.35,
+      sx: len, sy: 0.12*scale, sz: 0.28*scale,
+      color: i % 2 ? leaf : shade(leaf, 1.1),
+      ry: a,
+    });
+  }
+  // Coconut cluster
+  row.boxes.push({
+    x, y: crownY - 0.08*scale, z, sx:0.22*scale, sy:0.18*scale, sz:0.22*scale,
+    color: C(0x78350f), ry:0,
+  });
+}
+function addUmbrella(row, x, z, scale = 1){
+  const top = row.top;
+  const pole = C(0xf8fafc);
+  const canopy = chance(0.5) ? C(0xf43f5e) : C(0x38bdf8);
+  row.boxes.push({ x, y: top + 0.45*scale, z, sx:0.08*scale, sy:0.9*scale, sz:0.08*scale, color:pole, ry:0 });
+  row.boxes.push({ x, y: top + 0.95*scale, z, sx:0.95*scale, sy:0.12*scale, sz:0.95*scale, color:canopy, ry:randf(0,1) });
+}
+function addShell(row, x, z, scale = 1){
+  const col = chance(0.5) ? C(0xfda4af) : C(0xf5f5f4);
+  row.boxes.push({
+    x, y: row.top + 0.06*scale, z, sx:0.22*scale, sy:0.1*scale, sz:0.18*scale,
+    color:col, ry:randf(0, 2),
+  });
+}
 function addTree(row, x, z, scale = 1){
+  if(isSummerWorld() && chance(0.72)){ addPalm(row, x, z, scale); return; }
   const top = row.top;
   const trunkH = randf(0.30, 0.62) * scale;
   const trunk = pick(PAL.trunk);
@@ -113359,6 +113619,13 @@ function addBush(row, x, z, scale = 1){
 }
 function addScatter(row, x, z){
   const r = Math.random();
+  if(isSummerWorld()){
+    if(r < 0.48) addTree(row, x, z, randf(0.85, 1.2));
+    else if(r < 0.68) addUmbrella(row, x, z, randf(0.85, 1.1));
+    else if(r < 0.86) addShell(row, x, z, randf(0.9, 1.2));
+    else addRock(row, x, z, randf(0.7, 1.05));
+    return;
+  }
   if(r < 0.60) addTree(row, x, z, randf(0.8, 1.15));
   else if(r < 0.86) addBush(row, x, z, randf(0.85, 1.15));
   else addRock(row, x, z, randf(0.8, 1.15));
@@ -114821,6 +115088,7 @@ const screens = {
   chars: $('chars'), awards: $('awards'), quests: $('quests'),
   journey: $('journey'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
   weekly: $('weekly'), shop: $('shop'), bank: $('bank'), encyc: $('encyc'),
+  admin: $('admin'),
 };
 const multEl = $('multchip');
 const KEY = 'crossyhop.v1';
@@ -115447,6 +115715,7 @@ for(const [id, panel] of [
   ['btn-pets','pets'], ['btn-titles','titles'],
   ['btn-weekly','weekly'], ['btn-shop','shop'],
   ['btn-bank','bank'], ['btn-encyc','encyc'],
+  ['btn-admin','admin'],
 ]){
   const el = $(id);
   if(el) el.addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); openPanel(panel); });
@@ -115782,25 +116051,189 @@ function buildJourneyTier(){
   }
   return tiers;
 }
-const JOURNEY = buildJourneyTier();
+const JOURNEY_CLASSIC = buildJourneyTier();
 
+/** Summer Splash Pass — beach-themed rewards, brand-new loot table. */
+function buildSummerJourney(){
+  const tiers = [];
+  for(let i = 1; i <= 40; i++){
+    let goal;
+    if(i <= 5) goal = 2 + i;
+    else if(i <= 15) goal = 5 + i * 2;
+    else if(i <= 25) goal = 32 + (i - 15) * 3;
+    else goal = 58 + (i - 25) * 5;
+
+    let free;
+    if(i % 10 === 0) free = { kind:'chest', pay:'bronze', label:'Beach chest' };
+    else if(i % 5 === 0) free = { kind:'coins', pay:10 + i, label:'+' + (10+i) + ' shells' };
+    else if(i % 3 === 0) free = { kind:'xp', pay:10 + i, label:(10+i) + ' sun XP' };
+    else free = { kind:'coins', pay:4 + Math.floor(i/2), label:'+' + (4+Math.floor(i/2)) + ' shells' };
+
+    let vip;
+    if(i === 40) vip = { kind:'title', pay:'journey', label:'Sunlord title', exclusive:true, jackpot:true, value:'×14' };
+    else if(i === 35) vip = { kind:'trail', pay:'ember', label:'Sunset trail', exclusive:true, jackpot:true, value:'×11' };
+    else if(i === 30) vip = { kind:'trail', pay:'ice', label:'Wave trail', exclusive:true, jackpot:true, value:'×10' };
+    else if(i === 25) vip = { kind:'pet_egg', pay:1, label:'Tropical pet egg', exclusive:true, jackpot:true, value:'×10' };
+    else if(i === 20) vip = { kind:'chest', pay:'gold', label:'GOLD surf chest', exclusive:true, jackpot:true, value:'×9' };
+    else if(i === 15) vip = { kind:'chest', pay:'gold', label:'GOLD coconut chest', exclusive:true, jackpot:true, value:'×8' };
+    else if(i === 10) vip = { kind:'chest', pay:'silver', label:'Silver sand chest', exclusive:true, jackpot:true, value:'×6' };
+    else if(i % 7 === 0) vip = { kind:'spin', pay:2, label:'+2 surf spins', value:'×5' };
+    else if(i % 5 === 0) vip = { kind:'chest', pay:'silver', label:'Tidal chest', exclusive:true, value:'×5' };
+    else if(i % 4 === 0) vip = { kind:'shield', pay:1, label:'Sunscreen shield', value:'×4' };
+    else if(i % 3 === 0) vip = { kind:'magnet', pay:1, label:'Shell magnet', value:'×4' };
+    else if(i % 2 === 0) vip = { kind:'coins', pay:32 + i * 5, label:'+' + (32+i*5) + ' shells', value:'×3' };
+    else vip = { kind:'xp', pay:45 + i * 3, label:(45+i*3) + ' sun XP', value:'×3' };
+
+    tiers.push({
+      step: i,
+      goal,
+      free,
+      vip,
+      jackpot: !!(vip && vip.jackpot),
+      name: i % 10 === 0 ? ('Beach Mile ' + i) : ('Wave ' + i),
+    });
+  }
+  return tiers;
+}
+const JOURNEY_SUMMER = buildSummerJourney();
+
+const SEASON_ORDER = ['classic', 'summer'];
+const SEASON_META = {
+  classic: {
+    id: 'classic', name: 'Journey Pass', short: 'CLASSIC',
+    theme: 'classic', world: 'classic',
+    drops: ['ending soon','pet egg','gold chest','rainbow trail','banked shield','×12 title','flash sale','silver chest','magnet bank','spin ticket'],
+    feed: [
+      'hopper_88 claimed a GOLD chest',
+      'beakboss unlocked Rainbow trail',
+      'anonymous just bought VIP',
+      'chick_fan opened a Silver chest',
+      'roadkill_rev claimed Pet egg',
+    ],
+  },
+  summer: {
+    id: 'summer', name: 'Summer Splash Pass', short: 'SUMMER',
+    theme: 'summer', world: 'summer',
+    drops: ['tide rising','surf spin','gold surf chest','sunset trail','sunscreen shield','sunlord title','heatwave sale','coconut chest','shell magnet','tropical egg'],
+    feed: [
+      'beakboss caught a GOLD surf chest',
+      'log_rider unlocked Sunset trail',
+      'chick_fan slapped on VIP shades',
+      'pixelpeck hatched a tropical pet',
+      'vip_whale banked sunscreen shields',
+    ],
+  },
+};
+
+let JOURNEY = JOURNEY_CLASSIC;
+const JOURNEY_BY_ID = { classic: JOURNEY_CLASSIC, summer: JOURNEY_SUMMER };
+
+function seasonMeta(id){
+  return SEASON_META[id] || SEASON_META.classic;
+}
+function currentSeasonId(){
+  if(stats.adminSeasonForce === 'classic' || stats.adminSeasonForce === 'summer'){
+    return stats.adminSeasonForce;
+  }
+  return stats.seasonId || 'classic';
+}
+function nextSeasonId(id){
+  const i = SEASON_ORDER.indexOf(id);
+  return SEASON_ORDER[(i < 0 ? 0 : i + 1) % SEASON_ORDER.length];
+}
+function syncJourneyTable(){
+  const id = currentSeasonId();
+  JOURNEY = JOURNEY_BY_ID[id] || JOURNEY_CLASSIC;
+  return id;
+}
+function applySeasonTheme(id){
+  const meta = seasonMeta(id);
+  const sheet = $('journey');
+  if(sheet){
+    sheet.classList.toggle('season-summer', meta.theme === 'summer');
+    sheet.classList.toggle('season-classic', meta.theme !== 'summer');
+  }
+  const title = $('j-title');
+  if(title) title.textContent = meta.name;
+  const chip = $('j-seasonchip');
+  if(chip) chip.textContent = meta.short;
+  const track = $('j-drops-track');
+  if(track){
+    const drops = meta.drops || [];
+    track.innerHTML = drops.concat(drops).map((d, i) => {
+      const cls = (i % 5 === 0) ? ' hot' : (i % 2 === 0) ? ' vip' : '';
+      return '<span class="drop' + cls + '">' + d + '</span>';
+    }).join('');
+  }
+  applyWorldTheme(meta.world);
+}
+function refreshWorldForSeason(){
+  applyWorldTheme(seasonMeta(currentSeasonId()).world);
+  world.staticDirty = true;
+  try{ rebuildStatic(); }catch(e){}
+  if(state.mode !== 'play' && state.mode !== 'dying' && state.mode !== 'paused'){
+    try{ seedStart(); resetPlayer(); rebuildStatic(); }catch(e){}
+  }
+}
+function resetJourneyProgress(){
+  stats.journeyStep = 0;
+  stats.journeyStars = 0;
+  stats.freeClaimed = [];
+  stats.vipClaimed = [];
+  stats.vipPass = 0;
+  stats.vipBoughtAt = 0;
+  stats.claimHeat = 0;
+  stats.claimHeatAt = 0;
+  stats.starVault = 0;
+}
+function rotateToSeason(id, opts = {}){
+  const meta = seasonMeta(id);
+  stats.seasonId = meta.id;
+  stats.seasonStartedAt = Date.now();
+  stats.vipSaleSeen = 0;
+  stats.journeyUpsells = 0;
+  if(opts.resetProgress !== false) resetJourneyProgress();
+  syncJourneyTable();
+  applySeasonTheme(meta.id);
+  refreshWorldForSeason();
+  if(opts.announce !== false){
+    badge('NEW SEASON!', meta.name);
+    Sfx.prize();
+    flashScreen(meta.theme === 'summer' ? 'gold' : 'ultra');
+    burstConfetti(36, meta.theme === 'summer'
+      ? ['#fb923c','#67e8f9','#fde68a','#ffffff']
+      : ['#c084fc','#ffe07a','#ffffff']);
+  }
+  save();
+  if(state.panel === 'journey') renderJourney();
+  if(state.panel === 'admin') renderAdminPanel();
+  return meta.id;
+}
+function ensureSeasonApplied(){
+  if(!stats.seasonId) stats.seasonId = 'classic';
+  const id = currentSeasonId();
+  syncJourneyTable();
+  applySeasonTheme(id);
+}
 function journeySeasonEnd(){
-  // Align to a fixed weekly bucket so everyone shares the same FOMO clock.
   const now = Date.now();
   if(!stats.seasonStartedAt){
     stats.seasonStartedAt = now;
+    if(!stats.seasonId) stats.seasonId = 'classic';
+    ensureSeasonApplied();
     save();
   }
-  // Soft reset prompt when season rolls — keep progress, refresh sale.
-  // NOTE: never use `|0` on timestamps — ToInt32 truncates epoch ms.
+  ensureSeasonApplied();
+  if(stats.adminSeasonForce === 'classic' || stats.adminSeasonForce === 'summer'){
+    const started = Number(stats.seasonStartedAt) || now;
+    return started + JOURNEY_SEASON_MS;
+  }
   const started = Number(stats.seasonStartedAt) || now;
   const elapsed = now - started;
   if(elapsed > JOURNEY_SEASON_MS){
-    stats.seasonStartedAt = now;
-    stats.vipSaleSeen = 0;
-    stats.journeyUpsells = 0;
-    save();
-    return now + JOURNEY_SEASON_MS;
+    const next = nextSeasonId(stats.seasonId || 'classic');
+    rotateToSeason(next, { reason: 'season_end', resetProgress: true });
+    return Date.now() + JOURNEY_SEASON_MS;
   }
   return started + JOURNEY_SEASON_MS;
 }
@@ -116195,19 +116628,24 @@ function hideJourneyUpsell(){
 function updateJourneyChrome(){
   const sheet = $('journey');
   if(sheet) sheet.classList.add('amp');
+  const sid = currentSeasonId();
+  applySeasonTheme(sid);
   decayClaimHeat();
   const left = journeyMsLeft();
   const clock = $('j-clock');
   if(clock) clock.textContent = formatSeasonClock(left);
   const fomo = $('j-fomo');
   if(fomo) fomo.classList.toggle('urgent', left < 24 * 3600e3);
+  const summer = sid === 'summer';
+  const fomoLbl = fomo && fomo.querySelector('.row span:not(.clock)');
+  if(fomoLbl) fomoLbl.textContent = summer ? 'Tide turns in' : 'Season ends in';
   const scare = $('j-scare');
   if(scare){
     let line = left < 24 * 3600e3
-      ? 'FINAL HOURS · claim VIP before loot resets'
+      ? (summer ? 'FINAL HOURS · beach VIP loot washes away' : 'FINAL HOURS · claim VIP before loot resets')
       : vipSaleActive()
         ? ('FLASH SALE · VIP ' + vipPrice() + ' (was ' + VIP_PRICE_FULL + ')')
-        : 'unclaimed VIP loot vanishes with the season';
+        : (summer ? 'summer VIP loot vanishes with the tide' : 'unclaimed VIP loot vanishes with the season');
     try{
       if(typeof FOMO_LABELS !== 'undefined' && FOMO_LABELS.length){
         const hit = FOMO_LABELS[Math.floor(Date.now() / 90000) % FOMO_LABELS.length];
@@ -116218,8 +116656,10 @@ function updateJourneyChrome(){
   }
   const social = $('j-social');
   if(social){
-    const base = 12847 + Math.floor((Date.now() % 3600000) / 4000);
-    social.textContent = base.toLocaleString() + ' hoppers unlocked VIP this season';
+    const base = (summer ? 18420 : 12847) + Math.floor((Date.now() % 3600000) / 4000);
+    social.textContent = base.toLocaleString() + (summer
+      ? ' hoppers surfing the VIP lane this summer'
+      : ' hoppers unlocked VIP this season');
   }
   // Illegal value meter — show soft-currency VIP loot sitting on the table.
   const missed = estimateVipMissedCoins();
@@ -116351,17 +116791,17 @@ let _feedIdx = 0;
 function tickJourneyFeed(){
   const line = $('j-feed-line');
   if(!line || state.panel !== 'journey') return;
-  // Only rotate about once a second via clock; keep it sticky.
   if(!tickJourneyFeed._last || Date.now() - tickJourneyFeed._last > 2800){
     tickJourneyFeed._last = Date.now();
     line.classList.remove('show');
     setTimeout(() => {
-      _feedIdx = (_feedIdx + 1) % JOURNEY_FEED.length;
-      // Sprinkle the player's own heat into the feed for that "it's you" itch.
+      const meta = seasonMeta(currentSeasonId());
+      const feed = (meta.feed && meta.feed.length) ? meta.feed : JOURNEY_FEED;
+      _feedIdx = (_feedIdx + 1) % feed.length;
       if((stats.claimHeat|0) >= 3 && Math.random() < 0.35){
         line.textContent = 'you · heat x' + (stats.claimHeat|0) + ' · keep claiming';
       } else {
-        line.textContent = JOURNEY_FEED[_feedIdx];
+        line.textContent = feed[_feedIdx];
       }
       line.classList.add('show');
     }, 220);
@@ -116384,6 +116824,7 @@ function updateJourneyMascot(){
   const mascot = $('j-mascot');
   if(!mascot) return;
   const owned = !!stats.vipPass;
+  const summer = currentSeasonId() === 'summer';
   mascot.classList.toggle('owned', owned);
   mascot.setAttribute('aria-label', owned ? 'VIP Pass owned' : 'Unlock VIP Pass');
   const k = $('j-mascot-k');
@@ -116393,22 +116834,24 @@ function updateJourneyMascot(){
   const tl = $('j-ticket-lbl');
   const ts = $('j-ticket-sub');
   if(owned){
-    if(k) k.textContent = 'VIP ticket claimed';
-    if(n) n.textContent = 'Chicken unlocked the good lane';
-    if(h) h.textContent = 'Claim exclusive loot on every cleared tier';
+    if(k) k.textContent = summer ? 'shades secured' : 'VIP ticket claimed';
+    if(n) n.textContent = summer ? 'Chicken owns the beach VIP lane' : 'Chicken unlocked the good lane';
+    if(h) h.textContent = summer ? 'Claim tropical exclusives on every wave' : 'Claim exclusive loot on every cleared tier';
     if(cta) cta.textContent = 'Owned';
     if(tl) tl.textContent = 'VIP';
-    if(ts) ts.textContent = 'owned';
+    if(ts) ts.textContent = summer ? 'surf' : 'owned';
   } else {
     const price = vipPrice();
-    if(k) k.textContent = vipSaleActive() ? 'flash sale ticket' : 'limited VIP ticket';
-    if(n) n.textContent = 'This chicken has your pass';
+    if(k) k.textContent = summer
+      ? (vipSaleActive() ? 'heatwave ticket' : 'summer VIP ticket')
+      : (vipSaleActive() ? 'flash sale ticket' : 'limited VIP ticket');
+    if(n) n.textContent = summer ? 'Shades on · pass in beak' : 'This chicken has your pass';
     if(h) h.textContent = vipSaleActive()
       ? ('Only ' + price + ' coins · was ' + VIP_PRICE_FULL)
-      : ('Tap to unlock · ' + price + ' coins');
-    if(cta) cta.textContent = 'Get VIP';
+      : (summer ? ('Tap for beach VIP · ' + price + ' coins') : ('Tap to unlock · ' + price + ' coins'));
+    if(cta) cta.textContent = summer ? 'Get Summer VIP' : 'Get VIP';
     if(tl) tl.textContent = 'VIP';
-    if(ts) ts.textContent = 'pass';
+    if(ts) ts.textContent = summer ? 'splash' : 'pass';
   }
 }
 
@@ -118760,6 +119203,8 @@ function addictionLoad(raw){
   stats.starVault = raw.starVault|0;
   stats.nestAt = Number(raw.nestAt) || 0;
   stats.comebackChips = raw.comebackChips|0;
+  stats.seasonId = raw.seasonId || 'classic';
+  stats.adminSeasonForce = raw.adminSeasonForce || '';
 }
 
 function addictionSaveFields(){
@@ -118790,6 +119235,8 @@ function addictionSaveFields(){
     dealPay: stats.dealPay, dealLabel: stats.dealLabel || '',
     streakVault: stats.streakVault|0, spinPity: stats.spinPity|0, starVault: stats.starVault|0,
     nestAt: Number(stats.nestAt) || 0, comebackChips: stats.comebackChips|0,
+    seasonId: stats.seasonId || 'classic',
+    adminSeasonForce: stats.adminSeasonForce || '',
   };
 }
 
@@ -120762,6 +121209,91 @@ function renderEncyclopedia(){
   }
 }
 
+
+/* --- ADMIN PANEL — season / theme testing -------------------------------- */
+function renderAdminPanel(){
+  const st = $('admin-status');
+  const id = currentSeasonId();
+  const meta = seasonMeta(id);
+  const forced = stats.adminSeasonForce || '';
+  const left = formatSeasonClock(journeyMsLeft());
+  if(st){
+    st.innerHTML =
+      'live season · <b>' + meta.name + '</b><br>' +
+      'force · <b>' + (forced || 'AUTO') + '</b><br>' +
+      'clock · <b>' + left + '</b><br>' +
+      'world · <b>' + (isSummerWorld() ? 'summer beach' : 'classic roads') + '</b><br>' +
+      'pass tier · <b>' + (stats.journeyStep|0) + '</b> / ' + JOURNEY.length +
+      ' · VIP · <b>' + (stats.vipPass ? 'yes' : 'no') + '</b>';
+  }
+  for(const [bid, on] of [
+    ['admin-auto', !forced],
+    ['admin-classic', forced === 'classic'],
+    ['admin-summer', forced === 'summer'],
+  ]){
+    const el = $(bid);
+    if(el) el.classList.toggle('on', !!on);
+  }
+}
+function adminForceSeason(mode){
+  // mode: '' | 'classic' | 'summer'
+  stats.adminSeasonForce = mode || '';
+  if(mode === 'classic' || mode === 'summer'){
+    rotateToSeason(mode, { resetProgress: true, announce: true });
+  } else {
+    // Return to auto — keep current seasonId, clear force.
+    syncJourneyTable();
+    applySeasonTheme(currentSeasonId());
+    refreshWorldForSeason();
+    badge('Admin', 'auto season rotate');
+    save();
+  }
+  renderAdminPanel();
+  if(state.panel === 'journey') renderJourney();
+}
+function adminEndSeasonNow(){
+  if(stats.adminSeasonForce){
+    badge('Admin', 'clear force first (Auto rotate)');
+    Sfx.bump();
+    return;
+  }
+  const next = nextSeasonId(stats.seasonId || 'classic');
+  rotateToSeason(next, { resetProgress: true, announce: true });
+  renderAdminPanel();
+}
+function adminResetPass(){
+  resetJourneyProgress();
+  save();
+  badge('Admin', 'pass progress wiped');
+  renderAdminPanel();
+  if(state.panel === 'journey') renderJourney();
+}
+function wireAdminButtons(){
+  const map = [
+    ['admin-auto', () => adminForceSeason('')],
+    ['admin-classic', () => adminForceSeason('classic')],
+    ['admin-summer', () => adminForceSeason('summer')],
+    ['admin-end-season', () => adminEndSeasonNow()],
+    ['admin-reset-pass', () => adminResetPass()],
+    ['admin-rebuild', () => { refreshWorldForSeason(); badge('Admin', 'map rebuilt'); renderAdminPanel(); }],
+    ['admin-grant-coins', () => { addCoins(200); badge('Admin', '+200 coins'); renderAdminPanel(); }],
+    ['admin-grant-stars', () => { addJourneyStars(20); badge('Admin', '+20 stars'); renderAdminPanel(); }],
+    ['admin-grant-vip', () => {
+      stats.vipPass = 1; stats.vipBoughtAt = Date.now(); save();
+      badge('Admin', 'VIP granted'); renderAdminPanel();
+      if(state.panel === 'journey') renderJourney();
+    }],
+  ];
+  for(const [id, fn] of map){
+    const el = $(id);
+    if(el && !el.dataset.wired){
+      el.dataset.wired = '1';
+      el.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); fn(); });
+    }
+  }
+}
+wireAdminButtons();
+
 function addictionOpenPanel(name){
   if(name === "journey"){ hideJourneyUpsell(); hideJourneyReveal(); renderJourney(); }
   else if(name === "spin") renderSpin();
@@ -120771,6 +121303,7 @@ function addictionOpenPanel(name){
   else if(name === "shop") renderShop();
   else if(name === "bank") renderBank();
   else if(name === "encyc") renderEncyclopedia();
+  else if(name === "admin") renderAdminPanel();
 }
 
 function addictionTrySaveFromDeath(cause){
@@ -121861,6 +122394,8 @@ ensureQuests();
 ensureDailyMissions();
 addictionOnBoot();
 ensureJourneyClaims();
+if(!stats.seasonId) stats.seasonId = 'classic';
+ensureSeasonApplied();
 journeySeasonEnd();
 startJourneyClock();
 showTip();
@@ -121869,8 +122404,10 @@ pulseJourneyMenu();
 $('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
 $('btn-sound').classList.toggle('off', Sfx.muted);
 resize();
+applyWorldTheme(seasonMeta(currentSeasonId()).world);
 seedStart();
 resetPlayer();
+try{ rebuildStatic(); }catch(e){}
 show('start');
 refreshHourlyCrate();
 refreshMysteryDeal();
@@ -121922,6 +122459,8 @@ window.HOP = {
   buyVipPass, skipJourneyTier, buyStarPack, buyStarBoost, claimAllJourney,
   openHourlyCrate, buyMysteryDeal, cashStreakVault, cashStarVault,
   openEchoNest, acceptWager, doComebackRevive, detonateFuse, startClutchSalvage, tapClutch,
+  rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
+  JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };
