@@ -357,7 +357,7 @@
       <div id="level-title">Poached Eggs — 1-1</div>
       <div class="panel" id="birds-panel"></div>
     </div>
-    <div id="hint">Drag the bird back to aim, release to launch!</div>
+    <div id="hint">Drag the bird back to aim, release to launch! (or ←↑ + Space)</div>
     <div id="power-bar-wrap"><div id="power-bar"></div></div>
   </div>
 
@@ -1358,6 +1358,8 @@ function loadLevel(idx) {
   gameActive = true;
   launched = false;
   aiming = false;
+  pullOffset.set(0, 0, 0);
+  keyPull.set(0, 0, 0);
   updateBirdIcons();
   // Brief settle, then freeze sleeping bodies
   setTimeout(() => { levelReady = true; }, 400);
@@ -1587,6 +1589,37 @@ window.addEventListener('mouseup', onPointerUp);
 canvas.addEventListener('touchstart', onPointerDown, { passive: false });
 canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 window.addEventListener('touchend', onPointerUp);
+
+// Keyboard aim (Arrow keys pull, Space / Enter launch) — helps accessibility & testing
+const keyPull = new THREE.Vector3();
+window.addEventListener('keydown', (e) => {
+  if (!gameActive || !currentBird || launched || levelComplete) return;
+  const step = 0.22;
+  let changed = false;
+  if (e.key === 'ArrowLeft') { keyPull.x = Math.max(-MAX_PULL, keyPull.x - step); changed = true; }
+  if (e.key === 'ArrowRight') { keyPull.x = Math.min(0.1, keyPull.x + step); changed = true; }
+  if (e.key === 'ArrowDown') { keyPull.y = Math.max(-1.5, keyPull.y - step); changed = true; }
+  if (e.key === 'ArrowUp') { keyPull.y = Math.min(1.6, keyPull.y + step); changed = true; }
+  if (changed) {
+    e.preventDefault();
+    dragMoved = true;
+    aiming = true;
+    powerWrap.classList.add('visible');
+    hideHint();
+    pullOffset.copy(keyPull);
+    if (pullOffset.length() > MAX_PULL) pullOffset.setLength(MAX_PULL);
+    applyAimPose(SLING_ORIGIN.clone().add(pullOffset));
+  }
+  if ((e.key === ' ' || e.key === 'Enter') && dragMoved && pullOffset.length() >= 0.28) {
+    e.preventDefault();
+    aiming = false;
+    powerWrap.classList.remove('visible');
+    if (trajectoryLine) trajectoryLine.visible = false;
+    launchBird();
+    keyPull.set(0, 0, 0);
+    dragMoved = false;
+  }
+});
 
 /* ---------- Buttons ---------- */
 playBtn.addEventListener('click', (e) => {
