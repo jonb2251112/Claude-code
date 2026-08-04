@@ -186,11 +186,122 @@ html,body{
   font-size:clamp(15px,4.6vw,20px);color:#fff;white-space:nowrap;
   text-shadow:0 2px 0 rgba(18,52,80,.4);
   animation:rise 1s cubic-bezier(.2,.7,.3,1) forwards;
+  font-weight:900;pointer-events:none;
 }
+.toast.big{font-size:clamp(20px,6vw,28px);color:var(--gold);
+  text-shadow:0 3px 0 rgba(18,52,80,.45), 0 0 18px rgba(255,201,60,.55);}
+.toast.perfect{color:#7dffb0;letter-spacing:.08em;
+  text-shadow:0 3px 0 rgba(18,52,80,.4), 0 0 16px rgba(125,255,176,.5);}
+.toast.fever{color:#ffe07a;font-size:clamp(22px,7vw,32px);}
 @keyframes rise{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.6);}
-  22%{opacity:1;transform:translate(-50%,-90%) scale(1.1);}
-  100%{opacity:0;transform:translate(-50%,-190%) scale(1);}
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.55) rotate(-4deg);}
+  18%{opacity:1;transform:translate(-50%,-85%) scale(1.18) rotate(2deg);}
+  100%{opacity:0;transform:translate(-50%,-210%) scale(.95) rotate(-2deg);}
+}
+
+/* Score punch + coin chip bounce — the little hits that make a hop feel paid. */
+#score.punch{animation:scorepunch .32s cubic-bezier(.2,1.4,.3,1);}
+@keyframes scorepunch{
+  0%{transform:scale(1);}
+  35%{transform:scale(1.28);}
+  100%{transform:scale(1);}
+}
+#coinchip.punch{animation:coinpunch .38s cubic-bezier(.2,1.5,.3,1);}
+@keyframes coinpunch{
+  0%{transform:scale(1) rotate(0);}
+  30%{transform:scale(1.22) rotate(-6deg);}
+  55%{transform:scale(1.08) rotate(4deg);}
+  100%{transform:scale(1) rotate(0);}
+}
+#coinchip .coin.spin{animation:coinspin .45s ease;}
+@keyframes coinspin{0%{transform:rotateY(0);}100%{transform:rotateY(360deg);}}
+
+/* Full-screen colour flash for fever / revive / awards. */
+#flash{
+  position:absolute;inset:0;pointer-events:none;z-index:15;
+  opacity:0;background:#fff;mix-blend-mode:screen;
+}
+#flash.on{animation:flashbang .45s ease-out forwards;}
+#flash.gold{background:radial-gradient(circle at 50% 55%, #ffe07a, transparent 62%);}
+#flash.mint{background:radial-gradient(circle at 50% 55%, #7dffb0, transparent 62%);}
+#flash.rose{background:radial-gradient(circle at 50% 40%, #ff9a9a, transparent 60%);}
+@keyframes flashbang{
+  0%{opacity:.55;}
+  100%{opacity:0;}
+}
+
+/* Coins that fly from the world into the purse. */
+#flycoins{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:16;}
+.flycoin{
+  position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff2b0, var(--gold) 62%, var(--gold-dk));
+  box-shadow:0 2px 0 rgba(0,0,0,.18), 0 0 10px rgba(255,201,60,.55);
+  animation:flycoin .55s cubic-bezier(.2,.8,.2,1) forwards;
+  will-change:transform, opacity;
+}
+@keyframes flycoin{
+  0%{transform:translate(0,0) scale(.6);opacity:1;}
+  55%{transform:translate(var(--dx), calc(var(--dy) * .55)) scale(1.15);opacity:1;}
+  100%{transform:translate(var(--dx), var(--dy)) scale(.35);opacity:.15;}
+}
+
+/* Centre combo banner that grows with the streak. */
+#combo{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.6);
+  pointer-events:none;z-index:14;text-align:center;
+  opacity:0;transition:none;
+}
+#combo.show{
+  animation:combopop .7s cubic-bezier(.15,1.4,.3,1) forwards;
+}
+#combo .n{
+  font-size:clamp(42px,14vmin,78px);line-height:.9;color:#fff;
+  text-shadow:0 4px 0 rgba(18,52,80,.4), 0 0 24px rgba(255,154,60,.45);
+  font-variant-numeric:tabular-nums;
+}
+#combo.fever .n{color:var(--gold);text-shadow:0 4px 0 var(--gold-dk), 0 0 28px rgba(255,201,60,.65);}
+#combo .l{
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#fff;opacity:.92;
+  text-shadow:0 2px 0 rgba(18,52,80,.35);
+}
+@keyframes combopop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-6deg);}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1.12) rotate(2deg);}
+  70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0);}
+  100%{opacity:0;transform:translate(-50%,-62%) scale(.92);}
+}
+
+/* Confetti burst layer for awards / fever / revive. */
+#confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:17;}
+.confetti{
+  position:absolute;width:8px;height:12px;border-radius:2px;top:-12px;
+  animation:confetti-fall var(--dur) cubic-bezier(.2,.6,.3,1) forwards;
+  transform:rotate(var(--rot));
+}
+@keyframes confetti-fall{
+  0%{transform:translate(0,0) rotate(var(--rot)) scale(1);opacity:1;}
+  100%{transform:translate(var(--dx), var(--dy)) rotate(calc(var(--rot) + 420deg)) scale(.7);opacity:0;}
+}
+
+/* Soft land ring drawn as a CSS circle projected from world space. */
+.ring{
+  position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.85);pointer-events:none;
+  animation:ringout .45s ease-out forwards;
+  box-shadow:0 0 12px rgba(255,255,255,.35);
+}
+.ring.gold{border-color:var(--gold);box-shadow:0 0 14px rgba(255,201,60,.55);}
+.ring.mint{border-color:#7dffb0;box-shadow:0 0 14px rgba(125,255,176,.45);}
+@keyframes ringout{
+  0%{transform:scale(.4);opacity:.95;}
+  100%{transform:scale(4.2);opacity:0;}
+}
+
+.badge.pop{animation:badgein 2.9s cubic-bezier(.2,.8,.3,1) forwards, medalspin .6s ease;}
+@keyframes medalspin{
+  0%{filter:brightness(1);}
+  40%{filter:brightness(1.35);}
+  100%{filter:brightness(1);}
 }
 
 /* --- D-pad (touch) -------------------------------------------------------- */
@@ -485,7 +596,8 @@ kbd{
   #score{font-size:clamp(26px,8vh,42px);}
 }
 @media (prefers-reduced-motion:reduce){
-  #tapcue,#alert.show{animation:none;}
+  #tapcue,#alert.show,#combo.show,#flash.on,.flycoin,.confetti,.ring,
+  #score.punch,#coinchip.punch,.toast{animation:none;}
 }
 </style>
 </head>
@@ -512,6 +624,10 @@ kbd{
     <div id="alert">◀ get moving ▶</div>
     <div id="badges"></div>
     <div id="toasts"></div>
+    <div id="flycoins"></div>
+    <div id="confetti"></div>
+    <div id="flash"></div>
+    <div id="combo"><div class="n">x3</div><div class="l">streak</div></div>
     <div id="dpad" class="hide">
       <button class="up"    data-dir="up"    aria-label="Hop forward">▲</button>
       <button class="left"  data-dir="left"  aria-label="Hop left">◀</button>
@@ -716,6 +832,12 @@ const CFG = {
   FEVER_AT:        10,     // streak that doubles coin payouts
   FEVER_SUPER:     20,     // streak that triples them
   STREAK_WINDOW:   1.15,   // seconds between hops that keep the chain alive
+
+  /* --- dopamine / juice --- */
+  CAM_KICK:        0.55,   // orthographic zoom punch amplitude
+  CAM_KICK_DECAY:  7.5,    // how fast the punch settles
+  PERFECT_WINDOW:  0.55,   // hop within this many seconds of the last = perfect
+  LAND_SQUASH:     0.22,   // extra squash on a clean landing
 };
 
 /* Device tiering. Phones lose the antialias pass, take a smaller shadow map and
@@ -949,6 +1071,31 @@ const Sfx = (()=>{
       if(!live()) return;
       const t = ctx.currentTime;
       [880, 1175, 1760].forEach((f,i)=> tone('triangle', f, f, t + i*0.08, 0.22, 0.12));
+    },
+    /** Tight hop timed just after the last — a little sparkle. */
+    perfect(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      tone('sine', 1319, 1976, t, 0.1, 0.09);
+      tone('triangle', 2637, 2637, t + 0.05, 0.12, 0.06);
+      burst(t, 0.08, 0.04, 4000, 1200, 1.2);
+    },
+    /** Soft thud when the feet hit the ground. */
+    thump(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      burst(t, 0.06, 0.08, 400, 90, 0.8);
+      tone('sine', 90, 55, t, 0.08, 0.1);
+    },
+    /** A cascade of coin blips for multi-coin hits. */
+    cascade(n = 3){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      const count = Math.min(n, 6);
+      for(let i = 0; i < count; i++){
+        const f = 988 + i * 160;
+        tone('triangle', f, f * 1.2, t + i * 0.045, 0.08, 0.1);
+      }
     },
     /** Continuous rail rumble, gain driven by how close the nearest train is. */
     startRumble(){
@@ -2119,6 +2266,8 @@ const player = {
   idle: 0,
   bump: 0,
   iframe: 0,           // seconds of invulnerability after a revive
+  squash: 0,           // landing squash residual
+  hopDir: 'up',        // last hop direction, for perfect timing
 };
 
 function resetPlayer(){
@@ -2128,7 +2277,7 @@ function resetPlayer(){
   player.hopping = false; player.hopT = 0;
   player.yaw = 0; player.yawTo = 0;
   player.ride = null; player.maxRow = 0; player.idle = 0; player.bump = 0;
-  player.iframe = 0;
+  player.iframe = 0; player.squash = 0; player.hopDir = 'up';
   avatar.visible = true;
   avatar.scale.set(1,1,1);
   avatar.rotation.set(0,0,0);
@@ -2184,6 +2333,7 @@ function tryMove(dirName){
   player.yawTo = d.yaw;
   player.ride = null;
   player.row = toRow;
+  player.hopDir = dirName;
   stats.hops++;
   Sfx.hop(worn().pitch, worn().beep);
   if(d.dr === 1) buzz(9);
@@ -2203,7 +2353,16 @@ function landed(){
   player.x = player.toX;
   player.z = player.toZ;
   player.hopping = false;
+  player.squash = 1;
   if(!row) return;
+
+  // A forward hop that lands tight on the heels of the last one is a "perfect".
+  const gap = state.clock - run.lastHopT;
+  const perfect = player.hopDir === 'up'
+    && run.streak >= 1
+    && gap > 0.02
+    && gap < CFG.PERFECT_WINDOW
+    && player.row > player.maxRow;
 
   if(row.type === 'water'){
     let support = null;
@@ -2224,12 +2383,14 @@ function landed(){
     player.ride = support;
     player.y = row.top + (support.pad ? 0.09 : 0.34) + (worn().float || 0);
     if(!row.credited){ row.credited = true; stats.logRows++; run.logs++; tickQuests(); }
-    Sfx.land();
+    Sfx.land(); Sfx.thump();
+    landRing(player.x, player.y, player.z, perfect ? 'mint' : '');
   } else {
     player.col = Math.round(player.x);
     player.y = row.top + (worn().float || 0);
     player.ride = null;
-    Sfx.land();
+    Sfx.land(); Sfx.thump();
+    landRing(player.x, player.y, player.z, perfect ? 'mint' : (run.fever ? 'gold' : ''));
     if(row.type === 'rail' && !row.credited){ row.credited = true; stats.rails++; run.rails++; tickQuests(); }
     // Fever magnet: a coin one column away snaps into your beak.
     if(row.coin != null && !row.coinTaken){
@@ -2238,13 +2399,30 @@ function landed(){
         row.coinTaken = true;
         const pay = run.coinMult;
         Sfx.coin();
+        if(pay > 1) Sfx.cascade(pay);
         buzz(14);
-        toast(pay > 1 ? `+${pay} coins` : '+1 coin', player.x, player.y + 0.9, player.z);
-        spawnFeathers(player.x, player.y + 0.45, player.z, 7, COIN_C, 0.6);
+        toast(pay > 1 ? `+${pay} coins` : '+1 coin', player.x, player.y + 0.9, player.z, pay > 1 ? 'big' : '');
+        spawnFeathers(player.x, player.y + 0.45, player.z, 7 + pay * 2, COIN_C, 0.6 + pay * 0.1);
+        flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 4));
         addCoins(pay);
         run.coins += pay;
+        camKick(0.22 + pay * 0.06);
         tickQuests();
       }
+    }
+  }
+
+  if(perfect){
+    run.perfects = (run.perfects | 0) + 1;
+    toast('PERFECT', player.x, player.y + 1.15, player.z, 'perfect');
+    Sfx.perfect();
+    buzz([8, 30, 8]);
+    camKick(0.28);
+    if(run.perfects % 5 === 0){
+      addCoins(1);
+      run.coins += 1;
+      toast('+1 perfect', player.x, player.y + 1.35, player.z, 'big');
+      flyCoins(player.x, player.y + 0.5, player.z, 1);
     }
   }
 
@@ -2252,13 +2430,14 @@ function landed(){
     player.maxRow = player.row;
     player.idle = 0;
     state.score = player.maxRow;
-    hudScore();
-    onProgress();
+    hudScore(true);
+    onProgress(perfect);
   } else {
     run.streak = 0;
     _feverTier = 0;
     endFever();
     hudStreak();
+    hideCombo();
   }
 }
 
@@ -2334,6 +2513,13 @@ function updatePlayer(dt){
     const b = Math.abs(Math.sin(state.clock * 2.1));
     sy = 1 + b*0.06; sx = 1 - b*0.03;
     py = player.y + b*0.03;
+  } else if(player.squash > 0){
+    // Satisfying land: squash then spring back.
+    player.squash = Math.max(0, player.squash - dt * 5.5);
+    const k = Math.sin(player.squash * Math.PI) * CFG.LAND_SQUASH;
+    sy = 1 - k;
+    sx = 1 + k * 0.85;
+    py = player.y - k * 0.12;
   }
   if(player.bump > 0){
     player.bump = Math.max(0, player.bump - dt*7);
@@ -2418,6 +2604,7 @@ function die(cause, sub){
   endFever();
   run.streak = 0;
   hudStreak();
+  hideCombo();
   alertEl.classList.remove('show');
   Sfx.stopRumble();
 
@@ -2535,7 +2722,12 @@ function checkAwards(silent){
   for(const a of AWARDS){
     if(!stats.ach[a.id] && a.get() >= a.goal){
       stats.ach[a.id] = 1;
-      if(!silent && n++ < 3){ badge('Award unlocked', a.name); Sfx.award(); }
+      if(!silent && n++ < 3){
+        badge('Award unlocked', a.name);
+        Sfx.award();
+        burstConfetti(20, ['#ffc93c','#ffe07a','#ffffff']);
+        flashScreen('gold');
+      }
     }
   }
 }
@@ -2544,7 +2736,7 @@ function checkAwards(silent){
 const run = {
   streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0,
   revived: false, fever: false, coinMult: 1,
-  coins: 0, rails: 0, logs: 0, nears: 0,
+  coins: 0, rails: 0, logs: 0, nears: 0, perfects: 0,
 };
 
 function resetRun(){
@@ -2553,8 +2745,10 @@ function resetRun(){
   run.gateRow = stats.best;
   run.revived = false; run.fever = false; run.coinMult = 1;
   run.coins = 0; run.rails = 0; run.logs = 0; run.nears = 0;
+  run.perfects = 0;
   _feverTier = 0;
   hudMult();
+  hideCombo();
 }
 
 function endFever(){
@@ -2581,28 +2775,41 @@ function updateFeverTier(){
     badge(tier >= 3 ? 'Super fever!' : 'Fever!', tier >= 3 ? 'coins pay triple' : 'coins pay double');
     Sfx.fever();
     buzz([12, 40, 12, 40, 18]);
+    flashScreen('gold');
+    burstConfetti(28, ['#ffc93c','#ffe07a','#ff9a3c','#fff6cf']);
+    camKick(0.55);
+    toast(tier >= 3 ? 'SUPER FEVER' : 'FEVER', player.x, player.y + 1.2, player.z, 'fever');
   } else if(tier > prev){
     badge('Super fever!', 'coins pay triple');
     Sfx.fever();
+    flashScreen('gold');
+    burstConfetti(36, ['#ffc93c','#ffe07a','#fff6cf','#ffffff']);
+    camKick(0.7);
+    toast('SUPER FEVER', player.x, player.y + 1.2, player.z, 'fever');
   }
   hudMult();
 }
 
 /** Called on every hop that lands on a new furthest row. */
-function onProgress(){
+function onProgress(perfect){
   const now = state.clock;
   run.streak = (now - run.lastHopT < CFG.STREAK_WINDOW) ? run.streak + 1 : 1;
   run.lastHopT = now;
   if(run.streak > stats.bestStreak) stats.bestStreak = run.streak;
   if(run.streak > stats.feverPeak) stats.feverPeak = run.streak;
   updateFeverTier();
-  if(run.streak >= 3) hudStreak();
+  if(run.streak >= 3){
+    hudStreak();
+    showCombo(run.streak);
+  }
   if(run.streak > 0 && run.streak % 10 === 0){
     const pay = run.coinMult;
     addCoins(pay);
     run.coins += pay;
-    toast(`streak x${run.streak}  +${pay}`, player.x, player.y + 1.05, player.z);
+    toast(`streak x${run.streak}  +${pay}`, player.x, player.y + 1.05, player.z, 'big');
+    flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 3));
     Sfx.streak();
+    camKick(0.35);
     tickQuests();
   }
   const m = player.maxRow;
@@ -2611,22 +2818,33 @@ function onProgress(){
     const pay = run.coinMult;
     addCoins(pay);
     run.coins += pay;
-    toast(`${m} rows!  +${pay}`, player.x, player.y + 1.05, player.z);
+    toast(`${m} rows!  +${pay}`, player.x, player.y + 1.05, player.z, 'big');
+    flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay + 1, 4));
+    burstConfetti(18, ['#ffc93c','#ffffff','#7dffb0']);
+    flashScreen('gold');
     Sfx.milestone();
+    camKick(0.5);
     tickQuests();
   }
   if(!run.beatBest && stats.best > 4 && m > stats.best){
     run.beatBest = true;
     badge('New best', `${m} rows and counting`);
     Sfx.milestone();
+    burstConfetti(40, ['#ffc93c','#ffe07a','#ffffff','#7dffb0']);
+    flashScreen('gold');
+    camKick(0.6);
   }
+  // Tiny camera nod on every successful forward hop so the world feels alive.
+  camKick(perfect ? 0.12 : 0.05);
   tickQuests();
 }
 
-function addCoins(n){
+function addCoins(n, opts){
   stats.coins += n;
   stats.coinsTotal += n;
-  hudCoins();
+  // flyCoins handles its own delayed punch so we don't double-bounce.
+  if(!opts || !opts.silent) hudCoins(true);
+  else hudCoins();
   checkAwards();
   save();
 }
@@ -2637,9 +2855,12 @@ function nearMiss(){
   run.nearT = state.clock;
   stats.nearMisses++;
   run.nears++;
-  toast('close!', player.x, player.y + 0.95, player.z);
+  toast('close!', player.x, player.y + 0.95, player.z, 'big');
+  landRing(player.x, player.y, player.z, 'mint');
   Sfx.whoosh();
   buzz(10);
+  camKick(0.18);
+  state.shake = Math.max(state.shake, 0.25);
   checkAwards();
   tickQuests();
 }
@@ -2705,6 +2926,10 @@ function tickQuests(){
       badge('Challenge done', `+${spec.reward} coins · ${spec.name}`);
       Sfx.quest();
       buzz([14, 40, 14]);
+      flashScreen('gold');
+      burstConfetti(22, ['#ffc93c','#ffe07a','#ffffff']);
+      flyCoins(player.x, player.y + 0.5, player.z, Math.min(3, Math.ceil(spec.reward / 6)));
+      camKick(0.4);
     }
   }
   if(paid){ checkAwards(); save(); if(state.panel === 'quests') renderQuests(); }
@@ -2821,6 +3046,10 @@ function doRevive(){
   badge('Second chance', 'blink and hop');
   buzz([18, 50, 18]);
   spawnFeathers(player.x, player.y + 0.4, player.z, 10, COIN_C, 0.7);
+  flashScreen('mint');
+  burstConfetti(32, ['#7dffb0','#2ecc71','#ffffff','#ffc93c']);
+  landRing(player.x, player.y, player.z, 'mint');
+  camKick(0.45);
   return true;
 }
 
@@ -2837,7 +3066,7 @@ const CAM_E  = new THREE.Vector3(
 const CAM_UP = new THREE.Vector3(0,1,0)
   .addScaledVector(CAM_E, -Math.sin(CFG.CAM_PITCH)).normalize();
 
-const cam = { rowF: 0, x: 0, spanY: 16, spanX: 9 };
+const cam = { rowF: 0, x: 0, spanY: 16, spanX: 9, kick: 0 };
 const _tgt = new THREE.Vector3();
 const SUN_OFF = new THREE.Vector3(9, 15, 7);
 
@@ -2854,6 +3083,9 @@ function resize(){
 addEventListener('resize', resize);
 addEventListener('orientationchange', ()=> setTimeout(resize, 120));
 
+function camKick(amount){
+  cam.kick = Math.max(cam.kick, amount);
+}
 function updateCamera(dt){
   const rowNow = -player.z;                       // continuous, follows the hop
   const target = state.mode === 'menu'
@@ -2861,9 +3093,18 @@ function updateCamera(dt){
     : Math.max(rowNow, player.maxRow - 3);
   cam.rowF = damp(cam.rowF, target, CFG.CAM_LAG_Z, dt);
   cam.x = damp(cam.x, clamp(player.x, -CFG.CAM_X_CLAMP, CFG.CAM_X_CLAMP), CFG.CAM_LAG_X, dt);
+  cam.kick = damp(cam.kick, 0, CFG.CAM_KICK_DECAY, dt);
+
+  // A tiny orthographic zoom punch makes milestones and fever land harder.
+  const kick = cam.kick * CFG.CAM_KICK;
+  const spanY = cam.spanY * (1 - kick);
+  const spanX = cam.spanX * (1 - kick);
+  camera.left = -spanX/2; camera.right = spanX/2;
+  camera.top = spanY/2;   camera.bottom = -spanY/2;
+  camera.updateProjectionMatrix();
 
   const bias = state.mode === 'menu' ? CFG.MENU_BIAS : CFG.CAM_UP_BIAS;
-  _tgt.set(cam.x, 0, ROW_Z(cam.rowF)).addScaledVector(CAM_UP, cam.spanY * bias);
+  _tgt.set(cam.x, 0, ROW_Z(cam.rowF)).addScaledVector(CAM_UP, spanY * bias);
   camera.position.copy(_tgt).addScaledVector(CAM_E, CFG.CAM_DIST);
   camera.lookAt(_tgt);
 
@@ -3023,11 +3264,28 @@ function save(){
   }catch(e){}
 }
 
-const hudScore = ()=>{ scoreEl.textContent = state.score; };
+function hudScore(punch){
+  scoreEl.textContent = state.score;
+  if(punch){
+    scoreEl.classList.remove('punch');
+    void scoreEl.offsetWidth;
+    scoreEl.classList.add('punch');
+  }
+}
 const hudBest  = ()=>{ bestEl.textContent = 'BEST ' + stats.best; $('s-best').textContent = stats.best; };
-const hudCoins = ()=>{
+const hudCoins = (punch)=>{
   coinEl.textContent = stats.coins;
   $('s-coins').textContent = stats.coins;
+  if(punch){
+    const chip = $('coinchip');
+    chip.classList.remove('punch');
+    void chip.offsetWidth;
+    chip.classList.add('punch');
+    const c = chip.querySelector('.coin');
+    c.classList.remove('spin');
+    void c.offsetWidth;
+    c.classList.add('spin');
+  }
   if(state.panel === 'chars') renderChars();
 };
 function hudStreak(){
@@ -3051,11 +3309,29 @@ function hudMult(){
   multEl.classList.add('pop');
 }
 
-/** Slide-in notification for an award or a new personal best. */
+/* --- dopamine helpers: flash, fly-coins, confetti, rings, combo ------------ */
 const badgeLayer = $('badges');
+const toastLayer = $('toasts');
+const flyLayer   = $('flycoins');
+const confettiLayer = $('confetti');
+const flashEl    = $('flash');
+const comboEl    = $('combo');
+const comboN     = comboEl.querySelector('.n');
+const comboL     = comboEl.querySelector('.l');
+const _proj = new THREE.Vector3();
+
+function worldToPct(x, y, z){
+  _proj.set(x, y, z).project(camera);
+  return {
+    x: (_proj.x * 0.5 + 0.5) * 100,
+    y: (-_proj.y * 0.5 + 0.5) * 100,
+  };
+}
+
+/** Slide-in notification for an award or a new personal best. */
 function badge(kind, name){
   const el = document.createElement('div');
-  el.className = 'badge';
+  el.className = 'badge pop';
   el.innerHTML = '<span class="medal">★</span><span class="txt"><span class="k"></span><span class="n"></span></span>';
   el.querySelector('.k').textContent = kind;
   el.querySelector('.n').textContent = name;
@@ -3063,18 +3339,88 @@ function badge(kind, name){
   setTimeout(()=> el.remove(), 2950);
 }
 
-/** Floating text anchored to a world position. */
-const toastLayer = $('toasts');
-const _proj = new THREE.Vector3();
-function toast(text, x, y, z){
-  _proj.set(x, y, z).project(camera);
+/** Floating text anchored to a world position. `kind` can be '', 'big', 'perfect', 'fever'. */
+function toast(text, x, y, z, kind){
+  const p = worldToPct(x, y, z);
   const el = document.createElement('div');
-  el.className = 'toast';
+  el.className = 'toast' + (kind ? ' ' + kind : '');
   el.textContent = text;
-  el.style.left = ((_proj.x * 0.5 + 0.5) * 100) + '%';
-  el.style.top  = ((-_proj.y * 0.5 + 0.5) * 100) + '%';
+  el.style.left = p.x + '%';
+  el.style.top  = p.y + '%';
   toastLayer.appendChild(el);
-  setTimeout(()=> el.remove(), 1050);
+  setTimeout(()=> el.remove(), kind === 'fever' ? 1200 : 1050);
+}
+
+function flashScreen(kind){
+  flashEl.className = '';
+  void flashEl.offsetWidth;
+  flashEl.className = 'on' + (kind ? ' ' + kind : '');
+}
+
+/** Arc gold discs from a world point into the coin chip. */
+function flyCoins(x, y, z, n = 1){
+  const from = worldToPct(x, y, z);
+  const chip = $('coinchip').getBoundingClientRect();
+  const toX = ((chip.left + chip.width * 0.22) / innerWidth) * 100;
+  const toY = ((chip.top + chip.height * 0.5) / innerHeight) * 100;
+  const count = Math.max(1, n | 0);
+  for(let i = 0; i < count; i++){
+    const el = document.createElement('i');
+    el.className = 'flycoin';
+    const ox = from.x + randf(-2.5, 2.5);
+    const oy = from.y + randf(-2, 2);
+    el.style.left = ox + '%';
+    el.style.top  = oy + '%';
+    el.style.setProperty('--dx', (toX - ox) + 'vw');
+    // vw/vh mix: use % of viewport via calc-friendly custom props in px instead
+    el.style.setProperty('--dx', ((toX - ox) / 100 * innerWidth) + 'px');
+    el.style.setProperty('--dy', ((toY - oy) / 100 * innerHeight) + 'px');
+    el.style.animationDelay = (i * 0.05) + 's';
+    flyLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 700 + i * 50);
+  }
+  setTimeout(()=> hudCoins(true), 480);
+}
+
+function burstConfetti(n = 24, colors = ['#ffc93c','#ffe07a','#ef4d4d','#7dffb0','#fff']){
+  const cx = 50, cy = 38;
+  for(let i = 0; i < n; i++){
+    const el = document.createElement('i');
+    el.className = 'confetti';
+    el.style.left = (cx + randf(-8, 8)) + '%';
+    el.style.background = pick(colors);
+    el.style.setProperty('--dx', randf(-140, 140) + 'px');
+    el.style.setProperty('--dy', randf(180, 520) + 'px');
+    el.style.setProperty('--rot', randf(0, 360) + 'deg');
+    el.style.setProperty('--dur', randf(0.7, 1.35) + 's');
+    el.style.width = randi(6, 11) + 'px';
+    el.style.height = randi(9, 16) + 'px';
+    confettiLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 1500);
+  }
+}
+
+function landRing(x, y, z, kind){
+  const p = worldToPct(x, y + 0.05, z);
+  const el = document.createElement('i');
+  el.className = 'ring' + (kind ? ' ' + kind : '');
+  el.style.left = p.x + '%';
+  el.style.top  = p.y + '%';
+  toastLayer.appendChild(el);
+  setTimeout(()=> el.remove(), 480);
+}
+
+function showCombo(n){
+  if(n < 3 || state.mode !== 'play') return;
+  comboN.textContent = 'x' + n;
+  comboL.textContent = run.fever ? (run.coinMult >= 3 ? 'super fever' : 'fever') : (n >= 10 ? 'on fire' : 'streak');
+  comboEl.classList.toggle('fever', !!run.fever);
+  comboEl.classList.remove('show');
+  void comboEl.offsetWidth;
+  comboEl.classList.add('show');
+}
+function hideCombo(){
+  comboEl.classList.remove('show', 'fever');
 }
 
 function show(name){
@@ -3271,6 +3617,8 @@ function startGame(){
   $('loginstreak').classList.add('hidden');
   $('revivewrap').classList.add('hidden');
   hudMult();
+  hideCombo();
+  cam.kick = 0;
 }
 
 function gameOver(){
@@ -3430,6 +3778,7 @@ window.HOP = {
   CRITTERS, AWARDS, QUEST_POOL, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
   openPanel, closePanel, dailyGift, ensureQuests, tickQuests, doRevive, canRevive,
   save, load, onProgress, nearMiss, addCoins,
+  flashScreen, burstConfetti, flyCoins, camKick, showCombo,
   move: tryMove, start: startGame,
 };
 

@@ -73,6 +73,20 @@ persist in `localStorage`.
   flags either side. Cross it and the run announces itself.
 - **Daily gift.** A handful of coins the first time you play on a given day.
 
+## Feel
+
+Every hop is tuned to land with a little dopamine hit:
+
+- **Land squash** and expanding **rings** underfoot, with a soft thump.
+- **Perfect** hops (forward, tight on the last) flash mint, sparkle, and pay a
+  bonus coin every fifth one.
+- **Combo banner** grows in the centre of the screen as the streak climbs.
+- **Coins fly** into the purse; the chip spins and the score punches.
+- **Camera kick** on milestones, fever, near misses and revives — a brief zoom
+  punch, not a shake.
+- **Confetti and colour flashes** when fever ignites, awards unlock, challenges
+  clear, or you take a second chance.
+
 ## Rules of the road
 
 - **Roads** carry cars, lorries and buses. Lanes come in groups of one to four,
