@@ -71,6 +71,13 @@ persist in `localStorage`.
   title screen or the score card.
 - **Login streak.** Come back tomorrow and the daily gift grows (capped at 50).
   Miss a day and it resets.
+- **Hourly crate / mystery deal / streak vault.** Soft-currency only loops on the
+  title screen — a free hourly crate, a rotating mystery deal, and a streak vault
+  that banks coins from heat you lose on death so you can cash them later.
+- **Spin pity meter.** Dry spins fill a pity bar; after enough misses the wheel
+  forces a juicy hit so the itch never goes cold.
+- **Journey amp.** VIP value meter, loot marquee, jackpot odds tags, claim heat,
+  and a star vault you cash into tiers — FOMO chrome dialed up, still no real IAP.
 - **Near misses.** A vehicle that passes within a whisker prints `close!` and
   counts towards an award.
 - **Milestones and the record gate.** Every 25th row pays a coin (multiplied in

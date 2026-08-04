@@ -1211,13 +1211,121 @@ kbd{
   font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#fff;
   text-shadow:0 2px 0 rgba(18,52,80,.35);opacity:.9;
 }
-#j-lanes .vip{color:#e9d5ff;}
+#j-lanes .vip{color:#e9d5ff;animation:jcta 2s ease-in-out infinite;}
 #j-lanes .free{color:#bbf7d0;}
 .jtier.jackpot{
-  background:linear-gradient(90deg,rgba(255,201,60,.28),rgba(192,132,252,.3));
-  box-shadow:0 0 0 2px #c084fc, 0 0 18px rgba(192,132,252,.35);
+  background:linear-gradient(90deg,rgba(255,201,60,.38),rgba(192,132,252,.42));
+  box-shadow:0 0 0 2px #ffe07a, 0 0 26px rgba(255,201,60,.5), 0 0 18px rgba(192,132,252,.4);
+  animation:jjackrow 2.4s ease-in-out infinite;
 }
-.jtier.jackpot .num{color:#ffe07a;}
+.jtier.jackpot .num{color:#ffe07a;text-shadow:0 0 12px rgba(255,224,122,.8);}
+@keyframes jjackrow{50%{filter:brightness(1.1);transform:scale(1.01);}}
+#j-value{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:linear-gradient(105deg,#3b0764,#7c3aed 55%,#ef4d4d);
+  color:#fff;border-radius:14px;padding:10px 12px;
+  box-shadow:0 5px 0 #2e1065, 0 0 20px rgba(239,77,77,.35);
+}
+#j-value .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.85;}
+#j-value .n{font-size:15px;font-weight:900;letter-spacing:.04em;}
+#j-value .n b{color:#ffe07a;}
+#j-drops{
+  display:flex;gap:6px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+#j-drops .track{
+  display:flex;gap:6px;animation:jmarquee 18s linear infinite;white-space:nowrap;
+}
+#j-drops .drop{
+  flex:0 0 auto;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:rgba(255,253,246,.92);color:var(--ink);
+  box-shadow:0 2px 0 rgba(18,52,80,.18);
+}
+#j-drops .drop.vip{background:linear-gradient(#e9d5ff,#c084fc);color:#3b0764;box-shadow:0 2px 0 #6b21a8;}
+#j-drops .drop.hot{background:linear-gradient(#ff6b6b,#ef4d4d);color:#fff;box-shadow:0 2px 0 #9a1818;}
+@keyframes jmarquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+#j-vault{
+  display:flex;align-items:center;gap:10px;background:rgba(255,253,246,.95);
+  border-radius:14px;padding:8px 10px;box-shadow:0 3px 0 rgba(18,52,80,.18);
+}
+#j-vault .ico{
+  width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(#ffe07a,#ff9a3c);color:#3c2500;font-weight:900;box-shadow:0 3px 0 #c27818;
+}
+#j-vault .txt{flex:1;min-width:0;text-align:left;}
+#j-vault .t{font-size:12px;color:var(--ink);}
+#j-vault .s{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+#j-vault .go{
+  letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;border-radius:10px;border:0;
+  font-family:inherit;font-weight:800;cursor:pointer;
+  background:linear-gradient(#ffe07a,#ffc224);color:#3c2500;box-shadow:0 3px 0 var(--gold-dk);
+}
+#j-vault .go:disabled{opacity:.55;cursor:default;box-shadow:0 2px 0 #b8c2cc;background:#dfe6ee;color:#9fb0c0;}
+#j-vault.ready .go{animation:jcta 1.2s ease-in-out infinite;}
+#journey.amp #j-hero{
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(255,201,60,.35),transparent 55%),
+    radial-gradient(90% 60% at 100% 20%,rgba(192,132,252,.35),transparent 50%),
+    linear-gradient(180deg,#0b1c2e 0%,#16324a 40%,#1f4a66 100%);
+}
+#journey.amp #j-fomo{
+  box-shadow:0 0 0 1px rgba(255,107,107,.45), 0 8px 24px rgba(239,77,77,.25);
+}
+.jcell .odds{
+  font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:#ef4d4d;opacity:.9;
+}
+#hourlycrate, #mysterydeal, #streakvaultchip{
+  width:min(92vw,420px);border:0;cursor:pointer;font-family:inherit;text-align:left;
+  border-radius:16px;padding:10px 12px;display:none;align-items:center;gap:10px;
+  box-shadow:0 5px 0 rgba(18,52,80,.22);margin:4px auto;
+}
+#hourlycrate.show, #mysterydeal.show, #streakvaultchip.show{display:flex;}
+#hourlycrate{background:linear-gradient(135deg,#fff7ed,#ffedd5);color:var(--ink);}
+#hourlycrate .ico{
+  width:40px;height:40px;border-radius:12px;background:linear-gradient(#fb923c,#ea580c);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;
+  letter-spacing:.1em;font-weight:900;box-shadow:0 3px 0 #9a3412;animation:jcta 1.5s ease-in-out infinite;
+}
+#mysterydeal{background:linear-gradient(135deg,#faf5ff,#ede9fe);color:var(--ink);}
+#mysterydeal .ico{
+  width:40px;height:40px;border-radius:12px;background:linear-gradient(#c084fc,#7c3aed);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;
+  letter-spacing:.08em;font-weight:900;box-shadow:0 3px 0 #5b21b6;animation:jcta 1.3s ease-in-out infinite;
+}
+#streakvaultchip{background:linear-gradient(135deg,#ecfeff,#cffafe);color:var(--ink);}
+#streakvaultchip .ico{
+  width:40px;height:40px;border-radius:12px;background:linear-gradient(#22d3ee,#0891b2);
+  color:#042f2e;display:flex;align-items:center;justify-content:center;font-size:9px;
+  letter-spacing:.08em;font-weight:900;box-shadow:0 3px 0 #0e7490;
+}
+#hourlycrate .copy, #mysterydeal .copy, #streakvaultchip .copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+#hourlycrate .k, #mysterydeal .k, #streakvaultchip .k{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+}
+#hourlycrate .n, #mysterydeal .n, #streakvaultchip .n{font-size:14px;color:var(--ink);font-weight:800;}
+#hourlycrate .h, #mysterydeal .h, #streakvaultchip .h{font-size:10px;color:var(--ink-soft);}
+#hudstars{
+  display:none;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;
+  background:rgba(255,253,246,.94);color:var(--ink);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;box-shadow:0 3px 0 rgba(18,52,80,.2);
+}
+#hudstars.on{display:flex;animation:streakpop .35s ease;}
+#hudstars b{color:#7c3aed;}
+#spin-pity{
+  width:min(94vw,460px);margin:6px auto 0;background:rgba(255,253,246,.92);
+  border-radius:12px;padding:7px 10px;box-shadow:0 3px 0 rgba(18,52,80,.16);
+  display:none;flex-direction:column;gap:4px;
+}
+#spin-pity.show{display:flex;}
+#spin-pity .row{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);}
+#spin-pity .row b{color:var(--ink);}
+#spin-pity .bar{height:8px;border-radius:4px;background:#e2e9f0;overflow:hidden;}
+#spin-pity .bar i{
+  display:block;height:100%;width:0%;border-radius:4px;
+  background:linear-gradient(90deg,#c084fc,#ef4d4d,#ffe07a);
+  transition:width .35s cubic-bezier(.2,1.2,.3,1);
+}
 .jcell.claimable{
   cursor:pointer;box-shadow:0 0 0 2px #2ecc71, 0 3px 0 #1e9a52;
   animation:jclaimcell 1s ease-in-out infinite;
@@ -1348,6 +1456,7 @@ kbd{
   #j-mascot .spark,#j-mascot .cta-pill,#j-fomo,#j-claimpulse,#j-dangle::after,
   #j-dangle .jack,#j-progress .bar i,.jcell.claimable,#btn-journey.hot,#btn-journey2.hot,
   #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,
+  #j-drops .track,#j-vault.ready .go,#hourlycrate .ico,#mysterydeal .ico,.jtier.jackpot,
   #start:not(.hidden) #title .one,#start:not(.hidden) #title .two,
   .screen.sheet:not(.hidden),#reveal::before,#hatch::before{animation:none!important;transition:none!important;}
 }
@@ -1373,6 +1482,7 @@ kbd{
       <div id="coinchip" class="chip"><i class="coin"></i><span class="val">0</span></div>
       <div id="multchip" class="hidden">×2 coins</div>
       <div id="hudboost" class="hidden" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:linear-gradient(#ff9a3c,#e02b2b);border-radius:12px;padding:4px 10px;box-shadow:0 3px 0 #9a1818;">2× stars</div>
+      <div id="hudstars"><span>★</span><b id="hudstars-n">0</b><span>stars</span></div>
     </div>
     <div id="alert">◀ get moving ▶</div>
     <div id="badges"></div>
@@ -1408,6 +1518,30 @@ kbd{
     <div id="gift" class="hidden">daily gift +20 coins</div>
     <div id="loginstreak" class="hidden">day 1 streak</div>
     <div id="restbonus" class="hidden">welcome back</div>
+    <button type="button" id="hourlycrate" aria-label="Claim hourly crate">
+      <span class="ico">CRATE</span>
+      <span class="copy">
+        <span class="k" id="crate-k">hourly drop</span>
+        <span class="n" id="crate-n">Crate ready</span>
+        <span class="h" id="crate-h">tap to rip it open</span>
+      </span>
+    </button>
+    <button type="button" id="mysterydeal" aria-label="Mystery deal">
+      <span class="ico">DEAL</span>
+      <span class="copy">
+        <span class="k" id="deal-k">mystery deal · ends soon</span>
+        <span class="n" id="deal-n">??? for cheap</span>
+        <span class="h" id="deal-h">one tap · soft currency</span>
+      </span>
+    </button>
+    <button type="button" id="streakvaultchip" aria-label="Streak vault">
+      <span class="ico">VAULT</span>
+      <span class="copy">
+        <span class="k">streak vault</span>
+        <span class="n" id="vault-n">0 coins banked</span>
+        <span class="h" id="vault-h">survive streaks to fill it</span>
+      </span>
+    </button>
     <button id="btn-play" class="btn">Play</button>
     <div id="menurow" class="menugrid">
       <button id="btn-chars"  class="btn ghost">Characters</button>
@@ -1568,6 +1702,37 @@ kbd{
         <span class="cta-pill" id="j-mascot-cta">Get VIP</span>
       </button>
       <div id="j-social">12,847 hoppers unlocked VIP this season</div>
+      <div id="j-value">
+        <div>
+          <div class="k">VIP lane value locked</div>
+          <div class="n" id="j-value-n">~<b>0</b> coins on the table</div>
+        </div>
+        <div class="k" id="j-value-sub">tap chicken</div>
+      </div>
+      <div id="j-drops" aria-hidden="true">
+        <div class="track" id="j-drops-track">
+          <span class="drop hot">ending soon</span>
+          <span class="drop vip">pet egg</span>
+          <span class="drop">gold chest</span>
+          <span class="drop vip">rainbow trail</span>
+          <span class="drop">banked shield</span>
+          <span class="drop vip">×12 title</span>
+          <span class="drop hot">flash sale</span>
+          <span class="drop">silver chest</span>
+          <span class="drop vip">magnet bank</span>
+          <span class="drop">spin ticket</span>
+          <span class="drop hot">ending soon</span>
+          <span class="drop vip">pet egg</span>
+          <span class="drop">gold chest</span>
+          <span class="drop vip">rainbow trail</span>
+          <span class="drop">banked shield</span>
+          <span class="drop vip">×12 title</span>
+          <span class="drop hot">flash sale</span>
+          <span class="drop">silver chest</span>
+          <span class="drop vip">magnet bank</span>
+          <span class="drop">spin ticket</span>
+        </div>
+      </div>
       <div id="j-dangle">
         <span class="jack">Next jackpot</span>
         <div class="txt">
@@ -1594,6 +1759,14 @@ kbd{
         <div class="pips" id="j-heat-pips"><i></i><i></i><i></i><i></i><i></i></div>
         <span id="j-heat-hint">claim streak</span>
       </div>
+      <div id="j-vault">
+        <span class="ico">★</span>
+        <div class="txt">
+          <div class="t" id="j-vault-t">Star vault empty</div>
+          <div class="s" id="j-vault-s">hop to fill · cash out for tiers</div>
+        </div>
+        <button type="button" class="go" id="btn-vault-cash" disabled>Cash in</button>
+      </div>
       <button type="button" id="j-claimpulse"><span>Rewards ready</span><span class="n" id="j-claimpulse-n">0</span></button>
       <div id="j-actions">
         <button id="btn-buy-vip" class="btn vip">Unlock VIP</button>
@@ -1603,7 +1776,7 @@ kbd{
         <button id="btn-claim-all" class="btn ghost">Claim all</button>
       </div>
       <div id="boostchip">2× stars active · <span id="boost-left">0:00</span></div>
-      <div id="j-lanes"><span></span><span class="free">Free lane</span><span class="vip">VIP lane · 4× juicier</span></div>
+      <div id="j-lanes"><span></span><span class="free">Free lane</span><span class="vip">VIP lane · illegally juicy</span></div>
     </div>
     <div class="body"><div class="awards" id="j-list"></div></div>
     <div id="j-reveal"><div class="card"><div class="k" id="j-reveal-k">reward</div><div class="n" id="j-reveal-n">+10</div><div class="h" id="j-reveal-h">claimed</div></div></div>
@@ -1636,6 +1809,10 @@ kbd{
     </div>
     <div id="wheel-result">tap spin · feel the ticks</div>
     <button id="btn-dospin" class="btn">Spin</button>
+    <div id="spin-pity">
+      <div class="row"><span>pity meter</span><span><b id="pity-cur">0</b> / <b id="pity-goal">8</b> dry spins</span></div>
+      <div class="bar"><i id="pity-bar" style="width:0%"></i></div>
+    </div>
     <div id="spin-prizes"></div>
   </div>
 
@@ -113739,6 +113916,8 @@ function die(cause, sub){
   stats.deaths[state.cause] = (stats.deaths[state.cause] || 0) + 1;
   player.hopping = false;
   player.iframe = 0;
+  if(run.feverId) run.peakFeverId = run.feverId;
+  if((run.streak|0) > (run.peakStreak|0)) run.peakStreak = run.streak|0;
   endFever();
   run.streak = 0;
   hudStreak();
@@ -113875,18 +114054,18 @@ function checkAwards(silent){
 
 /* --- run-scoped feedback ---------------------------------------------------- */
 const run = {
-  streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0,
-  revived: false, fever: false, coinMult: 1, feverId: '',
+  streak: 0, peakStreak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0,
+  revived: false, fever: false, coinMult: 1, feverId: '', peakFeverId: '',
   magnet: 0, feverSlow: 1, hopScale: 1, feverLuck: 0, feverRain: 0,
   coins: 0, rails: 0, logs: 0, nears: 0, perfects: 0,
 };
 
 function resetRun(){
-  run.streak = 0; run.lastHopT = -9; run.nearT = -9;
+  run.streak = 0; run.peakStreak = 0; run.lastHopT = -9; run.nearT = -9;
   run.milestone = 0; run.beatBest = false;
   run.gateRow = stats.best;
   run.revived = false; run.fever = false; run.coinMult = 1;
-  run.feverId = ''; run.magnet = 0; run.feverSlow = 1; run.hopScale = 1;
+  run.feverId = ''; run.peakFeverId = ''; run.magnet = 0; run.feverSlow = 1; run.hopScale = 1;
   run.feverLuck = 0; run.feverRain = 0;
   run.coins = 0; run.rails = 0; run.logs = 0; run.nears = 0;
   run.perfects = 0;
@@ -114054,6 +114233,7 @@ function onProgress(perfect){
   const now = state.clock;
   run.streak = (now - run.lastHopT < CFG.STREAK_WINDOW) ? run.streak + 1 : 1;
   run.lastHopT = now;
+  if(run.streak > (run.peakStreak|0)) run.peakStreak = run.streak;
   if(run.streak > stats.bestStreak) stats.bestStreak = run.streak;
   if(run.streak > stats.feverPeak) stats.feverPeak = run.streak;
   updateFeverTier();
@@ -115155,6 +115335,10 @@ for(const [id, fn] of [
     if(stats.vipPass){ badge('VIP', 'already unlocked'); return; }
     buyVipPass(true);
   }],
+  ['btn-vault-cash', () => cashStarVault()],
+  ['hourlycrate', () => openHourlyCrate()],
+  ['mysterydeal', () => buyMysteryDeal()],
+  ['streakvaultchip', () => cashStreakVault()],
 ]){
   const el = $(id);
   if(el) el.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); fn(); });
@@ -115596,6 +115780,7 @@ function claimJourneyCell(idx, lane, opts = {}){
   }
   // Claim heat — streaky dopamine, bonus every 3 taps.
   stats.claimHeat = (stats.claimHeat|0) + 1;
+  stats.claimHeatAt = Date.now();
   stats.claimsTotal = (stats.claimsTotal|0) + 1;
   if((stats.claimHeat % 3) === 0){
     const bonus = 5 + (stats.claimHeat|0);
@@ -115700,10 +115885,15 @@ function starsToIndex(idx){
 }
 
 /** Advance tiers when stars fill the current goal. Rewards are claimable, not auto-granted. */
-function addJourneyStars(n){
+function addJourneyStars(n, opts = {}){
   if(n <= 0) return;
   stats.journeyStars = (stats.journeyStars | 0) + n;
   stats.journeyStarsTotal = (stats.journeyStarsTotal | 0) + n;
+  // Star vault — bank a slice for a cash-in hit later (soft-currency itch).
+  if(!opts.fromVault){
+    stats.starVault = (stats.starVault|0) + Math.max(1, Math.floor(n * 0.6));
+  }
+  updateHudStars();
   let advanced = 0;
   while(stats.journeyStep < JOURNEY.length){
     const node = JOURNEY[stats.journeyStep];
@@ -115848,6 +116038,9 @@ function hideJourneyUpsell(){
 }
 
 function updateJourneyChrome(){
+  const sheet = $('journey');
+  if(sheet) sheet.classList.add('amp');
+  decayClaimHeat();
   const left = journeyMsLeft();
   const clock = $('j-clock');
   if(clock) clock.textContent = formatSeasonClock(left);
@@ -115855,17 +116048,35 @@ function updateJourneyChrome(){
   if(fomo) fomo.classList.toggle('urgent', left < 24 * 3600e3);
   const scare = $('j-scare');
   if(scare){
-    scare.textContent = left < 24 * 3600e3
+    let line = left < 24 * 3600e3
       ? 'FINAL HOURS · claim VIP before loot resets'
       : vipSaleActive()
         ? ('FLASH SALE · VIP ' + vipPrice() + ' (was ' + VIP_PRICE_FULL + ')')
         : 'unclaimed VIP loot vanishes with the season';
+    try{
+      if(typeof FOMO_LABELS !== 'undefined' && FOMO_LABELS.length){
+        const hit = FOMO_LABELS[Math.floor(Date.now() / 90000) % FOMO_LABELS.length];
+        if(hit && hit.text) line = hit.text + ' · ' + line;
+      }
+    }catch(e){}
+    scare.textContent = line;
   }
   const social = $('j-social');
   if(social){
     const base = 12847 + Math.floor((Date.now() % 3600000) / 4000);
     social.textContent = base.toLocaleString() + ' hoppers unlocked VIP this season';
   }
+  // Illegal value meter — show soft-currency VIP loot sitting on the table.
+  const missed = estimateVipMissedCoins();
+  const vn = $('j-value-n');
+  if(vn) vn.innerHTML = '~<b>' + missed + '</b> coins on the table';
+  const vs = $('j-value-sub');
+  if(vs){
+    vs.textContent = stats.vipPass
+      ? (countClaimable() ? 'CLAIM NOW' : 'lane unlocked')
+      : (vipSaleActive() ? 'steal it · sale live' : 'tap chicken');
+  }
+  updateStarVaultChrome();
   // Next jackpot dangle
   const jack = nextJackpot();
   const dn = $('j-dangle-n');
@@ -115894,7 +116105,12 @@ function updateJourneyChrome(){
     const fire = $('j-heat-fire');
     if(fire) fire.textContent = 'heat x' + (stats.claimHeat|0);
     const hint = $('j-heat-hint');
-    if(hint) hint.textContent = heat >= 5 ? 'MAX HEAT · bonuses raining' : ((3 - ((stats.claimHeat|0) % 3)) + ' to bonus');
+    if(hint){
+      const h = stats.claimHeat|0;
+      hint.textContent = heat >= 5 ? 'MAX HEAT · bonuses raining'
+        : h <= 0 ? 'claim to ignite'
+        : ((h % 3 === 0) ? 'bonus just hit · keep going' : ((3 - (h % 3)) + ' to bonus'));
+    }
     const pips = $('j-heat-pips');
     if(pips){
       [...pips.children].forEach((p, i) => p.classList.toggle('on', i < heat));
@@ -116095,6 +116311,7 @@ function renderJourney(){
         + (jackpot ? '<span class="jacktag">JACKPOT</span>' : '')
         + (exclusive && !jackpot ? '<span class="xbadge">EXCLUSIVE</span>' : '')
         + (lane === 'vip' && rew.value && !claimed ? '<span class="value"></span>' : '')
+        + (jackpot && !claimed ? '<span class="odds">0.7% drop</span>' : '')
         + ((locked || (!reached && !claimed)) ? '<span class="lock"></span>' : '');
       btn.querySelector('.lane').textContent = lane === 'vip' ? 'VIP' : 'FREE';
       btn.querySelector('.rew').textContent = rew.label;
@@ -116243,7 +116460,21 @@ const SPIN_SEASON_SLOT_39 = { active:false, mult:1, label:'season-39' };
 /** Spin table flavor weight tweak slot 40 — reserved for seasonal events. */
 const SPIN_SEASON_SLOT_40 = { active:false, mult:1, label:'season-40' };
 
+const SPIN_PITY_GOAL = 8;
+function isSpinJackpot(p){
+  if(!p) return false;
+  return (p.kind === 'coins' && (p.pay|0) >= 100)
+    || (p.kind === 'chest' && p.pay === 'gold')
+    || (p.kind === 'chest' && p.pay === 'silver' && (stats.spinPity|0) >= SPIN_PITY_GOAL);
+}
 function pickSpinPrize(){
+  // Pity: after enough dry spins, force a juicy hit so the wheel never feels dead.
+  if((stats.spinPity|0) >= SPIN_PITY_GOAL){
+    const juicy = SPIN_PRIZES.filter(p =>
+      (p.kind === 'coins' && p.pay >= 100) || (p.kind === 'chest' && (p.pay === 'gold' || p.pay === 'silver'))
+    );
+    if(juicy.length) return juicy[Math.floor(Math.random() * juicy.length)];
+  }
   let total = 0;
   for(const p of SPIN_PRIZES) total += p.weight;
   let roll = Math.random() * total;
@@ -116372,6 +116603,8 @@ function doSpin(){
     const gridHit = document.querySelectorAll('.spinprize')[idx];
     if(gridHit) gridHit.classList.add('hit');
     applySpinPrize(prize);
+    if(isSpinJackpot(prize)) stats.spinPity = 0;
+    else stats.spinPity = (stats.spinPity|0) + 1;
     spinBusy = false;
     if(btn){ btn.classList.remove('spinning'); }
     renderSpin();
@@ -117435,6 +117668,7 @@ function renderSpin(){
     result.textContent = 'tap spin · feel the ticks';
     result.classList.add('show');
   }
+  updateSpinPityChrome();
 }
 
 function renderPets(){
@@ -117498,6 +117732,217 @@ function renderBank(){
   el.textContent = "Shields " + (stats.bankShield|0) + " · Magnets " + (stats.bankMagnet|0);
 }
 
+/* --- Fresh addicting soft-currency loops --------------------------------- */
+const HOURLY_CRATE_MS = 3600e3;
+const MYSTERY_DEAL_MS = 15 * 60e3;
+const STAR_VAULT_CASH_MIN = 8;
+const CLAIM_HEAT_DECAY_MS = 90e3;
+
+function decayClaimHeat(){
+  const at = Number(stats.claimHeatAt) || 0;
+  if(!at || !(stats.claimHeat|0)) return;
+  const steps = Math.floor((Date.now() - at) / CLAIM_HEAT_DECAY_MS);
+  if(steps <= 0) return;
+  stats.claimHeat = Math.max(0, (stats.claimHeat|0) - steps);
+  stats.claimHeatAt = Date.now();
+}
+
+function updateHudStars(){
+  const el = $('hudstars');
+  const n = $('hudstars-n');
+  if(!el || !n) return;
+  if(state.mode !== 'play'){ el.classList.remove('on'); return; }
+  n.textContent = String(stats.journeyStars|0);
+  el.classList.add('on');
+}
+
+function updateStarVaultChrome(){
+  const vault = $('j-vault');
+  if(!vault) return;
+  const n = stats.starVault|0;
+  const ready = n >= STAR_VAULT_CASH_MIN;
+  vault.classList.toggle('ready', ready);
+  const t = $('j-vault-t');
+  const s = $('j-vault-s');
+  const btn = $('btn-vault-cash');
+  if(t) t.textContent = n <= 0 ? 'Star vault empty' : (n + ' stars banked');
+  if(s) s.textContent = ready
+    ? ('cash in · +' + n + ' journey stars')
+    : ((STAR_VAULT_CASH_MIN - n) + ' more to cash');
+  if(btn){
+    btn.disabled = !ready;
+    btn.textContent = ready ? ('Cash +' + n) : 'Cash in';
+  }
+}
+
+function cashStarVault(){
+  const n = stats.starVault|0;
+  if(n < STAR_VAULT_CASH_MIN){ badge('Vault hungry', 'need ' + STAR_VAULT_CASH_MIN + ' stars'); Sfx.bump(); return false; }
+  stats.starVault = 0;
+  badge('STAR VAULT!', '+' + n + ' journey stars');
+  Sfx.prize();
+  flashScreen('gold');
+  burstConfetti(28, ['#ffe07a','#c084fc','#ffffff']);
+  addJourneyStars(n, { fromVault:true });
+  updateStarVaultChrome();
+  save();
+  return true;
+}
+
+function updateSpinPityChrome(){
+  const el = $('spin-pity');
+  if(!el) return;
+  el.classList.add('show');
+  const cur = Math.min(SPIN_PITY_GOAL, stats.spinPity|0);
+  const c = $('pity-cur'); if(c) c.textContent = cur;
+  const g = $('pity-goal'); if(g) g.textContent = SPIN_PITY_GOAL;
+  const bar = $('pity-bar');
+  if(bar) bar.style.width = Math.round((cur / SPIN_PITY_GOAL) * 100) + '%';
+}
+
+function crateReady(){
+  return Date.now() - (Number(stats.crateAt) || 0) >= HOURLY_CRATE_MS;
+}
+function refreshHourlyCrate(){
+  const el = $('hourlycrate');
+  if(!el) return;
+  const ready = crateReady();
+  el.classList.toggle('show', true);
+  const n = $('crate-n');
+  const h = $('crate-h');
+  const k = $('crate-k');
+  if(ready){
+    if(k) k.textContent = 'hourly drop · READY';
+    if(n) n.textContent = 'Crate ready';
+    if(h) h.textContent = 'tap to rip it open';
+    el.querySelector('.ico') && (el.querySelector('.ico').textContent = 'OPEN');
+  } else {
+    const left = HOURLY_CRATE_MS - (Date.now() - (Number(stats.crateAt) || 0));
+    if(k) k.textContent = 'hourly drop';
+    if(n) n.textContent = 'Next crate in ' + formatHMS(left).replace(/^00:/, '');
+    if(h) h.textContent = 'come back · free soft loot';
+    el.querySelector('.ico') && (el.querySelector('.ico').textContent = 'WAIT');
+  }
+}
+function openHourlyCrate(){
+  if(!crateReady()){
+    const left = HOURLY_CRATE_MS - (Date.now() - (Number(stats.crateAt) || 0));
+    badge('Crate cooling', formatHMS(left).replace(/^00:/, '') + ' left');
+    Sfx.bump();
+    refreshHourlyCrate();
+    return false;
+  }
+  stats.crateAt = Date.now();
+  const roll = Math.random();
+  let label = '';
+  if(roll < 0.12){ grantChest('silver', 'Hourly crate'); label = 'Silver chest'; }
+  else if(roll < 0.28){ stats.spins = (stats.spins|0) + 1; label = '+1 spin'; }
+  else if(roll < 0.42){ stats.bankShield = (stats.bankShield|0) + 1; label = '+1 shield'; }
+  else if(roll < 0.55){ addJourneyStars(3); label = '+3 stars'; }
+  else { const c = 12 + Math.floor(Math.random() * 28); addCoins(c); label = '+' + c + ' coins'; }
+  badge('Hourly crate!', label);
+  Sfx.prize();
+  flashScreen('gold');
+  burstConfetti(22, ['#fb923c','#ffe07a','#ffffff']);
+  save();
+  refreshHourlyCrate();
+  hudMeta();
+  return true;
+}
+
+const MYSTERY_DEALS = [
+  { kind:'stars', cost:35, pay:8, label:'8 Journey stars' },
+  { kind:'spins', cost:40, pay:2, label:'2 free spins' },
+  { kind:'shield', cost:28, pay:1, label:'Banked Shield' },
+  { kind:'magnet', cost:28, pay:1, label:'Banked Magnet' },
+  { kind:'coins', cost:25, pay:55, label:'55 coins bundle' },
+  { kind:'chest', cost:55, pay:'bronze', label:'Bronze chest' },
+  { kind:'xp', cost:30, pay:40, label:'40 XP rush' },
+];
+function ensureMysteryDeal(){
+  const now = Date.now();
+  if(!(Number(stats.dealAt) || 0) || now - (Number(stats.dealAt)||0) > MYSTERY_DEAL_MS || !stats.dealKind){
+    const d = MYSTERY_DEALS[Math.floor(Math.random() * MYSTERY_DEALS.length)];
+    stats.dealKind = d.kind;
+    stats.dealCost = d.cost;
+    stats.dealPay = d.pay;
+    stats.dealLabel = d.label;
+    stats.dealAt = now;
+  }
+}
+function refreshMysteryDeal(){
+  ensureMysteryDeal();
+  const el = $('mysterydeal');
+  if(!el) return;
+  el.classList.add('show');
+  const left = Math.max(0, MYSTERY_DEAL_MS - (Date.now() - (Number(stats.dealAt)||0)));
+  const d = MYSTERY_DEALS.find(x => x.kind === stats.dealKind && x.cost === (stats.dealCost|0))
+    || MYSTERY_DEALS.find(x => x.kind === stats.dealKind)
+    || MYSTERY_DEALS[0];
+  const label = stats.dealLabel || d.label;
+  const cost = stats.dealCost|0 || d.cost;
+  const n = $('deal-n');
+  const h = $('deal-h');
+  const k = $('deal-k');
+  if(k) k.textContent = left < 60e3 ? 'mystery deal · LAST SECONDS' : ('mystery deal · ' + formatHMS(left).replace(/^00:/, ''));
+  if(n) n.textContent = label + ' · ' + cost + ' coins';
+  if(h) h.textContent = 'one tap · soft currency only';
+}
+function buyMysteryDeal(){
+  ensureMysteryDeal();
+  refreshMysteryDeal();
+  const cost = stats.dealCost|0;
+  if(stats.coins < cost){ badge('Need coins', cost + ' for the deal'); Sfx.bump(); return false; }
+  stats.coins -= cost;
+  hudCoins(true);
+  const kind = stats.dealKind;
+  const pay = stats.dealPay;
+  const label = stats.dealLabel || 'Mystery deal';
+  if(kind === 'stars') addJourneyStars(pay|0);
+  else if(kind === 'spins'){ stats.spins = (stats.spins|0) + (pay|0); }
+  else if(kind === 'shield'){ stats.bankShield = (stats.bankShield|0) + (pay|0); }
+  else if(kind === 'magnet'){ stats.bankMagnet = (stats.bankMagnet|0) + (pay|0); }
+  else if(kind === 'coins') addCoins(pay|0);
+  else if(kind === 'chest') grantChest(pay, 'Mystery deal');
+  else if(kind === 'xp') addXp(pay|0, 'deal');
+  badge('DEAL CLAIMED!', label);
+  Sfx.fever();
+  flashScreen('ultra');
+  burstConfetti(26, ['#c084fc','#ffe07a','#ffffff']);
+  // Force a fresh deal after purchase.
+  stats.dealAt = 0;
+  stats.dealKind = '';
+  ensureMysteryDeal();
+  refreshMysteryDeal();
+  hudMeta();
+  save();
+  return true;
+}
+
+function refreshStreakVaultChip(){
+  const el = $('streakvaultchip');
+  if(!el) return;
+  const n = stats.streakVault|0;
+  el.classList.toggle('show', n > 0);
+  const vn = $('vault-n');
+  const vh = $('vault-h');
+  if(vn) vn.textContent = n + ' coins banked';
+  if(vh) vh.textContent = n > 0 ? 'tap to cash in' : 'survive streaks to fill it';
+}
+function cashStreakVault(){
+  const n = stats.streakVault|0;
+  if(n <= 0){ badge('Vault empty', 'build a streak first'); Sfx.bump(); return false; }
+  stats.streakVault = 0;
+  addCoins(n);
+  badge('STREAK VAULT!', '+' + n + ' coins');
+  Sfx.prize();
+  flashScreen('gold');
+  burstConfetti(24, ['#22d3ee','#ffe07a','#ffffff']);
+  refreshStreakVaultChip();
+  save();
+  return true;
+}
+
 /* --- Integration hooks called from the main loop ------------------------- */
 function addictionOnBoot(){
   mergeExtraCritters();
@@ -117510,6 +117955,11 @@ function addictionOnBoot(){
   dailySpinTicket();
   restBonus();
   refreshRank();
+  ensureMysteryDeal();
+  refreshHourlyCrate();
+  refreshMysteryDeal();
+  refreshStreakVaultChip();
+  updateSpinPityChrome();
   hudMeta();
 }
 
@@ -117580,6 +118030,17 @@ function addictionOnDeath(){
 function addictionOnGameOver(){
   const stars = journeyStarsFromRun();
   addJourneyStars(stars);
+  // Streak vault — bank soft coins from the heat you just lost, cash later.
+  const streak = Math.max(run.peakStreak|0, Math.min(25, Math.floor((state.score|0) / 4)));
+  if(streak >= 5 || (state.score|0) >= 10){
+    const feverBonus = run.peakFeverId ? 10 : 0;
+    const bank = Math.min(90, 6 + streak * 2 + Math.floor((run.coins|0) / 5) + feverBonus);
+    if(bank > 0){
+      stats.streakVault = (stats.streakVault|0) + bank;
+      badge('Streak vault', '+' + bank + ' banked');
+      refreshStreakVaultChip();
+    }
+  }
   addXp(5 + Math.floor(state.score / 4), "run");
   refreshRank();
   if((stats.owned||[]).length >= 10) unlockTitle("collector");
@@ -117599,6 +118060,19 @@ function addictionOnGameOver(){
 function addictionUpdate(dt){
   updatePowers(dt);
   updateEvents(dt);
+  // Slow UI drip for start-screen loops + mid-run star chip.
+  if(!addictionUpdate._acc) addictionUpdate._acc = 0;
+  addictionUpdate._acc += dt;
+  if(addictionUpdate._acc >= 1){
+    addictionUpdate._acc = 0;
+    if(state.mode === 'start' || (state.panel === '' && state.mode !== 'play')){
+      refreshHourlyCrate();
+      refreshMysteryDeal();
+      refreshStreakVaultChip();
+    }
+    if(state.mode === 'play') updateHudStars();
+    if(state.panel === 'journey') updateJourneyChrome();
+  }
 }
 
 function armBanked(kind){
@@ -117653,7 +118127,17 @@ function addictionLoad(raw){
   stats.journeyUpsells = raw.journeyUpsells|0;
   stats.vipSaleSeen = raw.vipSaleSeen|0;
   stats.claimHeat = raw.claimHeat|0;
+  stats.claimHeatAt = Number(raw.claimHeatAt) || 0;
   stats.claimsTotal = raw.claimsTotal|0;
+  stats.crateAt = Number(raw.crateAt) || 0;
+  stats.dealAt = Number(raw.dealAt) || 0;
+  stats.dealKind = raw.dealKind || '';
+  stats.dealCost = raw.dealCost|0;
+  stats.dealPay = raw.dealPay;
+  stats.dealLabel = raw.dealLabel || '';
+  stats.streakVault = raw.streakVault|0;
+  stats.spinPity = raw.spinPity|0;
+  stats.starVault = raw.starVault|0;
 }
 
 function addictionSaveFields(){
@@ -117677,7 +118161,12 @@ function addictionSaveFields(){
     freeClaimed: stats.freeClaimed||[], vipClaimed: stats.vipClaimed||[],
     boostUntil: Number(stats.boostUntil) || 0, journeyUpsells: stats.journeyUpsells|0,
     vipSaleSeen: stats.vipSaleSeen|0,
-    claimHeat: stats.claimHeat|0, claimsTotal: stats.claimsTotal|0,
+    claimHeat: stats.claimHeat|0, claimHeatAt: Number(stats.claimHeatAt) || 0,
+    claimsTotal: stats.claimsTotal|0,
+    crateAt: Number(stats.crateAt) || 0,
+    dealAt: Number(stats.dealAt) || 0, dealKind: stats.dealKind || '', dealCost: stats.dealCost|0,
+    dealPay: stats.dealPay, dealLabel: stats.dealLabel || '',
+    streakVault: stats.streakVault|0, spinPity: stats.spinPity|0, starVault: stats.starVault|0,
   };
 }
 
@@ -120760,6 +121249,9 @@ resize();
 seedStart();
 resetPlayer();
 show('start');
+refreshHourlyCrate();
+refreshMysteryDeal();
+refreshStreakVaultChip();
 applyChrome();
 
 let last = performance.now();
@@ -120802,6 +121294,7 @@ window.HOP = {
   flashScreen, burstConfetti, flyCoins, camKick, showCombo,
   addXp, doSpin, grantChest, hatchPet, grantPower,
   buyVipPass, skipJourneyTier, buyStarPack, buyStarBoost, claimAllJourney,
+  openHourlyCrate, buyMysteryDeal, cashStreakVault, cashStarVault,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };
