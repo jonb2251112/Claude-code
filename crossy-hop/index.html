@@ -7,6 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#8fd9ff" />
+<meta name="format-detection" content="telephone=no" />
 <meta name="description" content="CROSSY HOP — addictive voxel road-crossing. Soft-currency retention library, animated spin wheel, egg hatches. No real-money IAP." />
 <title>CROSSY HOP — 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,17 +37,22 @@
   --safe-l:env(safe-area-inset-left,0px);
   --safe-r:env(safe-area-inset-right,0px);
   --pad:12px;
+  --touch:44px;
+  --vh:100dvh;
+  --ui-scale:1;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{
   margin:0;padding:0;width:100%;height:100%;
+  height:100dvh;max-height:100dvh;
   overflow:hidden;background:#4fc0f5;color:var(--ink);
   font-family:"Baloo 2","Nunito","Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
   font-weight:800;
   overscroll-behavior:none;touch-action:none;
   user-select:none;-webkit-user-select:none;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
 }
-#app{position:fixed;inset:0;overflow:hidden;}
+#app{position:fixed;inset:0;overflow:hidden;height:100%;height:100dvh;}
 /* A <canvas> is a replaced element: without an explicit CSS size, `inset:0`
    cannot stretch it and a DPR-2 drawing buffer would lay out at twice the
    viewport, showing only the top-left quarter. */
@@ -78,7 +84,7 @@ html,body{
   font-family:inherit;font-weight:900;color:#3c2500;
   background:linear-gradient(#ffe07a,#ffc224);
   border-radius:20px;
-  padding:14px 34px;
+  padding:14px 34px;min-height:var(--touch);
   font-size:clamp(17px,5vw,22px);letter-spacing:.1em;text-transform:uppercase;
   box-shadow:0 6px 0 var(--gold-dk), 0 14px 22px rgba(18,52,80,.28);
   transition:transform .12s cubic-bezier(.2,1.2,.3,1), box-shadow .12s ease, filter .15s ease;
@@ -95,7 +101,7 @@ html,body{
 .btn.ghost{
   background:rgba(255,253,246,.92);color:var(--ink);
   box-shadow:0 5px 0 rgba(18,52,80,.25), 0 10px 18px rgba(18,52,80,.18);
-  font-size:clamp(13px,3.6vw,15px);padding:10px 22px;
+  font-size:clamp(12px,3.4vw,15px);padding:10px 16px;min-height:var(--touch);
 }
 .btn.spinning{pointer-events:none;filter:saturate(.7);animation:btnspinwait .6s ease-in-out infinite;}
 @keyframes btnshine{to{transform:translateX(120%);}}
@@ -374,19 +380,25 @@ html,body{
 
 /* --- D-pad (touch) -------------------------------------------------------- */
 #dpad{
-  position:absolute;right:calc(var(--safe-r) + 10px);bottom:calc(var(--safe-b) + 12px);
-  width:min(33vw,148px);aspect-ratio:1;
+  position:absolute;right:calc(var(--safe-r) + 8px);bottom:calc(var(--safe-b) + 10px);
+  width:min(44vw,176px);aspect-ratio:1;
   display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
-  gap:4px;pointer-events:none;opacity:.78;
+  gap:6px;pointer-events:none;opacity:.86;z-index:14;
 }
 #dpad.hide{display:none;}
 #dpad button{
   pointer-events:auto;border:0;padding:0;cursor:pointer;
-  background:rgba(255,253,246,.8);color:var(--ink);
-  border-radius:13px;font-size:min(4.6vw,20px);font-family:inherit;font-weight:900;
+  background:rgba(255,253,246,.88);color:var(--ink);
+  border-radius:14px;font-size:min(5.2vw,22px);font-family:inherit;font-weight:900;
   box-shadow:0 3px 0 rgba(18,52,80,.24);
   display:flex;align-items:center;justify-content:center;
+  min-width:0;min-height:0;
   transition:transform .06s, background .06s;
+  /* Expand hit area without growing the visual cell */
+  position:relative;
+}
+#dpad button::before{
+  content:"";position:absolute;inset:-6px;border-radius:16px;
 }
 #dpad button:active{transform:translateY(3px) scale(.97);background:#fff;box-shadow:0 1px 0 rgba(18,52,80,.26);}
 #dpad .up{grid-area:1/2;}
@@ -399,8 +411,8 @@ html,body{
 .screen{
   position:absolute;inset:0;z-index:20;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:clamp(10px,2.4vh,20px);
-  padding:calc(var(--safe-t) + 18px) 18px calc(var(--safe-b) + 18px);
+  gap:clamp(8px,2vh,20px);
+  padding:calc(var(--safe-t) + 14px) max(12px, var(--safe-l)) calc(var(--safe-b) + 14px) max(12px, var(--safe-r));
   text-align:center;pointer-events:auto;
   background:radial-gradient(120% 70% at 50% 18%, rgba(12,38,62,.12), rgba(12,38,62,.5));
   opacity:1;visibility:visible;transition:opacity .28s ease, visibility 0s;
@@ -416,12 +428,19 @@ html,body{
 .screen.hidden button{pointer-events:none;}
 /* Both overlays are top-weighted so the lower third of the screen — where the
    avatar stands — is never covered by a panel. */
-#start,#over{justify-content:flex-start;padding-top:calc(var(--safe-t) + 5vh);}
+#start,#over{
+  justify-content:flex-start;padding-top:calc(var(--safe-t) + 5vh);
+  overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  overscroll-behavior:contain;
+}
 /* Tight enough that the stack clears the critter posing in the lower third. */
-#start{gap:clamp(8px,1.8vh,15px);padding-top:calc(var(--safe-t) + 3vh);}
+#start{
+  gap:clamp(6px,1.4vh,14px);padding-top:calc(var(--safe-t) + 2.2vh);
+  padding-bottom:calc(var(--safe-b) + 20px);
+  background:radial-gradient(110% 55% at 50% 8%, rgba(12,38,62,.16), rgba(12,38,62,.44));
+}
 /* Clears the score column and the coin chip, whatever the death title reads. */
-#over{padding-top:calc(var(--safe-t) + 98px);}
-#start{background:radial-gradient(110% 55% at 50% 8%, rgba(12,38,62,.16), rgba(12,38,62,.44));}
+#over{padding-top:calc(var(--safe-t) + 88px);padding-bottom:calc(var(--safe-b) + 18px);}
 
 #title{
   font-size:clamp(40px,13vmin,96px);line-height:.86;color:#fff;letter-spacing:.02em;
@@ -540,7 +559,7 @@ kbd{
 }
 .sheet .head .count{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.9;}
 .close-btn{
-  width:40px;height:40px;flex:0 0 auto;border:0;border-radius:14px;cursor:pointer;
+  width:var(--touch);height:var(--touch);flex:0 0 auto;border:0;border-radius:14px;cursor:pointer;
   background:var(--paper);color:var(--ink);font-family:inherit;font-size:19px;font-weight:900;
   box-shadow:0 4px 0 rgba(18,52,80,.28);pointer-events:auto;
 }
@@ -548,15 +567,19 @@ kbd{
 /* The list scrolls; `pan-y` lets a drag inside it scroll instead of being read
    as a swipe by the global gesture handler. */
 .sheet .body{
-  width:min(94vw,460px);flex:0 1 auto;
+  width:min(94vw,460px);flex:1 1 auto;min-height:0;
   max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 210px);
+  max-height:calc(100dvh - var(--safe-t) - var(--safe-b) - 210px);
   overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   padding:3px;
   /* Fades the last row so it is obvious the list keeps going. */
   -webkit-mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
   mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
 }
-#awards .body,#quests .body{max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 116px);}
+#awards .body,#quests .body{
+  max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 116px);
+  max-height:calc(100dvh - var(--safe-t) - var(--safe-b) - 116px);
+}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;}
 .critter{
   display:flex;flex-direction:column;align-items:center;gap:5px;
@@ -794,7 +817,8 @@ kbd{
 #xpbar i{display:block;height:100%;width:0%;border-radius:4px;
   background:linear-gradient(90deg,#ffe07a,#ffc224,#7dffb0);transition:width .35s ease;}
 #powers{
-  position:absolute;left:50%;bottom:calc(var(--safe-b) + 86px);transform:translateX(-50%);
+  position:absolute;left:calc(var(--safe-l) + 10px);right:auto;bottom:calc(var(--safe-b) + 12px);
+  transform:none;max-width:min(48vw,200px);flex-wrap:wrap;
   display:flex;gap:6px;pointer-events:none;z-index:12;
 }
 #powers.hidden{display:none;}
@@ -823,7 +847,18 @@ kbd{
   max-width:min(92vw,420px);font-size:11px;letter-spacing:.04em;color:#fff;opacity:.85;
   text-shadow:0 2px 0 rgba(18,52,80,.3);font-weight:700;
 }
-.menugrid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:min(94vw,460px);}
+.menugrid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:min(94vw,460px);width:100%;}
+.menugrid .btn.ghost{flex:1 1 calc(33.33% - 6px);min-width:96px;max-width:150px;padding:10px 8px;}
+#menustack{display:flex;flex-direction:column;gap:6px;width:min(94vw,460px);align-items:stretch;}
+#looprail{
+  display:flex;flex-direction:column;gap:6px;width:min(94vw,420px);align-items:stretch;
+}
+#playdock{
+  width:min(92vw,420px);display:flex;justify-content:center;position:sticky;bottom:calc(var(--safe-b) + 6px);
+  z-index:6;padding:4px 0 2px;
+  background:linear-gradient(180deg,transparent,rgba(12,38,62,.35) 30%,rgba(12,38,62,.45));
+}
+#playdock #btn-play{width:min(92vw,360px);}
 #o-meta{display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:11px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);}
 #o-meta b{color:var(--ink);font-size:1.2em;}
@@ -843,11 +878,21 @@ kbd{
 
 
 /* --- VIP Journey / battle-pass chrome (soft currency, max FOMO) ------------ */
-#journey.sheet .body{max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 440px);}
-#journey.sheet{position:relative;}
+#journey.sheet{
+  position:relative;justify-content:flex-start;overflow:hidden;
+  height:100%;max-height:100dvh;
+}
+#journey.sheet .head{flex:0 0 auto;}
 #j-hero{
-  width:min(94vw,460px);display:flex;flex-direction:column;gap:8px;align-items:stretch;
-  margin-bottom:8px;
+  width:min(94vw,460px);display:flex;flex-direction:column;gap:6px;align-items:stretch;
+  margin-bottom:6px;flex:0 1 auto;
+  max-height:min(46dvh, 420px);
+  overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  overscroll-behavior:contain;padding-right:2px;
+}
+#journey.sheet .body{
+  width:min(94vw,460px);flex:1 1 auto;min-height:140px;
+  max-height:none !important;
 }
 #j-fomo{
   display:flex;flex-direction:column;gap:4px;
@@ -1274,10 +1319,10 @@ kbd{
 .jcell .odds{
   font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:#ef4d4d;opacity:.9;
 }
-#hourlycrate, #mysterydeal, #streakvaultchip{
-  width:min(92vw,420px);border:0;cursor:pointer;font-family:inherit;text-align:left;
-  border-radius:16px;padding:10px 12px;display:none;align-items:center;gap:10px;
-  box-shadow:0 5px 0 rgba(18,52,80,.22);margin:4px auto;
+#hourlycrate, #mysterydeal, #streakvaultchip, #echonest{
+  width:100%;border:0;cursor:pointer;font-family:inherit;text-align:left;
+  border-radius:14px;padding:9px 10px;display:none;align-items:center;gap:8px;
+  box-shadow:0 4px 0 rgba(18,52,80,.22);margin:0;min-height:var(--touch);
 }
 #hourlycrate.show, #mysterydeal.show, #streakvaultchip.show{display:flex;}
 #hourlycrate{background:linear-gradient(135deg,#fff7ed,#ffedd5);color:var(--ink);}
@@ -1538,8 +1583,8 @@ kbd{
 
 /* --- Never-before addiction chrome ---------------------------------------- */
 #dopafuse{
-  position:absolute;left:50%;bottom:calc(var(--safe-b) + 96px);transform:translateX(-50%);
-  width:min(78vw,280px);display:none;flex-direction:column;gap:3px;z-index:8;pointer-events:none;
+  position:absolute;left:calc(var(--safe-l) + 10px);bottom:calc(var(--safe-b) + 58px);transform:none;
+  width:min(46vw,200px);display:none;flex-direction:column;gap:3px;z-index:8;pointer-events:none;
 }
 #dopafuse.on{display:flex;}
 #dopafuse .row{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;
@@ -1556,8 +1601,8 @@ kbd{
 }
 #dopafuse.hot .bar i{animation:jbarflow .7s linear infinite, jnearpulse .55s ease-in-out infinite;}
 #wagerchip{
-  position:absolute;left:50%;bottom:calc(var(--safe-b) + 132px);transform:translateX(-50%);
-  width:min(88vw,340px);display:none;align-items:center;gap:8px;z-index:9;
+  position:absolute;left:50%;bottom:calc(var(--safe-b) + 188px);transform:translateX(-50%);
+  width:min(86vw,320px);display:none;align-items:center;gap:8px;z-index:9;
   border:0;cursor:pointer;font-family:inherit;text-align:left;
   background:linear-gradient(105deg,#1a0b2e,#4c1d95 50%,#7c3aed);
   color:#fff;border-radius:14px;padding:8px 10px;
@@ -1584,9 +1629,6 @@ kbd{
 #rivalban b{color:#ff6b6b;}
 #rivalban .ahead{color:#ffe07a;}
 #echonest{
-  width:min(92vw,420px);border:0;cursor:pointer;font-family:inherit;text-align:left;
-  border-radius:16px;padding:10px 12px;display:none;align-items:center;gap:10px;
-  box-shadow:0 5px 0 rgba(18,52,80,.22);margin:4px auto;
   background:linear-gradient(135deg,#fff1f2,#ffe4e6);color:var(--ink);
 }
 #echonest.show{display:flex;}
@@ -1604,7 +1646,7 @@ kbd{
 #echonest .bar{height:6px;border-radius:4px;background:#e2e9f0;overflow:hidden;margin-top:3px;}
 #echonest .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#fb7185,#ffe07a);transition:width .4s ease;}
 #sniperfeed{
-  width:min(92vw,420px);margin:4px auto;display:none;align-items:center;gap:8px;
+  width:100%;margin:0;display:none;align-items:center;gap:8px;
   background:rgba(12,38,62,.55);color:#fff;border-radius:12px;padding:7px 10px;
   font-size:10px;letter-spacing:.06em;text-transform:uppercase;
 }
@@ -1642,11 +1684,232 @@ kbd{
 #btn-comeback.show{display:block;animation:jmenupulse 1.2s ease-in-out infinite;}
 #btn-comeback .sub{display:block;font-size:10px;opacity:.85;margin-top:2px;letter-spacing:.1em;}
 #chipbank{
-  display:none;align-items:center;justify-content:center;gap:6px;margin:4px auto;
+  display:none;align-items:center;justify-content:center;gap:6px;margin:0;
   font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;
 }
 #chipbank.show{display:flex;}
 #chipbank b{color:#67e8f9;}
+
+
+/* --- mobile-first compaction --------------------------------------------- */
+#retrydock{width:min(92vw,420px);display:flex;justify-content:center;}
+#retrydock #btn-retry{width:min(92vw,360px);}
+#menustack2{display:flex;flex-direction:column;gap:6px;width:min(94vw,460px);align-items:stretch;}
+#looprail > *{width:100%;}
+#sniperfeed,#chipbank{width:100%;box-sizing:border-box;}
+
+@media (max-width:520px){
+  :root{ --pad:10px; }
+  #start{
+    gap:6px;
+    padding:
+      calc(var(--safe-t) + 10px)
+      max(10px, var(--safe-r))
+      calc(var(--safe-b) + 12px)
+      max(10px, var(--safe-l));
+    justify-content:flex-start;
+  }
+  #title{font-size:clamp(36px,12vw,56px);line-height:.88;}
+  #tagline{font-size:11px;letter-spacing:.18em;margin:0 0 2px;}
+  #start > .card{display:none;}
+  #startstats{font-size:10px;letter-spacing:.14em;}
+  #metarow{font-size:10px;letter-spacing:.1em;flex-wrap:wrap;justify-content:center;}
+  #xpbar{width:min(92vw,320px);height:8px;}
+  #looprail{
+    display:flex;flex-direction:column;gap:6px;
+    width:min(100%,420px);flex:0 0 auto;margin:2px 0;
+  }
+  #hourlycrate, #mysterydeal, #streakvaultchip, #echonest{
+    padding:8px 10px;border-radius:12px;gap:8px;
+  }
+  #hourlycrate .ico, #mysterydeal .ico, #streakvaultchip .ico, #echonest .ico{
+    width:34px;height:34px;font-size:8px;border-radius:10px;flex-shrink:0;
+  }
+  #hourlycrate .n, #mysterydeal .n, #streakvaultchip .n, #echonest .n{font-size:13px;}
+  #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{
+    font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  #sniperfeed{padding:6px 8px;font-size:9px;}
+  #chipbank{font-size:10px;margin:2px 0;}
+  #playdock{
+    position:sticky;bottom:0;z-index:6;
+    width:min(100%,420px);
+    padding:8px 0 max(4px, env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, transparent, rgba(12,38,62,.55) 28%, rgba(12,38,62,.72));
+  }
+  #playdock #btn-play{
+    width:100%;min-height:52px;font-size:16px;padding:14px 18px;border-radius:18px;
+  }
+  #menustack{width:min(100%,420px);gap:6px;padding-bottom:4px;}
+  .menugrid{gap:6px;max-width:none;}
+  .menugrid .btn.ghost{
+    flex:1 1 calc(33.33% - 6px);min-width:0;max-width:none;
+    min-height:var(--touch);font-size:11px;padding:10px 6px;border-radius:14px;
+  }
+  #gametip{display:none;}
+  #tapcue{font-size:10px;margin-top:2px;}
+  #over{
+    gap:8px;
+    padding:
+      calc(var(--safe-t) + 72px)
+      max(12px, var(--safe-r))
+      calc(var(--safe-b) + 12px)
+      max(12px, var(--safe-l));
+  }
+  #overtitle{font-size:clamp(28px,9vw,44px);}
+  #overwhy{font-size:12px;}
+  #over > .card{padding:12px 14px;border-radius:18px;max-width:min(94vw,420px);}
+  #stats .v{font-size:clamp(22px,7vw,34px);}
+  #nextaward{margin-top:8px;padding-top:8px;}
+  #clutch{padding:12px;margin:4px auto;width:min(94vw,400px);}
+  #clutch .mash{min-height:var(--touch);padding:12px;}
+  #btn-comeback{min-height:var(--touch);width:min(94vw,400px);}
+  #retrydock{
+    position:sticky;bottom:0;z-index:6;width:min(100%,420px);
+    padding:8px 0 max(4px, env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, transparent, rgba(12,38,62,.55) 28%, rgba(12,38,62,.72));
+  }
+  #retrydock #btn-retry{width:100%;min-height:52px;font-size:16px;}
+  #menustack2{width:min(100%,420px);}
+  #hud .chip{font-size:12px;padding:5px 9px;}
+  #score{font-size:clamp(26px,8vw,40px);}
+  #top{gap:6px;}
+  #dpad{
+    width:min(48vw,188px);gap:6px;
+    right:max(6px, var(--safe-r));
+    bottom:max(8px, var(--safe-b));
+  }
+  #dpad button{font-size:min(5.6vw,22px);border-radius:14px;}
+  #dpad button::before{inset:-10px;}
+  #powers{
+    left:max(8px, var(--safe-l));
+    bottom:calc(var(--safe-b) + 10px);
+    max-width:min(40vw,150px);
+  }
+  #powers .powerchip{font-size:10px;padding:4px 8px;}
+  #dopafuse{
+    left:max(8px, var(--safe-l));
+    bottom:calc(var(--safe-b) + 56px);
+    width:min(40vw,150px);
+  }
+  #wagerchip{
+    left:auto;right:max(8px, var(--safe-r));transform:none;
+    bottom:calc(var(--safe-b) + 200px);
+    width:min(46vw,168px);padding:8px;gap:6px;
+  }
+  #wagerchip .n{font-size:11px;}
+  #wagerchip .ico{width:30px;height:30px;font-size:8px;}
+  #rivalban{top:calc(var(--safe-t) + 70px);width:min(94vw,360px);font-size:9px;}
+  #eventban{top:calc(var(--safe-t) + 100px);min-width:0;width:min(88vw,280px);padding:7px 12px;}
+  .sheet{
+    justify-content:flex-end;padding:0;
+  }
+  .sheet .head{
+    width:100%;max-width:none;border-radius:18px 18px 0 0;
+    padding:12px 14px 8px;
+  }
+  /* Keep sheets full-bleed bottom sheets on phones */
+  #chars.sheet, #awards.sheet, #quests.sheet, #spin.sheet, #pets.sheet,
+  #shop.sheet, #bank.sheet, #titles.sheet, #weekly.sheet, #encyc.sheet,
+  #admin.sheet, #journey.sheet{
+    background:rgba(12,38,62,.55);
+  }
+  .sheet .body{
+    width:100%;max-width:none;
+    max-height:min(62dvh, calc(100dvh - var(--safe-t) - var(--safe-b) - 160px));
+    padding:8px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  #journey.sheet{
+    justify-content:flex-start;
+    background:rgba(12,38,62,.62);
+  }
+  #journey.sheet .head{width:min(100%,100%);max-width:none;}
+  #j-hero{
+    width:100%;max-width:none;
+    max-height:min(36dvh, 260px);
+    padding:0 12px;gap:5px;margin-bottom:4px;
+  }
+  #j-mascot{transform:scale(.9);transform-origin:center bottom;}
+  #j-drops, #j-social, #j-heat, #j-flash{display:none !important;}
+  #j-vault{padding:7px 8px;gap:8px;}
+  #j-vault .go{min-height:40px;padding:8px 12px;}
+  #j-actions{
+    position:sticky;bottom:0;z-index:4;
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    width:100%;padding:8px 0 4px;
+    background:linear-gradient(180deg, transparent, rgba(12,38,62,.35) 24%);
+  }
+  #j-actions .btn{min-height:var(--touch);width:100%;font-size:11px;padding:10px 8px;}
+  #journey.sheet .body{
+    width:100%;max-width:none;flex:1 1 auto;min-height:0;
+    max-height:none !important;
+    padding:6px 10px calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+  .jtier{gap:5px;padding:5px;border-radius:12px;}
+  .jtier .num{font-size:12px;}
+  .jcell{padding:7px 8px;min-height:52px;}
+  .jcell .rew{font-size:11px;}
+  #j-upsell{
+    left:10px;right:10px;width:auto;transform:none;
+    bottom:max(10px, env(safe-area-inset-bottom, 0px));
+    padding:12px;gap:8px;border-radius:16px;
+  }
+  #j-upsell .btns .btn{min-height:40px;flex:1 1 120px;}
+  #admin .btns .btn{min-height:var(--touch);flex:1 1 calc(50% - 8px);}
+  #wheel-wrap, #spin .wheelwrap{max-width:min(78vw,280px);}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;}
+  .critter{padding:8px 6px;}
+  .close-btn{width:var(--touch);height:var(--touch);}
+}
+
+@media (max-width:520px) and (max-height:720px){
+  #title{font-size:clamp(30px,10vw,44px);}
+  #tagline,#tapcue{display:none;}
+  #startstats,#metarow{font-size:9px;}
+  #looprail{
+    display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:stretch;
+  }
+  #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{display:none;}
+  #hourlycrate .k, #mysterydeal .k, #streakvaultchip .k, #echonest .k{font-size:8px;}
+  #hourlycrate .n, #mysterydeal .n, #streakvaultchip .n, #echonest .n{font-size:12px;}
+  #sniperfeed,#chipbank{grid-column:1 / -1;}
+  #j-hero{max-height:min(28dvh,200px);}
+  #j-vipbar{padding:8px 10px;}
+  #j-vipbar .t{font-size:12px;}
+  .sheet .body{max-height:min(55dvh, calc(100dvh - 140px));}
+}
+
+@media (max-width:380px){
+  #title{font-size:32px;}
+  .menugrid .btn.ghost{flex:1 1 calc(50% - 6px);font-size:10px;padding:9px 4px;}
+  #dpad{width:min(54vw,168px);}
+  #powers,#dopafuse{max-width:36vw;width:min(36vw,130px);}
+  #wagerchip{width:min(42vw,150px);bottom:calc(var(--safe-b) + 188px);}
+  #j-actions{grid-template-columns:1fr;}
+}
+
+@media (orientation:landscape) and (max-height:480px){
+  #start,#over{
+    flex-direction:row;flex-wrap:wrap;align-content:flex-start;
+    justify-content:center;gap:8px;
+    padding:8px max(12px, var(--safe-r)) 8px max(12px, var(--safe-l));
+  }
+  #title{font-size:28px;width:100%;}
+  #tagline,#start > .card,#gametip,#tapcue,#tapcue2,#looprail{display:none !important;}
+  #playdock,#retrydock{position:static;background:none;padding:0;width:auto;}
+  #playdock #btn-play,#retrydock #btn-retry{width:auto;min-width:150px;min-height:44px;font-size:14px;}
+  #menustack,#menustack2{width:auto;flex-direction:row;flex-wrap:wrap;align-items:center;}
+  .menugrid{display:flex;flex-wrap:wrap;max-width:none;}
+  .menugrid .btn.ghost{flex:0 1 auto;min-width:88px;max-width:none;}
+  #dpad{width:min(28vh,140px);bottom:8px;right:8px;}
+  #wagerchip{bottom:12px;right:160px;left:auto;transform:none;width:min(30vw,180px);}
+  #powers,#dopafuse{bottom:12px;}
+  #j-drops,#j-social,#j-heat,#j-flash{display:none !important;}
+  #j-hero{max-height:32dvh;}
+  .sheet{align-items:center;justify-content:center;padding:8px;}
+  .sheet .head{border-radius:16px 16px 0 0;width:min(92vw,560px);}
+  .sheet .body{width:min(92vw,560px);max-height:min(70dvh, calc(100dvh - 100px));}
+}
 
 /* --- landscape ------------------------------------------------------------ */
 @media (orientation:landscape) and (max-height:560px){
@@ -1739,6 +2002,7 @@ kbd{
     <div id="gift" class="hidden">daily gift +20 coins</div>
     <div id="loginstreak" class="hidden">day 1 streak</div>
     <div id="restbonus" class="hidden">welcome back</div>
+    <div id="looprail">
     <button type="button" id="hourlycrate" aria-label="Claim hourly crate">
       <span class="ico">CRATE</span>
       <span class="copy">
@@ -1774,7 +2038,11 @@ kbd{
     </button>
     <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
     <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
+    </div>
+    <div id="playdock">
     <button id="btn-play" class="btn">Play</button>
+    </div>
+    <div id="menustack">
     <div id="menurow" class="menugrid">
       <button id="btn-chars"  class="btn ghost">Characters</button>
       <button id="btn-quests" class="btn ghost">Today</button>
@@ -1792,6 +2060,7 @@ kbd{
       <button id="btn-admin" class="btn ghost">Admin</button>
     </div>
     <div id="gametip">One more hop is always justified.</div>
+    </div>
     <div id="tapcue">tap anywhere to start</div>
   </div>
 
@@ -1826,13 +2095,17 @@ kbd{
       <div id="revivehint">keep your score · hop from safety</div>
     </div>
     <button type="button" id="btn-comeback">Comeback revive<span class="sub" id="comeback-sub">3 chips · free soft revive</span></button>
+    <div id="retrydock">
     <button id="btn-retry" class="btn">Retry</button>
+    </div>
+    <div id="menustack2">
     <div id="menurow2" class="menugrid">
       <button id="btn-chars2"  class="btn ghost">Characters</button>
       <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-journey2" class="btn ghost">Journey</button>
       <button id="btn-spin2" class="btn ghost">Spin</button>
       <button id="btn-awards2" class="btn ghost">Awards</button>
+    </div>
     </div>
     <div id="tapcue2" class="hint" style="color:#fff;opacity:.85;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">tap anywhere to hop again</div>
   </div>
@@ -114940,8 +115213,13 @@ const cam = { rowF: 0, x: 0, spanY: 16, spanX: 9, kick: 0 };
 const _tgt = new THREE.Vector3();
 const SUN_OFF = new THREE.Vector3(9, 15, 7);
 
+function syncVh(){
+  const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  document.documentElement.style.setProperty('--vh', h + 'px');
+}
 function resize(){
-  const w = innerWidth, h = innerHeight;
+  syncVh();
+  const w = innerWidth, h = (window.visualViewport && window.visualViewport.height) || innerHeight;
   renderer.setSize(w, h, false);
   const aspect = w / h;
   cam.spanY = Math.max(CFG.VIEW_W / aspect, CFG.VIEW_H_MIN);
@@ -114952,6 +115230,10 @@ function resize(){
 }
 addEventListener('resize', resize);
 addEventListener('orientationchange', ()=> setTimeout(resize, 120));
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', resize, { passive:true });
+  window.visualViewport.addEventListener('scroll', syncVh, { passive:true });
+}
 
 function camKick(amount){
   cam.kick = Math.max(cam.kick, amount);
@@ -115041,9 +115323,14 @@ const SWIPE = 26;
 let ptr = null;
 function onDown(e){
   Sfx.resume();
-  // Buttons handle themselves, and a drag inside a sheet is a scroll.
+  // Buttons handle themselves, and a drag inside a sheet/menu is a scroll.
   const el = e.target;
-  if(el && el.closest && (el.closest('button') || el.closest('.sheet'))) return;
+  if(el && el.closest && (
+    el.closest('button') || el.closest('.sheet') ||
+    el.closest('#start') || el.closest('#over') ||
+    el.closest('#wagerchip') || el.closest('#powers') || el.closest('#dopafuse') ||
+    el.closest('#rivalban') || el.closest('#eventban') || el.closest('#toast')
+  )) return;
   ptr = { x:e.clientX, y:e.clientY, t:performance.now(), fired:false, id:e.pointerId };
 }
 function onMove(e){
@@ -115775,10 +116062,30 @@ $('btn-revive').addEventListener('click', e=>{
   if(doRevive()) return;
   Sfx.click();
 });
-screens.start.addEventListener('click', ()=>{ Sfx.click(); startGame(); });
+/* Ignore click-to-start after a scroll gesture on the menu / score card. */
+let _menuPtr = null;
+function armMenuPtr(screen){
+  return e => {
+    _menuPtr = { id:e.pointerId, x:e.clientX, y:e.clientY, scroll:screen.scrollTop, t:performance.now() };
+  };
+}
+function menuPtrWasScroll(screen, e){
+  if(!_menuPtr) return false;
+  const scrolled = Math.abs(screen.scrollTop - _menuPtr.scroll) > 6;
+  const dragged = Math.hypot(e.clientX - _menuPtr.x, e.clientY - _menuPtr.y) > 14;
+  return scrolled || dragged;
+}
+screens.start.addEventListener('pointerdown', armMenuPtr(screens.start), { passive:true });
+screens.over.addEventListener('pointerdown', armMenuPtr(screens.over), { passive:true });
+screens.start.addEventListener('click', e=>{
+  if(e.target && e.target.closest && e.target.closest('button, a, #looprail, #menustack, #playdock')) return;
+  if(menuPtrWasScroll(screens.start, e)) return;
+  Sfx.click(); startGame();
+});
 screens.over.addEventListener('click', e=>{
   // Don't restart if the tap was aiming at the second-chance offer / clutch mash.
-  if(e.target && e.target.closest && e.target.closest('#revivewrap, #clutch, #btn-comeback')) return;
+  if(e.target && e.target.closest && e.target.closest('#revivewrap, #clutch, #btn-comeback, #retrydock, #menustack2')) return;
+  if(menuPtrWasScroll(screens.over, e)) return;
   if(clutch.active && !clutch.done){ tapClutch(); return; }
   if(state.overT > 0.9){ Sfx.click(); startGame(); }
 });
