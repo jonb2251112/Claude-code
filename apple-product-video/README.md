@@ -20,6 +20,22 @@ scene that runs for the whole film.
 
 ## Quick start
 
+### Browser player (no install)
+
+Open **`index.html`** in a modern browser (or serve the folder):
+
+```bash
+cd apple-product-video
+python3 -m http.server 8765
+# → http://localhost:8765/index.html
+```
+
+Click **Play**. The full 40s film runs as a self-contained three.js + DOM page
+(CDN three.js, Web Audio pads/whooshes/chime, mute + scrubber). No Remotion,
+React, or `npm install` required.
+
+### Remotion Studio (edit / render)
+
 ```bash
 cd apple-product-video
 npm install          # also synthesises the placeholder audio stems

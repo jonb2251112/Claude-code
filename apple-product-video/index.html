@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AURA — Aura One</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%236fa8ff' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet" />
@@ -62,7 +63,7 @@
     pointer-events: none;
     z-index: 40;
   }
-  #ui button, #ui .scrub {
+  #ui button, #ui .scrub, #play-overlay, #replay-overlay {
     pointer-events: auto;
   }
   #play-overlay, #replay-overlay {
@@ -70,6 +71,7 @@
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.72);
     z-index: 50;
+    cursor: pointer;
   }
   #replay-overlay { display: none; background: #000; }
   .cta {
@@ -82,7 +84,9 @@
     text-indent: 0.28em;
     text-transform: uppercase;
     cursor: pointer;
-    padding: 28px 40px;
+    padding: 48px 72px;
+    min-width: 280px;
+    min-height: 120px;
     transition: opacity 0.35s ease, letter-spacing 0.45s ease;
     opacity: 0.92;
   }
@@ -269,7 +273,7 @@ const TYPE = {
 
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
-const FORMING_COUNT = 2500;
+const FORMING_COUNT = 4000;
 const DUST_COUNT = 900;
 const HOVER_HEIGHT = PRODUCT.dimensions.hover;
 const PIVOT_Y = PRODUCT.dimensions.hover;
@@ -1194,7 +1198,7 @@ formingGeo.setAttribute('position', new THREE.BufferAttribute(formingPositions, 
 const formingMat = new THREE.PointsMaterial({
   map: particleSprite,
   color: COLORS_3D.accent,
-  size: 0.05,
+  size: 0.062,
   sizeAttenuation: true,
   transparent: true,
   opacity: 0,
@@ -2090,8 +2094,17 @@ const startPlayback = async (fromFrame = 0) => {
   rafId = requestAnimationFrame(tick);
 };
 
-document.getElementById('play-btn').addEventListener('click', () => startPlayback(0));
-document.getElementById('replay-btn').addEventListener('click', () => startPlayback(0));
+const bindStart = (el) => {
+  el.addEventListener('click', (e) => {
+    e.preventDefault();
+    startPlayback(0);
+  });
+};
+bindStart(document.getElementById('play-btn'));
+bindStart(document.getElementById('replay-btn'));
+// Whole overlay is also a hit target (thin letterspaced type is easy to miss)
+bindStart(playOverlay);
+bindStart(replayOverlay);
 
 muteBtn.addEventListener('click', () => {
   muted = !muted;
