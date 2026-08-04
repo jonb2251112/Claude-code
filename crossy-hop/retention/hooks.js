@@ -123,6 +123,10 @@ export const RETENTION_META = {
   seasons: SEASON_COUNT,
   achievements: ACHIEVEMENT_COUNT,
   difficultyRows: DIFFICULTY_CURVE.length,
+  fomoLabels: FOMO_LABELS.length,
+  starDrip: STAR_DRIP.length,
+  loginPouch: LOGIN_POUCH.length,
+  heat: HEAT_THRESHOLDS.length,
   version: '1.0.0',
   note: 'Soft-currency retention library — organized, free-to-play, no IAP.',
 };
