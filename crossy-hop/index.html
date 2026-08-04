@@ -123,6 +123,50 @@ html,body{
 #alert.show{opacity:1;animation:alertpulse .7s infinite;}
 @keyframes alertpulse{50%{transform:translateX(-50%) scale(1.07);}}
 
+/* Streak counter: sits under the score and heats up as the chain grows. */
+#streak{
+  display:flex;align-items:baseline;gap:5px;
+  padding:3px 10px 4px;border-radius:13px;
+  background:linear-gradient(#ff9a3c,#f4622a);color:#fff;
+  box-shadow:0 3px 0 rgba(150,50,10,.45);
+  font-size:15px;letter-spacing:.04em;font-variant-numeric:tabular-nums;
+  transform-origin:left center;
+}
+#streak .lbl{font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.9;}
+#streak.hot{background:linear-gradient(#ff6a3c,#e02b2b);}
+#streak.hidden{display:none;}
+#streak.pop{animation:streakpop .3s ease;}
+@keyframes streakpop{0%{transform:scale(1);}40%{transform:scale(1.22);}100%{transform:scale(1);}}
+
+/* Award / new-best badge that slides down from the top. */
+#badges{
+  /* Below the alert banner, so an award never covers the eagle warning. */
+  position:absolute;left:50%;top:calc(var(--safe-t) + 142px);transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:7px;width:max-content;max-width:88vw;
+}
+.badge{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 15px 9px;border-radius:18px;
+  background:rgba(255,253,246,.97);
+  box-shadow:0 5px 0 rgba(18,52,80,.24), 0 12px 24px rgba(18,52,80,.26);
+  animation:badgein 2.9s cubic-bezier(.2,.8,.3,1) forwards;
+}
+.badge .medal{
+  width:30px;height:30px;flex:0 0 auto;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff3b6, var(--gold) 60%, var(--gold-dk));
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.16);
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:#5a3c00;
+}
+.badge .txt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;}
+.badge .k{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);}
+.badge .n{font-size:14px;color:var(--ink);letter-spacing:.02em;}
+@keyframes badgein{
+  0%{opacity:0;transform:translateY(-26px) scale(.9);}
+  8%{opacity:1;transform:translateY(0) scale(1);}
+  86%{opacity:1;transform:translateY(0) scale(1);}
+  100%{opacity:0;transform:translateY(-14px) scale(.96);}
+}
+
 /* Floating "+1" style score toasts. */
 #toasts{position:absolute;inset:0;overflow:hidden;}
 .toast{
@@ -168,17 +212,27 @@ html,body{
   padding:calc(var(--safe-t) + 18px) 18px calc(var(--safe-b) + 18px);
   text-align:center;pointer-events:auto;
   background:radial-gradient(120% 70% at 50% 18%, rgba(12,38,62,.12), rgba(12,38,62,.5));
-  opacity:1;transition:opacity .28s ease;
+  opacity:1;visibility:visible;transition:opacity .28s ease, visibility 0s;
 }
-.screen.hidden{opacity:0;pointer-events:none;}
+/* `pointer-events` is set explicitly on buttons, so a child would override an
+   inherited `none` and an invisible panel's buttons would keep eating clicks.
+   `visibility` cannot be overridden that way, and it is held back until the
+   fade finishes so the panel still animates out. */
+.screen.hidden{
+  opacity:0;pointer-events:none;visibility:hidden;
+  transition:opacity .28s ease, visibility 0s linear .28s;
+}
+.screen.hidden button{pointer-events:none;}
 /* Both overlays are top-weighted so the lower third of the screen — where the
-   chicken stands — is never covered by a panel. */
+   avatar stands — is never covered by a panel. */
 #start,#over{justify-content:flex-start;padding-top:calc(var(--safe-t) + 5vh);}
+/* Tight enough that the stack clears the critter posing in the lower third. */
+#start{gap:clamp(8px,1.8vh,15px);padding-top:calc(var(--safe-t) + 3vh);}
 #over{padding-top:calc(var(--safe-t) + 62px);}
 #start{background:radial-gradient(110% 55% at 50% 8%, rgba(12,38,62,.16), rgba(12,38,62,.44));}
 
 #title{
-  font-size:clamp(42px,15vmin,104px);line-height:.86;color:#fff;letter-spacing:.02em;
+  font-size:clamp(40px,13vmin,96px);line-height:.86;color:#fff;letter-spacing:.02em;
   text-shadow:0 5px 0 var(--grass-dk), 0 10px 0 rgba(18,52,80,.35), 0 22px 32px rgba(18,52,80,.4);
   transform:rotate(-2.5deg);
 }
@@ -208,6 +262,7 @@ kbd{
 #startstats b{color:var(--gold);font-size:1.25em;}
 #hud.menu #topleft{opacity:0;}
 #topleft{transition:opacity .25s;}
+#hud.away{opacity:0;pointer-events:none;transition:opacity .2s;}
 #tapcue{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;
   animation:blink 1.6s infinite;text-shadow:0 2px 0 rgba(18,52,80,.3);}
 @keyframes blink{50%{opacity:.3;}}
@@ -224,14 +279,142 @@ kbd{
 #stats .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
 #stats .v{font-size:clamp(26px,8vmin,42px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;}
 #stats .v.gold{color:var(--gold-dk);}
-#newbest{
+#newbest,#gift{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#3c2500;
   background:var(--gold);border-radius:12px;padding:4px 12px;
   box-shadow:0 3px 0 var(--gold-dk);
 }
-#newbest.hidden{display:none;}
+#newbest.hidden,#gift.hidden{display:none;}
 
 #pausecard .t{font-size:clamp(22px,7vmin,34px);color:var(--ink);margin-bottom:6px;}
+
+/* --- sheets (characters / awards) ----------------------------------------- */
+.sheet{justify-content:flex-start;padding-top:calc(var(--safe-t) + 12px);}
+.sheet .head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  width:min(94vw,460px);
+}
+.sheet .head h2{
+  font-size:clamp(20px,6vmin,28px);color:#fff;letter-spacing:.04em;
+  text-shadow:0 3px 0 rgba(18,52,80,.4);
+}
+.sheet .head .count{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.9;}
+.close-btn{
+  width:40px;height:40px;flex:0 0 auto;border:0;border-radius:14px;cursor:pointer;
+  background:var(--paper);color:var(--ink);font-family:inherit;font-size:19px;font-weight:900;
+  box-shadow:0 4px 0 rgba(18,52,80,.28);pointer-events:auto;
+}
+.close-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(18,52,80,.28);}
+/* The list scrolls; `pan-y` lets a drag inside it scroll instead of being read
+   as a swipe by the global gesture handler. */
+.sheet .body{
+  width:min(94vw,460px);flex:0 1 auto;
+  max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 210px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  padding:3px;
+  /* Fades the last row so it is obvious the list keeps going. */
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
+  mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
+}
+#awards .body{max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 116px);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;}
+.critter{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:9px 6px 10px;border-radius:16px;border:0;cursor:pointer;pointer-events:auto;
+  background:rgba(255,253,246,.95);font-family:inherit;
+  box-shadow:0 4px 0 rgba(18,52,80,.2);
+  transition:transform .08s ease;
+}
+.critter:active{transform:translateY(3px);}
+.critter .swatch{
+  width:54px;height:54px;border-radius:12px;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.14);
+  display:flex;align-items:center;justify-content:center;font-size:17px;color:rgba(0,0,0,.5);
+}
+/* A rendered portrait needs no plinth shading. */
+.critter .swatch.pic{
+  box-shadow:none;
+  background-size:contain;background-position:center;background-repeat:no-repeat;
+}
+.critter .n{font-size:11px;letter-spacing:.04em;color:var(--ink);}
+.critter .r{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);}
+.critter.locked{background:rgba(255,253,246,.55);cursor:default;}
+.critter.locked .n{color:var(--ink-soft);}
+.critter.on{box-shadow:0 0 0 3px var(--gold), 0 4px 0 var(--gold-dk);}
+.critter.on .r{color:var(--gold-dk);}
+.awards{display:flex;flex-direction:column;gap:7px;}
+.award{
+  display:flex;align-items:center;gap:11px;
+  padding:9px 12px;border-radius:15px;background:rgba(255,253,246,.94);
+  box-shadow:0 3px 0 rgba(18,52,80,.18);text-align:left;
+}
+.award.locked{background:rgba(255,253,246,.6);}
+.award .medal{
+  width:28px;height:28px;flex:0 0 auto;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff3b6, var(--gold) 60%, var(--gold-dk));
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.16);
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:#5a3c00;
+}
+.award.locked .medal{background:#dfe6ee;color:#9fb0c0;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08);}
+.award .txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.award .n{font-size:13px;color:var(--ink);}
+.award.locked .n{color:var(--ink-soft);}
+.award .h{font-size:10px;letter-spacing:.06em;color:var(--ink-soft);text-transform:uppercase;}
+.bar{height:5px;border-radius:3px;background:#e2e9f0;overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#ffd54a,#f5a70f);}
+.award.done .bar{display:none;}
+.prize{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+}
+.prize .cost{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.92;
+  text-shadow:0 2px 0 rgba(18,52,80,.35);}
+.btn[disabled]{filter:grayscale(.7);opacity:.6;pointer-events:none;box-shadow:0 3px 0 var(--gold-dk);}
+#menurow{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;}
+
+/* Prize reveal: the winning critter's colour bursts out of the machine. */
+#reveal{
+  position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;background:rgba(10,32,54,.6);
+  animation:fadein .2s ease both;
+}
+#reveal.hidden{display:none;}
+@keyframes fadein{from{opacity:0;}to{opacity:1;}}
+#reveal .rcard{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  animation:pop .5s cubic-bezier(.2,1.4,.4,1) both;
+}
+/* Sunburst behind the prize so the reveal lands. */
+#reveal::before{
+  content:'';position:absolute;left:50%;top:50%;width:min(80vw,340px);aspect-ratio:1;
+  background:conic-gradient(from 0deg, rgba(255,201,60,.55) 0 6deg, transparent 6deg 30deg,
+    rgba(255,201,60,.55) 30deg 36deg, transparent 36deg 60deg,
+    rgba(255,201,60,.55) 60deg 66deg, transparent 66deg 90deg,
+    rgba(255,201,60,.55) 90deg 96deg, transparent 96deg 120deg,
+    rgba(255,201,60,.55) 120deg 126deg, transparent 126deg 150deg,
+    rgba(255,201,60,.55) 150deg 156deg, transparent 156deg 180deg,
+    rgba(255,201,60,.55) 180deg 186deg, transparent 186deg 210deg,
+    rgba(255,201,60,.55) 210deg 216deg, transparent 216deg 240deg,
+    rgba(255,201,60,.55) 240deg 246deg, transparent 246deg 270deg,
+    rgba(255,201,60,.55) 270deg 276deg, transparent 276deg 300deg,
+    rgba(255,201,60,.55) 300deg 306deg, transparent 306deg 330deg,
+    rgba(255,201,60,.55) 330deg 336deg, transparent 336deg 360deg);
+  mask-image:radial-gradient(circle, #000 22%, transparent 66%);
+  -webkit-mask-image:radial-gradient(circle, #000 22%, transparent 66%);
+  animation:spin 9s linear infinite;
+}
+@keyframes spin{
+  from{transform:translate(-50%,-50%) rotate(0deg);}
+  to{transform:translate(-50%,-50%) rotate(360deg);}
+}
+#reveal .swatch{
+  width:112px;height:112px;border-radius:26px;
+  background-size:contain;background-position:center;background-repeat:no-repeat;
+}
+#reveal .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;}
+#reveal .n{font-size:clamp(24px,8vmin,36px);color:#fff;text-shadow:0 3px 0 rgba(18,52,80,.45);}
+#reveal .r{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+@keyframes pop{0%{opacity:0;transform:scale(.5) rotate(-8deg);}100%{opacity:1;transform:scale(1) rotate(-2deg);}}
 
 /* --- landscape ------------------------------------------------------------ */
 @media (orientation:landscape) and (max-height:560px){
@@ -254,6 +437,7 @@ kbd{
     <div id="topleft">
       <div id="score">0</div>
       <div id="best">BEST 0</div>
+      <div id="streak" class="hidden"><span class="lbl">streak</span><span class="val">0</span></div>
     </div>
     <div id="topright">
       <div id="btnrow">
@@ -264,6 +448,7 @@ kbd{
       <div id="coinchip" class="chip"><i class="coin"></i><span class="val">0</span></div>
     </div>
     <div id="alert">◀ get moving ▶</div>
+    <div id="badges"></div>
     <div id="toasts"></div>
     <div id="dpad" class="hide">
       <button class="up"    data-dir="up"    aria-label="Hop forward">▲</button>
@@ -280,13 +465,17 @@ kbd{
     <div id="tagline">how far can one chicken get?</div>
     <div class="card">
       <div class="hint">
-        <div class="row"><b>Swipe</b> or <b>tap</b> to hop</div>
-        <div class="row"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> on a keyboard</div>
+        <div class="row"><b>Swipe</b> or <b>tap</b> to hop &nbsp;·&nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></div>
         <div class="row">Dodge traffic · ride the logs · don't dawdle</div>
       </div>
     </div>
-    <div id="startstats">best <b id="s-best">0</b> &nbsp;·&nbsp; coins <b id="s-coins">0</b></div>
+    <div id="startstats">best <b id="s-best">0</b> &nbsp;·&nbsp; coins <b id="s-coins">0</b> &nbsp;·&nbsp; awards <b id="s-awards">0</b></div>
+    <div id="gift" class="hidden">daily gift +20 coins</div>
     <button id="btn-play" class="btn">Play</button>
+    <div id="menurow">
+      <button id="btn-chars"  class="btn ghost">Characters</button>
+      <button id="btn-awards" class="btn ghost">Awards</button>
+    </div>
     <div id="tapcue">tap anywhere to start</div>
   </div>
 
@@ -303,7 +492,45 @@ kbd{
     </div>
     <div id="newbest" class="hidden">new best!</div>
     <button id="btn-retry" class="btn">Retry</button>
+    <div id="menurow2" style="display:flex;gap:9px;flex-wrap:wrap;justify-content:center;">
+      <button id="btn-chars2"  class="btn ghost">Characters</button>
+      <button id="btn-awards2" class="btn ghost">Awards</button>
+    </div>
     <div id="tapcue2" class="hint" style="color:#fff;opacity:.85;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">tap anywhere to hop again</div>
+  </div>
+
+  <!-- ===================== CHARACTERS ===================== -->
+  <div id="chars" class="screen sheet hidden">
+    <div class="head">
+      <h2>Characters</h2>
+      <span class="count" id="c-count">1 / 12</span>
+      <button class="close-btn" data-close="chars" aria-label="Close">✕</button>
+    </div>
+    <div class="body"><div class="grid" id="c-grid"></div></div>
+    <div class="prize">
+      <button id="btn-prize" class="btn">Prize Machine</button>
+      <div class="cost" id="c-cost">40 coins per try</div>
+    </div>
+  </div>
+
+  <!-- ===================== AWARDS ===================== -->
+  <div id="awards" class="screen sheet hidden">
+    <div class="head">
+      <h2>Awards</h2>
+      <span class="count" id="a-count">0 / 20</span>
+      <button class="close-btn" data-close="awards" aria-label="Close">✕</button>
+    </div>
+    <div class="body"><div class="awards" id="a-list"></div></div>
+  </div>
+
+  <!-- ===================== PRIZE REVEAL ===================== -->
+  <div id="reveal" class="hidden">
+    <div class="rcard">
+      <div class="swatch" id="r-swatch"></div>
+      <div class="k">new character</div>
+      <div class="n" id="r-name">Duck</div>
+      <div class="r" id="r-rarity">common</div>
+    </div>
   </div>
 
   <!-- ===================== PAUSE ===================== -->
@@ -379,8 +606,8 @@ const CFG = {
   /* --- eagle ---
    * Two ways to summon it: linger without setting a new record, or drift too
    * far back from your high-water mark (which is what the camera tracks). */
-  IDLE_WARN:       4.2,
-  IDLE_DEATH:      7.4,
+  IDLE_WARN:       5.0,
+  IDLE_DEATH:      9.0,
   BEHIND_LIMIT:    7,
 
   /* --- camera ---
@@ -496,12 +723,13 @@ const Sfx = (()=>{
       if(muted) api.stopRumble();
       if(ok) master.gain.setTargetAtTime(muted?0:0.9, ctx.currentTime, 0.02);
     },
-    hop(){
+    /** `pitch` retunes the blip per character; `beep` makes it a square chirp. */
+    hop(pitch = 1, beep = false){
       if(!live()) return;
       const t = ctx.currentTime;
-      const base = hopFlip++ % 2 ? 430 : 392;
-      tone('triangle', base, base*1.5, t, 0.075, 0.18);
-      burst(t, 0.05, 0.05, 2600, 700);
+      const base = (hopFlip++ % 2 ? 430 : 392) * pitch;
+      tone(beep ? 'square' : 'triangle', base, base * (beep ? 2.2 : 1.5), t, 0.075, beep ? 0.1 : 0.18);
+      if(!beep) burst(t, 0.05, 0.05, 2600, 700);
     },
     land(){
       if(!live()) return;
@@ -577,6 +805,38 @@ const Sfx = (()=>{
     click(){
       if(!live()) return;
       tone('triangle', 660, 990, ctx.currentTime, 0.06, 0.12);
+    },
+    /** Rising arpeggio for a new award. */
+    award(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      [784, 988, 1319, 1568].forEach((f,i)=> tone('triangle', f, f, t + i*0.075, 0.2, 0.13));
+    },
+    /** Short bright ping that climbs with the streak length. */
+    streak(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      tone('square', 1175, 1568, t, 0.1, 0.07);
+      tone('triangle', 2350, 2350, t + 0.05, 0.09, 0.05);
+    },
+    milestone(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      [523, 659, 784].forEach((f,i)=> tone('triangle', f, f*1.5, t + i*0.06, 0.22, 0.12));
+    },
+    /** Air rushing past on a near miss: brightens, then falls away. */
+    whoosh(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      burst(t, 0.11, 0.075, 500, 2600, 1.4);
+      burst(t + 0.09, 0.18, 0.055, 2400, 420, 1.4);
+    },
+    /** Prize machine: a hopper of coins, then the reveal. */
+    prize(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      for(let i=0;i<9;i++) tone('triangle', 600 + Math.random()*900, 500, t + i*0.055, 0.07, 0.07);
+      [659, 880, 1319].forEach((f,i)=> tone('triangle', f, f, t + 0.55 + i*0.09, 0.3, 0.14));
     },
     /** Continuous rail rumble, gain driven by how close the nearest train is. */
     startRumble(){
@@ -749,9 +1009,9 @@ const PAL = {
   grass:     [C(0x7ec850), C(0x71bb46)],
   grassTint: [C(0x8ad25b), C(0x69b040), C(0x86cf57)],
   road:      [C(0x4c4e59), C(0x53555f)],
-  railBed:   C(0x7d756b),
-  railTie:   C(0x6b503a),
-  railSteel: C(0xb9c0c7),
+  railBed:   C(0x6e6862),
+  railTie:   C(0x5b432f),
+  railSteel: C(0xc3cad1),
   water:     C(0x3b8ccb),
   waterDeep: C(0x2f7bb6),
   trunk:     [C(0x7d5432), C(0x6b472a)],
@@ -779,27 +1039,157 @@ const PAL = {
 };
 
 /* --- model library -------------------------------------------------------- */
-function chickenGeom(){
+/**
+ * One builder for every playable critter. At the size these appear on screen the
+ * cues that actually read are the silhouette above the head, the beak or snout,
+ * and the belly contrast — so those are what the spec varies. Nose points -Z,
+ * which is the direction of travel.
+ */
+function critterGeom(s){
   const v = new Vox();
-  const body = C(0xfcfcf6), wing = C(0xecece2), foot = C(0xf2a12b), red = C(0xe0453f);
-  v.box( 0.13, 0.08,  0.02, 0.09, 0.17, 0.09, foot);
-  v.box(-0.13, 0.08,  0.02, 0.09, 0.17, 0.09, foot);
-  v.box( 0.13, 0.02, -0.08, 0.09, 0.05, 0.17, foot);
-  v.box(-0.13, 0.02, -0.08, 0.09, 0.05, 0.17, foot);
-  v.box( 0.00, 0.36,  0.02, 0.46, 0.36, 0.44, body);
-  v.box( 0.25, 0.34,  0.02, 0.07, 0.24, 0.30, wing);
-  v.box(-0.25, 0.34,  0.02, 0.07, 0.24, 0.30, wing);
-  v.box( 0.00, 0.48,  0.27, 0.20, 0.20, 0.14, wing);
-  v.box( 0.00, 0.64, -0.07, 0.31, 0.27, 0.30, body);
-  v.box( 0.00, 0.62, -0.26, 0.15, 0.10, 0.12, foot);
-  v.box( 0.00, 0.53, -0.20, 0.08, 0.09, 0.07, red);
-  v.box( 0.00, 0.81, -0.14, 0.07, 0.10, 0.08, red);
-  v.box( 0.00, 0.82, -0.05, 0.07, 0.12, 0.08, red);
-  v.box( 0.00, 0.80,  0.04, 0.07, 0.09, 0.08, red);
-  v.box( 0.14, 0.68, -0.19, 0.06, 0.07, 0.05, C(0x1b1b22));
-  v.box(-0.14, 0.68, -0.19, 0.06, 0.07, 0.05, C(0x1b1b22));
+  const body = C(s.body);
+  const wing = C(s.wing ?? s.body);
+  const head = C(s.head ?? s.body);
+  const foot = C(s.foot ?? 0xf2a12b);
+  const trim = C(s.trim ?? 0xe0453f);
+  const eye  = C(s.eye ?? 0x1b1b22);
+  const legless = s.legs === 'none';
+  const bw = s.wide ? 0.52 : 0.46;
+  const bh = 0.36;
+  const y0 = legless ? 0.14 : 0.18;      // underside of the body
+
+  if(!legless){
+    for(const sx of [0.13, -0.13]){
+      v.box(sx, 0.08,  0.02, 0.09, 0.17, 0.09, foot);
+      v.box(sx, 0.02, -0.08, 0.09, 0.05, 0.17, foot);
+    }
+  } else {
+    // A hem of tapering blocks instead of legs, for the things that float.
+    v.box(0, y0 - 0.06, 0.02, bw*0.82, 0.12, 0.38, shade(body, 0.92));
+  }
+
+  v.box(0, y0 + bh/2, 0.02, bw, bh, 0.44, body);
+  if(s.belly) v.box(0, y0 + bh*0.45, -0.17, bw*0.66, bh*0.7, 0.16, C(s.belly));
+  if(s.wings !== 'none'){
+    v.box( bw/2 + 0.02, y0 + bh*0.48, 0.02, 0.07, 0.24, 0.30, wing);
+    v.box(-bw/2 - 0.02, y0 + bh*0.48, 0.02, 0.07, 0.24, 0.30, wing);
+  }
+  if(s.tail === 'long'){
+    v.box(0, y0 + bh*0.5, 0.30, 0.12, 0.12, 0.22, wing);
+    v.box(0, y0 + bh*0.9, 0.40, 0.11, 0.20, 0.11, wing);
+  } else if(s.tail === 'fan'){
+    v.box(0, y0 + bh*0.8, 0.30, 0.26, 0.24, 0.14, C(s.tailColor ?? s.wing ?? s.body));
+  } else if(s.tail !== 'none'){
+    v.box(0, y0 + bh*0.85, 0.27, 0.20, 0.20, 0.14, wing);
+  }
+
+  const hy = y0 + bh + 0.10;
+  const hw = s.bighead ? 0.34 : 0.31;
+  v.box(0, hy, -0.07, hw, 0.27, 0.30, head);
+
+  /* --- muzzle / bill --- */
+  const bill = C(s.billColor ?? s.foot ?? 0xf2a12b);
+  if(s.bill === 'wide')       v.box(0, hy - 0.03, -0.27, 0.22, 0.09, 0.16, bill);
+  else if(s.bill === 'snout') v.box(0, hy - 0.04, -0.26, 0.20, 0.14, 0.16, bill);
+  else if(s.bill === 'hook'){ v.box(0, hy + 0.01, -0.25, 0.13, 0.14, 0.12, bill);
+                              v.box(0, hy - 0.07, -0.27, 0.09, 0.08, 0.09, bill); }
+  else if(s.bill === 'visor') v.box(0, hy + 0.02, -0.23, hw*0.94, 0.09, 0.06, C(s.visor ?? 0x4fe3ff).multiplyScalar(1.6));
+  else if(s.bill !== 'none')  v.box(0, hy - 0.02, -0.26, 0.15, 0.10, 0.12, bill);
+  if(s.nose) v.box(0, hy + 0.02, -0.24, 0.09, 0.07, 0.07, C(s.nose));
+
+  /* --- what sits on top: the strongest silhouette cue --- */
+  if(s.crest === 'comb'){
+    v.box(0, hy + 0.17, -0.07, 0.07, 0.10, 0.08, trim);
+    v.box(0, hy + 0.18,  0.02, 0.07, 0.12, 0.08, trim);
+    v.box(0, hy + 0.16,  0.11, 0.07, 0.09, 0.08, trim);
+    v.box(0, hy - 0.11, -0.20, 0.08, 0.09, 0.07, trim);   // wattle
+  } else if(s.crest === 'ears'){
+    for(const sx of [0.10, -0.10]){
+      v.box(sx, hy + 0.17, -0.05, 0.10, 0.16, 0.08, head);
+      v.box(sx, hy + 0.15, -0.05, 0.05, 0.09, 0.05, trim);
+    }
+  } else if(s.crest === 'longears'){
+    for(const sx of [0.09, -0.09]){
+      v.box(sx, hy + 0.28, -0.02, 0.09, 0.38, 0.09, head);
+      v.box(sx, hy + 0.34, -0.02, 0.05, 0.20, 0.05, trim);
+    }
+  } else if(s.crest === 'quiff'){
+    v.box(0, hy + 0.20, -0.10, 0.09, 0.18, 0.09, trim);
+    v.box(0, hy + 0.26, -0.02, 0.09, 0.16, 0.14, trim);
+  } else if(s.crest === 'spikes'){
+    for(let i=0;i<4;i++)
+      v.box(0, y0 + bh + 0.02 - i*0.02, -0.02 + i*0.14, 0.07, 0.16 - i*0.02, 0.09, trim);
+  } else if(s.crest === 'antenna'){
+    v.box(0, hy + 0.22, -0.05, 0.05, 0.20, 0.05, C(0x8a949c));
+    v.box(0, hy + 0.34, -0.05, 0.10, 0.10, 0.10, C(s.lamp ?? 0xff5a4a).multiplyScalar(1.7));
+  } else if(s.crest === 'blob'){
+    v.box(0, hy + 0.15, -0.02, 0.16, 0.10, 0.16, shade(head, 1.06));
+  }
+
+  /* --- eyes: on the sides for birds, high and wide for frogs --- */
+  if(s.eyes === 'top'){
+    for(const sx of [0.12, -0.12]){
+      v.box(sx, hy + 0.15, -0.10, 0.13, 0.13, 0.13, C(s.eyeRing ?? s.body));
+      v.box(sx, hy + 0.17, -0.15, 0.08, 0.08, 0.05, eye);
+    }
+  } else if(s.eyes === 'patch'){
+    for(const sx of [0.13, -0.13]){
+      v.box(sx, hy + 0.03, -0.18, 0.13, 0.14, 0.08, C(s.patch ?? 0x1b1b22));
+      v.box(sx, hy + 0.04, -0.22, 0.06, 0.07, 0.04, C(0xfdfdfd));
+    }
+  } else if(s.eyes !== 'none'){
+    // Sat a whisker proud of the skull so they read from the front as well as
+    // the side, whatever the head width.
+    for(const sx of [0.14, -0.14]) v.box(sx, hy + 0.04, -0.21, 0.07, 0.08, 0.06, eye);
+  }
   return v.build();
 }
+
+/**
+ * The roster. `pitch` retunes the hop blip and `hop` scales the arc, so each
+ * character feels slightly different to control without changing the odds.
+ * Rarity only affects what the prize machine is likely to hand over.
+ */
+const CRITTERS = [
+  { id:'chicken', name:'Chicken',  rarity:'start', pitch:1.00,
+    spec:{ body:0xfcfcf6, wing:0xecece2, crest:'comb', bill:'beak' } },
+  { id:'duck',    name:'Duck',     rarity:'common', pitch:0.94,
+    spec:{ body:0xf7d64a, wing:0xeec93c, bill:'wide', billColor:0xf07a2c, trim:0xf07a2c } },
+  { id:'pigeon',  name:'Pigeon',   rarity:'common', pitch:1.06,
+    spec:{ body:0x8593a8, wing:0x74829a, head:0x596880, belly:0x9fb0c4,
+           bill:'beak', billColor:0x3d4450, trim:0x2fb98a, foot:0xe8756b } },
+  { id:'cat',     name:'Cat',      rarity:'common', pitch:1.12,
+    spec:{ body:0xf0a24b, wing:0xe08f3a, head:0xf0a24b, belly:0xfdf1de, crest:'ears',
+           trim:0xffb9c6, bill:'snout', billColor:0xfdf1de, nose:0xff8fa3, tail:'long',
+           foot:0xfdf1de } },
+  { id:'bunny',   name:'Bunny',    rarity:'common', pitch:1.16,
+    spec:{ body:0xf2ece2, wing:0xe6ddd0, crest:'longears', trim:0xffb9c6, bill:'snout',
+           billColor:0xf7f2ea, nose:0xff8fa3, foot:0xf7f2ea } },
+  { id:'penguin', name:'Penguin',  rarity:'rare', pitch:0.9,
+    spec:{ body:0x2a3441, wing:0x212a34, belly:0xf4f6f8, bill:'wide', billColor:0xf7a728,
+           foot:0xf7a728, trim:0xf7a728, tail:'none' } },
+  { id:'parrot',  name:'Parrot',   rarity:'rare', pitch:1.2,
+    spec:{ body:0xe0453f, wing:0x2f9a4d, head:0xe0453f, crest:'quiff', trim:0xf7d64a,
+           bill:'hook', billColor:0x3d4450, tail:'fan', tailColor:0x3f7fd6 } },
+  { id:'frog',    name:'Frog',     rarity:'rare', pitch:0.72, hop:1.22,
+    spec:{ body:0x5cbb52, wing:0x4aa843, belly:0xd7ea72, eyes:'top', eyeRing:0x7ed36f,
+           bill:'none', crest:'none', tail:'none', foot:0x4aa843, wide:true } },
+  { id:'panda',   name:'Panda',    rarity:'rare', pitch:0.86,
+    spec:{ body:0xf4f4f0, wing:0x22262c, head:0xf4f4f0, crest:'ears', trim:0x22262c,
+           eyes:'patch', patch:0x22262c, bill:'snout', billColor:0x22262c, foot:0x22262c,
+           tail:'none', bighead:true, wide:true } },
+  { id:'dino',    name:'Dino',     rarity:'rare', pitch:0.78,
+    spec:{ body:0x4aa96c, wing:0x3c9760, belly:0xd9e86b, crest:'spikes', trim:0xf3b32a,
+           bill:'snout', billColor:0x4aa96c, tail:'long', foot:0xf3b32a } },
+  { id:'robot',   name:'Robot',    rarity:'epic', pitch:1.3, beep:true,
+    spec:{ body:0xb8c2cc, wing:0x98a3ad, head:0xa8b3bd, crest:'antenna', lamp:0xff5a4a,
+           bill:'visor', visor:0x4fe3ff, eyes:'none', foot:0x6d7780, trim:0xff5a4a } },
+  { id:'ghost',   name:'Ghost',    rarity:'epic', pitch:1.05, float:0.16,
+    spec:{ body:0xe4eeff, wing:0xd5e2f7, legs:'none', bill:'none', crest:'blob',
+           tail:'none', wings:'none', eyes:'default', eye:0x2b3a55, bighead:true } },
+];
+const CRITTER_BY_ID = Object.fromEntries(CRITTERS.map(c => [c.id, c]));
+const RARITY_WEIGHT = { common: 6, rare: 2, epic: 1, start: 0 };
 
 /** Saloon car, 1.78 long, nose pointing +X. */
 function carGeom(hex){
@@ -1040,10 +1430,73 @@ const VEHICLES = {
   bus:   { len: 3.00, batches: busBatches,   speed: 0.86, y: 0 },
 };
 
-/* Player and eagle are one-offs, not pools. */
-const chicken = new THREE.Mesh(chickenGeom().scale(1.1, 1.1, 1.1), MAT_VC);
-chicken.castShadow = true;
-scene.add(chicken);
+/* Player and eagle are one-offs, not pools. Critter geometry is built on first
+ * use and then kept, so boot only pays for the character you are wearing. */
+const CRITTER_GEOM = {};
+function critterMesh(id){
+  if(!CRITTER_GEOM[id]){
+    const c = CRITTER_BY_ID[id] || CRITTER_BY_ID.chicken;
+    CRITTER_GEOM[id] = critterGeom(c.spec).scale(1.1, 1.1, 1.1);
+  }
+  return CRITTER_GEOM[id];
+}
+const avatar = new THREE.Mesh(critterMesh('chicken'), MAT_VC);
+avatar.castShadow = true;
+scene.add(avatar);
+
+/**
+ * Portraits for the character sheet. In game you only ever see a critter from
+ * behind, so the sheet renders each one from the front through a render target
+ * and caches the result as a data URL. Falls back to a flat colour swatch if
+ * anything about the readback fails.
+ */
+const THUMB = { cache: {}, rt: null, scene: null, cam: null, mesh: null, buf: null, cvs: null };
+function critterThumb(id){
+  if(THUMB.cache[id] !== undefined) return THUMB.cache[id];
+  try{
+    if(!THUMB.rt){
+      const S = 176;
+      THUMB.rt = new THREE.WebGLRenderTarget(S, S);
+      // Without this the readback is linear and every portrait comes out muddy.
+      THUMB.rt.texture.colorSpace = THREE.SRGBColorSpace;
+      THUMB.scene = new THREE.Scene();
+      THUMB.scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe8ef, 1.15));
+      const key = new THREE.DirectionalLight(0xffffff, 0.7);
+      key.position.set(2.4, 3.6, 3.2);
+      THUMB.scene.add(key);
+      THUMB.mesh = new THREE.Mesh(critterMesh('chicken'), MAT_VC);
+      THUMB.scene.add(THUMB.mesh);
+      THUMB.cam = new THREE.OrthographicCamera(-0.66, 0.66, 0.66, -0.66, -6, 12);
+      THUMB.cam.position.set(-1.5, 1.4, -2.1);   // front three-quarter view
+      THUMB.cam.lookAt(0, 0.54, 0);
+      THUMB.buf = new Uint8Array(S * S * 4);
+      THUMB.cvs = document.createElement('canvas');
+      THUMB.cvs.width = THUMB.cvs.height = S;
+    }
+    const S = THUMB.cvs.width;
+    THUMB.mesh.geometry = critterMesh(id);
+    const prevTarget = renderer.getRenderTarget();
+    renderer.setRenderTarget(THUMB.rt);
+    renderer.setClearAlpha(0);
+    renderer.clear();
+    renderer.render(THUMB.scene, THUMB.cam);
+    renderer.readRenderTargetPixels(THUMB.rt, 0, 0, S, S, THUMB.buf);
+    renderer.setRenderTarget(prevTarget);
+    renderer.setClearAlpha(1);
+
+    const ctx = THUMB.cvs.getContext('2d');
+    const img = ctx.createImageData(S, S);
+    for(let y = 0; y < S; y++){                       // GL rows arrive bottom-up
+      const src = (S - 1 - y) * S * 4, dst = y * S * 4;
+      img.data.set(THUMB.buf.subarray(src, src + S * 4), dst);
+    }
+    ctx.putImageData(img, 0, 0);
+    THUMB.cache[id] = THUMB.cvs.toDataURL('image/png');
+  }catch(e){
+    THUMB.cache[id] = null;
+  }
+  return THUMB.cache[id];
+}
 
 const eagle = new THREE.Group();
 const eagleBody = new THREE.Mesh(eagleBodyGeom(), MAT_VC);
@@ -1056,9 +1509,12 @@ eagleBody.castShadow = eagleWingR.castShadow = eagleWingL.castShadow = true;
 eagle.add(eagleBody, eagleWingR, eagleWingL);
 eagle.visible = false;
 scene.add(eagle);
-/* Blinking level-crossing lamps: dynamic because their colour changes. */
-const lamps = new InstBatch(BOX_GEOM, MAT_VC, 16, { colors: true, cast: false });
+/* Odds and ends whose colour changes frame to frame: crossing lamps, the
+ * warning stripes along a live railway, and the personal-best gate. */
+const bits = new InstBatch(BOX_GEOM, MAT_VC, 48, { colors: true, cast: false });
 const LAMP_ON = C(0xff3b30).multiplyScalar(1.9), LAMP_OFF = C(0x5a2622);
+const GATE_GOLD = C(0xffc93c).multiplyScalar(1.25), GATE_POST = C(0xe2a112);
+const GATE_TMP  = C(0xffffff);            // reused so the pulse allocates nothing
 
 /* ============================================================================
  * 7. WORLD GENERATION
@@ -1138,7 +1594,8 @@ function planSection(){
       world.lastDanger = true;
       return;
     }
-    const rows = randi(1, 1 + Math.min(3, Math.floor(d*3.2)));
+    // Never one row: a single-row river reads as a ditch rather than water.
+    const rows = randi(2, 2 + Math.min(2, Math.floor(d*2.6)));
     const base = lerp(CFG.LOG_SPEED[0], CFG.LOG_SPEED[1], d);
     const dir0 = chance(0.5) ? 1 : -1;
     for(let i=0;i<rows;i++){
@@ -1292,10 +1749,10 @@ function makeRow(idx, desc){
 
   else if(row.type === 'rail'){
     base(PAL.railBed);
+    for(let x = -FILL_MAX; x <= FILL_MAX; x += 1.2)
+      row.boxes.push({ x, y: row.top + 0.03, z, sx:0.36, sy:0.12, sz:0.88, color:PAL.railTie, ry:0 });
     for(let s of [-0.30, 0.30])
-      row.boxes.push({ x:0, y: row.top + 0.05, z: z + s, sx:FIELD_W, sy:0.1, sz:0.11, color:PAL.railSteel, ry:0 });
-    for(let x = -EDGE_MAX - 1; x <= EDGE_MAX + 1; x += 1.5)
-      row.boxes.push({ x, y: row.top + 0.02, z, sx:0.3, sy:0.1, sz:0.86, color:PAL.railTie, ry:0 });
+      row.boxes.push({ x:0, y: row.top + 0.1, z: z + s, sx:FIELD_W, sy:0.11, sz:0.12, color:PAL.railSteel, ry:0 });
     // Crossing signals just outside the playable strip.
     row.signals = [];
     for(const side of [-1, 1]){
@@ -1404,7 +1861,7 @@ function updateTraffic(dt, focus){
   for(const b of truckBatches) b.begin();
   for(const b of busBatches)   b.begin();
   for(const b of logBatches)   b.begin();
-  trainBatch.begin(); coinBatch.begin(); lamps.begin();
+  trainBatch.begin(); coinBatch.begin(); bits.begin();
 
   let rumble = 0;
   const t = state.clock;
@@ -1502,13 +1959,28 @@ function updateTraffic(dt, focus){
         for(let i=0;i<row.signals.length;i++){
           const s = row.signals[i];
           const lit = (i === 0) === on;
-          lamps.push(s.x + (i ? 0.17 : -0.17), s.y, s.z, 0.17, 0.17, 0.17, 0, lit ? LAMP_ON : LAMP_OFF);
+          bits.push(s.x + (i ? 0.17 : -0.17), s.y, s.z, 0.17, 0.17, 0.17, 0, lit ? LAMP_ON : LAMP_OFF);
         }
+        // The posts sit outside a phone's visible width, so the warning is
+        // repeated as stripes along both rails, flashing alternately.
+        bits.push(0, row.top + 0.05, z - 0.46, FIELD_W, 0.1, 0.1, 0, on ? LAMP_ON : LAMP_OFF);
+        bits.push(0, row.top + 0.05, z + 0.46, FIELD_W, 0.1, 0.1, 0, on ? LAMP_OFF : LAMP_ON);
       }
     }
 
     if(row.coin !== null && !row.coinTaken && draw){
       coinBatch.push(row.coin, row.top + 0.46 + Math.sin(t*3 + row.idx)*0.07, z, 1,1,1, t*2.6);
+    }
+
+    /* The record line: a gold stripe across the row you have to beat, with a
+     * flag either side near the screen edges so it is unmissable. */
+    if(draw && row.idx === run.gateRow && !run.beatBest && state.mode !== 'menu'){
+      GATE_TMP.copy(GATE_GOLD).multiplyScalar(1 + Math.sin(t*4)*0.16);
+      bits.push(0, row.top + 0.06, z, FIELD_W, 0.09, 0.17, 0, GATE_TMP);
+      for(const sx of [3.9, -3.9]){
+        bits.push(sx, row.top + 0.45, z, 0.11, 0.9, 0.11, 0, GATE_POST);
+        bits.push(sx + Math.sign(sx) * -0.19, row.top + 0.82, z, 0.28, 0.2, 0.12, 0, GATE_TMP);
+      }
     }
   }
 
@@ -1516,7 +1988,7 @@ function updateTraffic(dt, focus){
   for(const b of truckBatches) b.end();
   for(const b of busBatches)   b.end();
   for(const b of logBatches)   b.end();
-  trainBatch.end(); coinBatch.end(); lamps.end();
+  trainBatch.end(); coinBatch.end(); bits.end();
   Sfx.updateRumble(rumble);
 }
 
@@ -1537,15 +2009,16 @@ const player = {
 };
 
 function resetPlayer(){
+  const y = CFG.TOP.grass + (worn().float || 0);
   player.row = 0; player.col = 0;
-  player.x = 0; player.z = ROW_Z(0); player.y = CFG.TOP.grass;
+  player.x = 0; player.z = ROW_Z(0); player.y = y;
   player.hopping = false; player.hopT = 0;
   player.yaw = 0; player.yawTo = 0;
   player.ride = null; player.maxRow = 0; player.idle = 0; player.bump = 0;
-  chicken.visible = true;
-  chicken.scale.set(1,1,1);
-  chicken.rotation.set(0,0,0);
-  chicken.position.set(0, CFG.TOP.grass, ROW_Z(0));
+  avatar.visible = true;
+  avatar.scale.set(1,1,1);
+  avatar.rotation.set(0,0,0);
+  avatar.position.set(0, y, ROW_Z(0));
 }
 
 const DIRS = {
@@ -1592,12 +2065,13 @@ function tryMove(dirName){
   player.toZ = ROW_Z(toRow);
   // Water lands somewhere between a lily pad and the top of a log; the exact
   // height is only known once landed(), which resolves the actual support.
-  player.toY = row.type === 'water' ? row.top + 0.24 : row.top;
+  player.toY = (row.type === 'water' ? row.top + 0.24 : row.top) + (worn().float || 0);
   player.hopping = true; player.hopT = 0;
   player.yawTo = d.yaw;
   player.ride = null;
   player.row = toRow;
-  Sfx.hop();
+  stats.hops++;
+  Sfx.hop(worn().pitch, worn().beep);
   if(d.dr === 1) buzz(9);
   return true;
 }
@@ -1634,21 +2108,22 @@ function landed(){
     }
     if(!support){ die('water'); return; }
     player.ride = support;
-    player.y = row.top + (support.pad ? 0.09 : 0.34);
+    player.y = row.top + (support.pad ? 0.09 : 0.34) + (worn().float || 0);
+    if(!row.credited){ row.credited = true; stats.logRows++; }
     Sfx.land();
   } else {
     player.col = Math.round(player.x);
-    player.y = row.top;
+    player.y = row.top + (worn().float || 0);
     player.ride = null;
     Sfx.land();
+    if(row.type === 'rail' && !row.credited){ row.credited = true; stats.rails++; }
     if(row.coin === player.col && !row.coinTaken){
       row.coinTaken = true;
-      state.coins++;
       Sfx.coin();
       buzz(14);
-      toast('+1', player.x, player.y + 0.9, player.z);
-      hudCoins();
-      save();
+      toast('+1 coin', player.x, player.y + 0.9, player.z);
+      spawnFeathers(player.x, player.y + 0.45, player.z, 7, COIN_C, 0.6);
+      addCoins(1);
     }
   }
 
@@ -1657,6 +2132,10 @@ function landed(){
     player.idle = 0;
     state.score = player.maxRow;
     hudScore();
+    onProgress();
+  } else {
+    run.streak = 0;
+    hudStreak();
   }
 }
 
@@ -1671,7 +2150,11 @@ function hazards(dt){
     if(row.type === 'road'){
       const pad = CFG.PLAYER_HALF * 0.82 + row.speed * dt * 0.5;
       for(const v of row.vehicles){
-        if(Math.abs(v.x - player.x) < v.len/2 + pad){ die('car', v.kind); return true; }
+        const gap = Math.abs(v.x - player.x) - v.len/2 - pad;
+        if(gap < 0){ die('car', v.kind); return true; }
+        // A vehicle that skims past is worth celebrating, once per vehicle.
+        if(gap < 0.42){ if(!v.near && !player.hopping){ v.near = true; nearMiss(); } }
+        else if(gap > 1.3) v.near = false;
       }
     } else if(row.type === 'rail' && row.rail.state === 'run'){
       if(Math.abs(row.rail.x - player.x) < TRAIN_HALF + CFG.PLAYER_HALF + CFG.TRAIN_SPEED*dt*0.5){
@@ -1713,7 +2196,7 @@ function updatePlayer(dt){
     const t = player.hopT;
     px = lerp(player.fromX, player.toX, t);
     pz = lerp(player.fromZ, player.toZ, t);
-    py = lerp(player.fromY, player.toY, t) + Math.sin(Math.PI * t) * CFG.HOP_HEIGHT;
+    py = lerp(player.fromY, player.toY, t) + Math.sin(Math.PI * t) * CFG.HOP_HEIGHT * (worn().hop || 1);
     sy = 1 + Math.sin(Math.PI * t) * 0.26;
     sx = 1 - Math.sin(Math.PI * t) * 0.13;
   } else if(state.mode === 'menu'){
@@ -1732,12 +2215,12 @@ function updatePlayer(dt){
   // Once a death animation has run, the pose it left behind is the pose the
   // score card is presented over, so live positioning stops here.
   if(state.mode !== 'dying' && state.mode !== 'over'){
-    chicken.position.set(px, py, pz);
-    chicken.scale.set(sx, sy, sx);
+    avatar.position.set(px, py, pz);
+    avatar.scale.set(sx, sy, sx);
     // Shortest-path turn towards the last hop direction.
     let dy = ((player.yawTo - player.yaw + Math.PI) % (Math.PI*2) + Math.PI*2) % (Math.PI*2) - Math.PI;
     player.yaw += dy * Math.min(1, dt*18);
-    chicken.rotation.y = player.yaw;
+    avatar.rotation.y = player.yaw;
   }
 }
 /* ============================================================================
@@ -1790,13 +2273,17 @@ const DEATHS = {
 
 const FEATHER_W = [C(0xfcfcf6), C(0xecece2), C(0xe0453f), C(0xf2a12b)];
 const SPLASH_C  = [C(0xbfe6ff), C(0x8fd2f5), C(0xffffff)];
+const COIN_C    = [C(0xffc93c), C(0xffe89a), C(0xfff6cf)];
 
 function die(cause, sub){
   if(state.mode !== 'play') return;
   state.mode = 'dying';
   state.deathT = 0;
   state.cause = (cause === 'car' && sub && DEATHS[sub]) ? sub : cause;
+  stats.deaths[state.cause] = (stats.deaths[state.cause] || 0) + 1;
   player.hopping = false;
+  run.streak = 0;
+  hudStreak();
   alertEl.classList.remove('show');
   Sfx.stopRumble();
 
@@ -1824,11 +2311,11 @@ function updateDying(dt){
   if(cause === 'water' || cause === 'edge'){
     const row = world.rows.get(player.row);
     const surface = (row ? row.top : 0);
-    chicken.position.set(player.x, surface - smooth(t*1.5)*0.75, player.z);
-    if(cause === 'edge' && player.ride?.log) chicken.position.x = player.ride.log.x + player.ride.off;
+    avatar.position.set(player.x, surface - smooth(t*1.5)*0.75, player.z);
+    if(cause === 'edge' && player.ride?.log) avatar.position.x = player.ride.log.x + player.ride.off;
     const s = 1 - smooth(t*1.3)*0.35;
-    chicken.scale.set(s, s, s);
-    chicken.rotation.z = t*1.4;
+    avatar.scale.set(s, s, s);
+    avatar.rotation.z = t*1.4;
     if(t > 1.05) gameOver();
 
   } else if(cause === 'eagle'){
@@ -1837,12 +2324,12 @@ function updateDying(dt){
       const k = smooth(t/0.45);
       eagle.position.set(lerp(gx + 2.4, gx, k), lerp(8.5, gy + 0.62, k), lerp(gz - 4.2, gz, k));
       eagle.rotation.y = lerp(-0.5, 0, k);
-      chicken.position.set(gx, gy, gz);
+      avatar.position.set(gx, gy, gz);
     } else {
       const k = smooth((t - 0.45)/1.15);
       eagle.position.set(lerp(gx, gx + 1.1, k), lerp(gy + 0.62, gy + 11, k), lerp(gz, gz + 4.5, k));
-      chicken.position.set(eagle.position.x, eagle.position.y - 0.62, eagle.position.z + 0.06);
-      chicken.rotation.z = Math.sin(t*9)*0.25;
+      avatar.position.set(eagle.position.x, eagle.position.y - 0.62, eagle.position.z + 0.06);
+      avatar.rotation.z = Math.sin(t*9)*0.25;
       if(t > 0.5 && t < 0.56) Sfx.wings();
     }
     const flap = Math.sin(t*23) * 0.72;
@@ -1854,12 +2341,148 @@ function updateDying(dt){
     // Squashed flat, with a beat of stillness before the score card.
     const k = smooth(t*8);
     const row = world.rows.get(player.row);
-    chicken.position.set(player.x, (row ? row.top : 0) + 0.05, player.z);
-    chicken.scale.set(1 + k*0.55, 1 - k*0.86, 1 + k*0.42);
-    if(cause === 'train') chicken.rotation.y += dt*7;
+    avatar.position.set(player.x, (row ? row.top : 0) + 0.05, player.z);
+    avatar.scale.set(1 + k*0.55, 1 - k*0.86, 1 + k*0.42);
+    if(cause === 'train') avatar.rotation.y += dt*7;
     if(t > 0.95) gameOver();
   }
 }
+
+/* ============================================================================
+ * 10b. PROGRESSION — the reasons to press retry.
+ *
+ * Everything here is bookkeeping over `stats`, which is persisted: lifetime
+ * totals feed the awards, coins feed the prize machine, and the per-run streak
+ * and near-miss counters feed the little jolts of feedback during a run.
+ * ========================================================================== */
+const stats = {
+  best: 0, coins: 0, coinsTotal: 0, runs: 0, hops: 0,
+  logRows: 0, rails: 0, nearMisses: 0, bestStreak: 0,
+  deaths: {}, owned: ['chicken'], char: 'chicken', ach: {}, gift: '',
+};
+
+const AWARDS = [
+  { id:'reach10',   name:'Hatchling',      hint:'Reach 10',                     goal:10,   get:()=>stats.best },
+  { id:'reach25',   name:'Commuter',       hint:'Reach 25',                     goal:25,   get:()=>stats.best },
+  { id:'reach50',   name:'Long Hauler',    hint:'Reach 50',                     goal:50,   get:()=>stats.best },
+  { id:'reach100',  name:'Centurion',      hint:'Reach 100',                    goal:100,  get:()=>stats.best },
+  { id:'reach200',  name:'Unstoppable',    hint:'Reach 200',                    goal:200,  get:()=>stats.best },
+  { id:'coin25',    name:'Pocket Change',  hint:'Collect 25 coins',             goal:25,   get:()=>stats.coinsTotal },
+  { id:'coin100',   name:'Coin Purse',     hint:'Collect 100 coins',            goal:100,  get:()=>stats.coinsTotal },
+  { id:'coin400',   name:'Piggy Bank',     hint:'Collect 400 coins',            goal:400,  get:()=>stats.coinsTotal },
+  { id:'logs20',    name:'Log Roller',     hint:'Ride 20 rows of river',        goal:20,   get:()=>stats.logRows },
+  { id:'logs75',    name:'River Master',   hint:'Ride 75 rows of river',        goal:75,   get:()=>stats.logRows },
+  { id:'rail10',    name:'Level Crossing', hint:'Cross 10 railways',            goal:10,   get:()=>stats.rails },
+  { id:'near1',     name:'Close Call',     hint:'Survive a near miss',          goal:1,    get:()=>stats.nearMisses },
+  { id:'near25',    name:'Daredevil',      hint:'Survive 25 near misses',       goal:25,   get:()=>stats.nearMisses },
+  { id:'streak10',  name:'Hot Streak',     hint:'Chain 10 hops without a pause',goal:10,   get:()=>stats.bestStreak },
+  { id:'streak25',  name:'On Fire',        hint:'Chain 25 hops without a pause',goal:25,   get:()=>stats.bestStreak },
+  { id:'hops1000',  name:'Hop To It',      hint:'Hop 1000 times',               goal:1000, get:()=>stats.hops },
+  { id:'runs25',    name:'Frequent Flyer', hint:'Play 25 runs',                 goal:25,   get:()=>stats.runs },
+  { id:'zoo5',      name:'Zoo Keeper',     hint:'Own 5 characters',             goal:5,    get:()=>stats.owned.length },
+  { id:'zooAll',    name:'Full House',     hint:'Own every character',          goal:CRITTERS.length, get:()=>stats.owned.length },
+  { id:'allDeaths', name:'Every Which Way',hint:'Meet all 7 ends',              goal:7,    get:()=>Object.keys(stats.deaths).length },
+];
+
+const awardsDone = ()=> AWARDS.reduce((n,a)=> n + (stats.ach[a.id] ? 1 : 0), 0);
+
+/** Re-check every award; announce each newly earned one unless syncing at boot. */
+function checkAwards(silent){
+  let n = 0;
+  for(const a of AWARDS){
+    if(!stats.ach[a.id] && a.get() >= a.goal){
+      stats.ach[a.id] = 1;
+      if(!silent && n++ < 3){ badge('Award unlocked', a.name); Sfx.award(); }
+    }
+  }
+}
+
+/* --- run-scoped feedback ---------------------------------------------------- */
+const run = { streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0 };
+
+function resetRun(){
+  run.streak = 0; run.lastHopT = -9; run.nearT = -9;
+  run.milestone = 0; run.beatBest = false;
+  run.gateRow = stats.best;
+}
+
+/** Called on every hop that lands on a new furthest row. */
+function onProgress(){
+  const now = state.clock;
+  run.streak = (now - run.lastHopT < 1.15) ? run.streak + 1 : 1;
+  run.lastHopT = now;
+  if(run.streak > stats.bestStreak) stats.bestStreak = run.streak;
+  if(run.streak >= 3) hudStreak();
+  if(run.streak > 0 && run.streak % 10 === 0){
+    addCoins(1);
+    toast(`streak x${run.streak}  +1`, player.x, player.y + 1.05, player.z);
+    Sfx.streak();
+  }
+  const m = player.maxRow;
+  if(m >= 25 && m % 25 === 0 && m !== run.milestone){
+    run.milestone = m;
+    addCoins(1);
+    toast(`${m} rows!  +1`, player.x, player.y + 1.05, player.z);
+    Sfx.milestone();
+  }
+  if(!run.beatBest && stats.best > 4 && m > stats.best){
+    run.beatBest = true;
+    badge('New best', `${m} rows and counting`);
+    Sfx.milestone();
+  }
+}
+
+function addCoins(n){
+  stats.coins += n;
+  stats.coinsTotal += n;
+  hudCoins();
+  checkAwards();
+  save();
+}
+
+/** A vehicle went past close enough to ruffle some feathers. */
+function nearMiss(){
+  if(state.clock - run.nearT < 0.4) return;
+  run.nearT = state.clock;
+  stats.nearMisses++;
+  toast('close!', player.x, player.y + 0.95, player.z);
+  Sfx.whoosh();
+  buzz(10);
+  checkAwards();
+}
+
+/* --- the prize machine ----------------------------------------------------- */
+const PRIZE_COST = 40;
+
+function lockedCritters(){ return CRITTERS.filter(c => !stats.owned.includes(c.id)); }
+
+function drawPrize(){
+  const pool = lockedCritters();
+  if(!pool.length || stats.coins < PRIZE_COST) return null;
+  stats.coins -= PRIZE_COST;
+  let total = 0;
+  for(const c of pool) total += RARITY_WEIGHT[c.rarity] || 1;
+  let roll = Math.random() * total;
+  let won = pool[pool.length - 1];
+  for(const c of pool){
+    roll -= RARITY_WEIGHT[c.rarity] || 1;
+    if(roll <= 0){ won = c; break; }
+  }
+  stats.owned.push(won.id);
+  equip(won.id);
+  checkAwards();
+  save();
+  return won;
+}
+
+function equip(id){
+  if(!stats.owned.includes(id)) return;
+  stats.char = id;
+  avatar.geometry = critterMesh(id);
+  save();
+}
+/** The critter currently worn, for hop feel and sound. */
+const worn = ()=> CRITTER_BY_ID[stats.char] || CRITTER_BY_ID.chicken;
 
 /* ============================================================================
  * 11. CAMERA & SKY
@@ -1921,9 +2544,17 @@ function updateCamera(dt){
  * 12. INPUT
  * ========================================================================== */
 const queue = [];
+
+/** A tap, a click, Space or Enter — anything that reads as "go". */
+function confirmInput(){
+  // With a sheet open, taps belong to the sheet, not to the game.
+  if(state.panel){ return true; }
+  if(state.mode === 'menu'){ startGame(); return true; }
+  if(state.mode === 'over'){ if(state.overT > 0.9) startGame(); return true; }
+  return false;
+}
 function enqueue(dir){
-  if(state.mode === 'menu'){ startGame(); return; }
-  if(state.mode === 'over'){ if(state.overT > 0.55) startGame(); return; }
+  if(confirmInput()) return;
   if(state.mode !== 'play') return;
   if(!player.hopping){ tryMove(dir); return; }
   if(queue.length < CFG.QUEUE_MAX) queue.push(dir);
@@ -1938,10 +2569,18 @@ const KEYS = {
 addEventListener('keydown', e=>{
   if(e.repeat) return;
   Sfx.resume();
+  if(e.code === 'Escape' && state.panel){ Sfx.click(); closePanel(); e.preventDefault(); return; }
+  if(state.panel) return;
   if(e.code === 'KeyP' || e.code === 'Escape'){ togglePause(); e.preventDefault(); return; }
   if(e.code === 'KeyM'){ toggleSound(); return; }
+  if(e.code === 'Enter'){ confirmInput(); e.preventDefault(); return; }
   const d = KEYS[e.code];
-  if(d){ enqueue(d); e.preventDefault(); }
+  if(!d) return;
+  e.preventDefault();
+  // On the score card only a deliberate confirm restarts, so a stray direction
+  // key cannot wipe the card before it has been read.
+  if(state.mode === 'over'){ if(e.code === 'Space') confirmInput(); return; }
+  enqueue(d);
 });
 
 /* Touch: a tap hops forward, a swipe hops the way you swiped. The gesture fires
@@ -1951,7 +2590,9 @@ const SWIPE = 26;
 let ptr = null;
 function onDown(e){
   Sfx.resume();
-  if(e.target.closest('button')) return;
+  // Buttons handle themselves, and a drag inside a sheet is a scroll.
+  const el = e.target;
+  if(el && el.closest && (el.closest('button') || el.closest('.sheet'))) return;
   ptr = { x:e.clientX, y:e.clientY, t:performance.now(), fired:false, id:e.pointerId };
 }
 function onMove(e){
@@ -1984,20 +2625,38 @@ for(const b of document.querySelectorAll('#dpad button[data-dir]')){
  * 13. GAME STATE, HUD AND LOOP
  * ========================================================================== */
 const state = {
-  mode: 'menu', clock: 0, score: 0, coins: 0, best: 0,
+  mode: 'menu', clock: 0, score: 0, panel: null,
   cause: 'car', deathT: 0, overT: 0, shake: 0,
 };
 
 const alertEl = $('alert');
 const scoreEl = $('score'), bestEl = $('best'), coinEl = $('coinchip').querySelector('.val');
-const screens = { start: $('start'), over: $('over'), pause: $('pause') };
+const streakEl = $('streak'), streakVal = streakEl.querySelector('.val');
+const screens = {
+  start: $('start'), over: $('over'), pause: $('pause'),
+  chars: $('chars'), awards: $('awards'),
+};
 const KEY = 'crossyhop.v1';
 
 function load(){
   try{
     const raw = JSON.parse(localStorage.getItem(KEY) || '{}');
-    state.best = raw.best | 0;
-    state.coins = raw.coins | 0;
+    stats.best       = raw.best | 0;
+    stats.coins      = raw.coins | 0;
+    stats.coinsTotal = Math.max(raw.coinsTotal | 0, stats.coins);
+    stats.runs       = raw.runs | 0;
+    stats.hops       = raw.hops | 0;
+    stats.logRows    = raw.logRows | 0;
+    stats.rails      = raw.rails | 0;
+    stats.nearMisses = raw.nearMisses | 0;
+    stats.bestStreak = raw.bestStreak | 0;
+    stats.deaths     = (raw.deaths && typeof raw.deaths === 'object') ? raw.deaths : {};
+    stats.ach        = (raw.ach && typeof raw.ach === 'object') ? raw.ach : {};
+    stats.gift       = raw.gift || '';
+    // Only keep ids we still ship, and never lose the starter.
+    const owned = Array.isArray(raw.owned) ? raw.owned.filter(id => CRITTER_BY_ID[id]) : [];
+    stats.owned = [...new Set(['chicken', ...owned])];
+    stats.char  = stats.owned.includes(raw.char) ? raw.char : 'chicken';
     Sfx.setMuted(!!raw.muted);
     padOn = raw.pad === undefined ? IS_TOUCH : !!raw.pad;
   }catch(e){ padOn = IS_TOUCH; }
@@ -2005,14 +2664,44 @@ function load(){
 function save(){
   try{
     localStorage.setItem(KEY, JSON.stringify({
-      best: state.best, coins: state.coins, muted: Sfx.muted, pad: padOn,
+      best: stats.best, coins: stats.coins, coinsTotal: stats.coinsTotal,
+      runs: stats.runs, hops: stats.hops, logRows: stats.logRows, rails: stats.rails,
+      nearMisses: stats.nearMisses, bestStreak: stats.bestStreak,
+      deaths: stats.deaths, ach: stats.ach, owned: stats.owned, char: stats.char,
+      gift: stats.gift, muted: Sfx.muted, pad: padOn,
     }));
   }catch(e){}
 }
 
 const hudScore = ()=>{ scoreEl.textContent = state.score; };
-const hudBest  = ()=>{ bestEl.textContent = 'BEST ' + state.best; $('s-best').textContent = state.best; };
-const hudCoins = ()=>{ coinEl.textContent = state.coins; $('s-coins').textContent = state.coins; };
+const hudBest  = ()=>{ bestEl.textContent = 'BEST ' + stats.best; $('s-best').textContent = stats.best; };
+const hudCoins = ()=>{
+  coinEl.textContent = stats.coins;
+  $('s-coins').textContent = stats.coins;
+  if(state.panel === 'chars') renderChars();
+};
+function hudStreak(){
+  const n = run.streak;
+  streakEl.classList.toggle('hidden', n < 3);
+  if(n < 3) return;
+  streakVal.textContent = 'x' + n;
+  streakEl.classList.toggle('hot', n >= 10);
+  streakEl.classList.remove('pop');
+  void streakEl.offsetWidth;              // restart the pop animation
+  streakEl.classList.add('pop');
+}
+
+/** Slide-in notification for an award or a new personal best. */
+const badgeLayer = $('badges');
+function badge(kind, name){
+  const el = document.createElement('div');
+  el.className = 'badge';
+  el.innerHTML = '<span class="medal">★</span><span class="txt"><span class="k"></span><span class="n"></span></span>';
+  el.querySelector('.k').textContent = kind;
+  el.querySelector('.n').textContent = name;
+  badgeLayer.appendChild(el);
+  setTimeout(()=> el.remove(), 2950);
+}
 
 /** Floating text anchored to a world position. */
 const toastLayer = $('toasts');
@@ -2032,12 +2721,115 @@ function show(name){
   for(const k in screens) screens[k].classList.toggle('hidden', k !== name);
 }
 
+/* --- sheets ---------------------------------------------------------------- */
+const hex = n => '#' + n.toString(16).padStart(6, '0');
+
+function renderChars(){
+  const grid = $('c-grid');
+  grid.textContent = '';
+  for(const c of CRITTERS){
+    const owned = stats.owned.includes(c.id);
+    const el = document.createElement('button');
+    el.className = 'critter' + (owned ? '' : ' locked') + (stats.char === c.id ? ' on' : '');
+    el.innerHTML = '<span class="swatch"></span><span class="n"></span><span class="r"></span>';
+    const sw = el.querySelector('.swatch');
+    const pic = owned ? critterThumb(c.id) : null;
+    if(pic){ sw.classList.add('pic'); sw.style.backgroundImage = `url(${pic})`; }
+    else { sw.style.background = owned ? hex(c.spec.body) : '#d9e2ea'; }
+    if(!owned) sw.textContent = '?';
+    el.querySelector('.n').textContent = owned ? c.name : 'Locked';
+    el.querySelector('.r').textContent = stats.char === c.id ? 'wearing' : (owned ? c.rarity : '');
+    if(owned) el.addEventListener('click', ev=>{
+      ev.stopPropagation(); Sfx.click(); equip(c.id); renderChars();
+    });
+    grid.appendChild(el);
+  }
+  $('c-count').textContent = `${stats.owned.length} / ${CRITTERS.length}`;
+  const all = lockedCritters().length === 0;
+  const btn = $('btn-prize');
+  btn.disabled = all || stats.coins < PRIZE_COST;
+  btn.textContent = all ? 'All unlocked' : 'Prize Machine';
+  $('c-cost').textContent = all
+    ? 'you own the whole zoo'
+    : `${PRIZE_COST} coins per try · you have ${stats.coins}`;
+}
+
+function renderAwards(){
+  const list = $('a-list');
+  list.textContent = '';
+  for(const a of AWARDS){
+    const done = !!stats.ach[a.id];
+    const at = Math.min(a.get(), a.goal);
+    const el = document.createElement('div');
+    el.className = 'award' + (done ? ' done' : ' locked');
+    el.innerHTML = '<span class="medal">★</span><span class="txt"><span class="n"></span>' +
+                   '<span class="h"></span><span class="bar"><i></i></span></span>';
+    el.querySelector('.n').textContent = a.name;
+    el.querySelector('.h').textContent = done ? a.hint : `${a.hint} — ${at}/${a.goal}`;
+    el.querySelector('.bar i').style.width = Math.round(at / a.goal * 100) + '%';
+    list.appendChild(el);
+  }
+  $('a-count').textContent = `${awardsDone()} / ${AWARDS.length}`;
+}
+
+function openPanel(name){
+  state.panel = name;
+  if(name === 'chars') renderChars(); else renderAwards();
+  show(name);
+  applyChrome();
+}
+function closePanel(){
+  const back = state.mode === 'over' ? 'over' : state.mode === 'menu' ? 'start' : null;
+  state.panel = null;
+  show(back);
+  applyChrome();
+  $('s-awards').textContent = awardsDone();
+}
+
+/** Spin the machine: coins in, a critter out, and it is worn straight away. */
+let prizeBusy = false;
+function pullPrize(){
+  if(prizeBusy) return;
+  const won = drawPrize();
+  if(!won){ Sfx.click(); return; }
+  prizeBusy = true;
+  Sfx.prize();
+  const rev = $('reveal');
+  const pic = critterThumb(won.id);
+  const sw = $('r-swatch');
+  sw.style.backgroundImage = pic ? `url(${pic})` : 'none';
+  sw.style.background = pic ? `url(${pic}) center/contain no-repeat` : hex(won.spec.body);
+  $('r-name').textContent = won.name;
+  $('r-rarity').textContent = won.rarity;
+  rev.classList.remove('hidden');
+  buzz([18, 60, 18, 60, 30]);
+  hudCoins();
+  renderChars();
+  setTimeout(()=>{ rev.classList.add('hidden'); prizeBusy = false; }, 1900);
+}
+
+/** One free handful of coins per calendar day, to reward coming back. */
+function dailyGift(){
+  const today = new Date().toISOString().slice(0, 10);
+  if(stats.gift === today) return;
+  const first = !stats.gift;
+  const amount = first ? 20 : 15;
+  stats.gift = today;
+  addCoins(amount);
+  // Shown as a chip on the title screen rather than a toast, so it cannot be
+  // missed while the first frame is still going up.
+  const el = $('gift');
+  el.textContent = `daily gift +${amount} coins`;
+  el.classList.remove('hidden');
+}
+
 function startGame(){
   // Taps reach here from both the overlay and the global pointer handler, and a
   // death animation must be allowed to finish, so guard the transition.
   if(state.mode === 'play' || state.mode === 'dying') return;
   Sfx.resume();
   state.mode = 'play';
+  state.panel = null;
   state.score = 0; state.deathT = 0; state.shake = 0;
   state.cause = 'car';
   queue.length = 0;
@@ -2045,25 +2837,32 @@ function startGame(){
   for(const p of partPool) p.life = 0;
   seedStart();
   resetPlayer();
+  resetRun();
+  hudStreak();
+  stats.runs++;
   cam.rowF = 0; cam.x = 0;
   hudScore();
   show(null);
   $('newbest').classList.add('hidden');
+  $('gift').classList.add('hidden');
 }
 
 function gameOver(){
   state.mode = 'over';
   state.overT = 0;
-  const beat = state.score > state.best;
-  if(beat) state.best = state.score;
+  const beat = state.score > stats.best;
+  if(beat) stats.best = state.score;
+  checkAwards();
   save();
   hudBest();
+  streakEl.classList.add('hidden');
+  $('s-awards').textContent = awardsDone();
   const d = DEATHS[state.cause] || DEATHS.car;
   $('overtitle').textContent = d.title;
   $('overwhy').textContent = d.why;
   $('o-score').textContent = state.score;
-  $('o-best').textContent = state.best;
-  $('o-coins').textContent = state.coins;
+  $('o-best').textContent = stats.best;
+  $('o-coins').textContent = stats.coins;
   $('newbest').classList.toggle('hidden', !beat);
   alertEl.classList.remove('show');
   Sfx.over();
@@ -2084,12 +2883,15 @@ function togglePause(){
 let padOn = IS_TOUCH, chromeKey = null;
 /** Show or hide the touch pad and the in-run score, keyed to the mode. */
 function applyChrome(){
-  const key = padOn + '|' + (state.mode === 'menu');
+  const menu = state.mode === 'menu';
+  const key = padOn + '|' + menu + '|' + state.panel;
   if(key === chromeKey) return;
   chromeKey = key;
-  $('dpad').classList.toggle('hide', !padOn || state.mode === 'menu');
+  $('dpad').classList.toggle('hide', !padOn || menu || !!state.panel);
   $('btn-pad').classList.toggle('off', !padOn);
-  $('hud').classList.toggle('menu', state.mode === 'menu');
+  $('hud').classList.toggle('menu', menu);
+  // A sheet owns the whole screen; the HUD buttons would collide with its header.
+  $('hud').classList.toggle('away', !!state.panel);
 }
 function toggleSound(){
   Sfx.resume();
@@ -2112,8 +2914,15 @@ $('btn-pad').addEventListener('click', e=>{
   e.stopPropagation(); Sfx.click();
   padOn = !padOn; applyChrome(); save();
 });
+for(const [id, panel] of [['btn-chars','chars'], ['btn-chars2','chars'], ['btn-awards','awards'], ['btn-awards2','awards']]){
+  $(id).addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); openPanel(panel); });
+}
+for(const b of document.querySelectorAll('[data-close]')){
+  b.addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); closePanel(); });
+}
+$('btn-prize').addEventListener('click', e=>{ e.stopPropagation(); pullPrize(); });
 screens.start.addEventListener('click', ()=>{ Sfx.click(); startGame(); });
-screens.over.addEventListener('click', ()=>{ if(state.overT > 0.55){ Sfx.click(); startGame(); } });
+screens.over.addEventListener('click', ()=>{ if(state.overT > 0.9){ Sfx.click(); startGame(); } });
 
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden && state.mode === 'play') togglePause();
@@ -2122,7 +2931,11 @@ addEventListener('blur', ()=>{ if(state.mode === 'play') togglePause(); });
 
 /* --- boot ----------------------------------------------------------------- */
 load();
+equip(stats.char);
+checkAwards(true);          // credit anything a previous version already earned
 hudBest(); hudCoins(); hudScore();
+$('s-awards').textContent = awardsDone();
+dailyGift();
 $('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
 $('btn-sound').classList.toggle('off', Sfx.muted);
 resize();
@@ -2162,7 +2975,12 @@ function frame(now){
 requestAnimationFrame(frame);
 
 /* A small handle for tweaking and driving the game from the console. */
-window.HOP = { CFG, state, player, world, cam, Sfx, THREE, scene, renderer, move: tryMove, start: startGame };
+window.HOP = {
+  CFG, state, stats, run, player, world, cam, camera, avatar, Sfx, THREE, scene, renderer,
+  CRITTERS, AWARDS, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
+  openPanel, closePanel, dailyGift, save, load, onProgress, nearMiss, addCoins,
+  move: tryMove, start: startGame,
+};
 
 </script>
 </body>
