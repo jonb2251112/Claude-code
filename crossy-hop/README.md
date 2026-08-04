@@ -46,17 +46,31 @@ persist in `localStorage`.
   rarity, revealed with a sunburst and worn immediately. The character sheet
   shows portraits rendered off-screen from the real geometry, viewed from the
   front — the only place in the game you get to see a critter's face.
-- **Awards.** Twenty of them, tracking distance, coins, log rows, railways,
-  near misses, streaks, hops, runs, the size of your collection and the number of
-  distinct ways you have died. Each announces itself as it lands, and the score
-  card dangles whichever one you are closest to.
+- **Awards.** Twenty-six of them, tracking distance, coins, log rows, railways,
+  near misses, streaks, hops, runs, the size of your collection, the number of
+  distinct ways you have died, revives, fever peaks, daily challenges and login
+  streaks. Each announces itself as it lands, and the score card dangles
+  whichever one you are closest to.
 - **Streaks.** Hops that land within 1.15 s of the last one chain; every tenth
   link pays a coin. The chip under the score turns red at ten.
+- **Fever.** Chain ten hops and coins pay double — twenty and they pay triple.
+  The streak chip goes gold, a multiplier pip appears next to your purse, and a
+  nearby coin on the same grass row snaps into your beak. Break the chain and
+  the heat dies.
+- **Second chance.** Die with at least 25 coins and the score card offers one
+  revive per run. You keep your score, blink back onto safe grass with a short
+  free pass, and hop on.
+- **Daily challenges.** Three seeded goals every calendar day — reach a score,
+  pocket coins, ride rivers, cross rails, survive near misses, catch a fever.
+  Finish one for a coin payout and a badge. Open them from **Today** on the
+  title screen or the score card.
+- **Login streak.** Come back tomorrow and the daily gift grows (capped at 50).
+  Miss a day and it resets.
 - **Near misses.** A vehicle that passes within a whisker prints `close!` and
   counts towards an award.
-- **Milestones and the record gate.** Every 25th row pays a coin, and your
-  previous best is drawn across the world as a gold stripe with flags either
-  side. Cross it and the run announces itself.
+- **Milestones and the record gate.** Every 25th row pays a coin (multiplied in
+  fever), and your previous best is drawn across the world as a gold stripe with
+  flags either side. Cross it and the run announces itself.
 - **Daily gift.** A handful of coins the first time you play on a given day.
 
 ## Rules of the road
@@ -115,16 +129,18 @@ antialiasing and halves the shadow map on low-core touch hardware. Pausing on
 
 Every knob worth turning is in the `CFG` block at the top of the script: hop
 timing, vehicle and train speeds, the minimum crossing gap, the eagle's patience,
-camera framing and fog distance. The roster lives in `CRITTERS` and the awards in
-`AWARDS`, both plain tables — a new character is a spec object, a new award is a
-name, a goal and a getter.
+camera framing, fog distance, revive cost and fever thresholds. The roster lives
+in `CRITTERS`, the awards in `AWARDS` and the daily challenge pool in
+`QUEST_POOL` — a new character is a spec object, a new award is a name, a goal
+and a getter, a new challenge is the same shape plus a coin reward.
 
 `window.HOP` exposes the state, the world, the player, the progression systems
 and `HOP.move('up' | 'down' | 'left' | 'right')` for poking at a live game from
 the console. Useful while tinkering:
 
 ```js
-HOP.stats.coins = 500; HOP.save();   // fund the prize machine
+HOP.stats.coins = 500; HOP.save();   // fund the prize machine / second chance
 HOP.equip('robot');                  // wear something else
-HOP.openPanel('awards');             // open a sheet
+HOP.openPanel('quests');             // open today's challenges
+HOP.doRevive();                      // take the second chance if offered
 ```

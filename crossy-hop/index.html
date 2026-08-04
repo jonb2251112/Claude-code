@@ -134,9 +134,21 @@ html,body{
 }
 #streak .lbl{font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.9;}
 #streak.hot{background:linear-gradient(#ff6a3c,#e02b2b);}
+#streak.fever{background:linear-gradient(#ffe07a,#ff9a1a);color:#3c2500;
+  box-shadow:0 3px 0 #c07800, 0 0 18px rgba(255,201,60,.55);}
 #streak.hidden{display:none;}
 #streak.pop{animation:streakpop .3s ease;}
 @keyframes streakpop{0%{transform:scale(1);}40%{transform:scale(1.22);}100%{transform:scale(1);}}
+
+/* Coin multiplier pip that rides next to the coin chip during fever. */
+#multchip{
+  font-size:12px;letter-spacing:.08em;color:#3c2500;
+  background:linear-gradient(#ffe07a,#ffc224);border-radius:12px;
+  padding:4px 10px;box-shadow:0 3px 0 var(--gold-dk);
+  font-variant-numeric:tabular-nums;
+}
+#multchip.hidden{display:none;}
+#multchip.pop{animation:streakpop .35s ease;}
 
 /* Award / new-best badge that slides down from the top. */
 #badges{
@@ -291,14 +303,51 @@ kbd{
 #nextaward .h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
 #nextaward .bar{width:min(58vw,220px);margin:2px 0 1px;}
 
-#newbest,#gift{
+#newbest,#gift,#loginstreak{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#3c2500;
   background:var(--gold);border-radius:12px;padding:4px 12px;
   box-shadow:0 3px 0 var(--gold-dk);
 }
-#newbest.hidden,#gift.hidden{display:none;}
+#newbest.hidden,#gift.hidden,#loginstreak.hidden{display:none;}
+#loginstreak{background:linear-gradient(#ffe07a,#ffb020);}
 
 #pausecard .t{font-size:clamp(22px,7vmin,34px);color:var(--ink);margin-bottom:6px;}
+
+/* Second-chance button on the score card — loud on purpose. */
+.btn.revive{
+  background:linear-gradient(#7dffb0,#2ecc71);color:#0b3d24;
+  box-shadow:0 6px 0 #1e9a52, 0 14px 22px rgba(18,52,80,.28);
+}
+.btn.revive:active{box-shadow:0 1px 0 #1e9a52;}
+.btn.revive .sub{display:block;font-size:10px;letter-spacing:.16em;opacity:.75;margin-top:2px;}
+#revivewrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+#revivewrap.hidden{display:none;}
+#revivehint{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.85;
+  text-shadow:0 2px 0 rgba(18,52,80,.35);}
+
+/* Daily challenge rows inside the challenges sheet. */
+.quest{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:15px;background:rgba(255,253,246,.94);
+  box-shadow:0 3px 0 rgba(18,52,80,.18);text-align:left;
+}
+.quest.done{background:linear-gradient(90deg,rgba(255,233,160,.95),rgba(255,253,246,.95));}
+.quest .medal{
+  width:28px;height:28px;flex:0 0 auto;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #fff3b6, var(--gold) 60%, var(--gold-dk));
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.16);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:#5a3c00;
+}
+.quest.done .medal{background:linear-gradient(#7dffb0,#2ecc71);color:#0b3d24;}
+.quest .txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.quest .n{font-size:13px;color:var(--ink);}
+.quest .h{font-size:10px;letter-spacing:.06em;color:var(--ink-soft);text-transform:uppercase;}
+.quest .pay{font-size:11px;letter-spacing:.06em;color:var(--gold-dk);white-space:nowrap;}
+.quest.done .pay{color:#1e9a52;}
+#questday{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.9;
+  text-shadow:0 2px 0 rgba(18,52,80,.35);
+}
 
 /* --- sheets (characters / awards) ----------------------------------------- */
 .sheet{justify-content:flex-start;padding-top:calc(var(--safe-t) + 12px);}
@@ -328,7 +377,7 @@ kbd{
   -webkit-mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
   mask-image:linear-gradient(#000 calc(100% - 34px), transparent);
 }
-#awards .body{max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 116px);}
+#awards .body,#quests .body{max-height:calc(100vh - var(--safe-t) - var(--safe-b) - 116px);}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;}
 .critter{
   display:flex;flex-direction:column;align-items:center;gap:5px;
@@ -458,6 +507,7 @@ kbd{
         <button id="btn-pause" class="icon-btn" aria-label="Pause">❚❚</button>
       </div>
       <div id="coinchip" class="chip"><i class="coin"></i><span class="val">0</span></div>
+      <div id="multchip" class="hidden">×2 coins</div>
     </div>
     <div id="alert">◀ get moving ▶</div>
     <div id="badges"></div>
@@ -483,9 +533,11 @@ kbd{
     </div>
     <div id="startstats">best <b id="s-best">0</b> &nbsp;·&nbsp; coins <b id="s-coins">0</b> &nbsp;·&nbsp; awards <b id="s-awards">0</b></div>
     <div id="gift" class="hidden">daily gift +20 coins</div>
+    <div id="loginstreak" class="hidden">day 1 streak</div>
     <button id="btn-play" class="btn">Play</button>
     <div id="menurow">
       <button id="btn-chars"  class="btn ghost">Characters</button>
+      <button id="btn-quests" class="btn ghost">Today</button>
       <button id="btn-awards" class="btn ghost">Awards</button>
     </div>
     <div id="tapcue">tap anywhere to start</div>
@@ -509,9 +561,14 @@ kbd{
       </div>
     </div>
     <div id="newbest" class="hidden">new best!</div>
+    <div id="revivewrap" class="hidden">
+      <button id="btn-revive" class="btn revive">Second Chance<span class="sub" id="revive-cost">25 coins · once per run</span></button>
+      <div id="revivehint">keep your score · hop from safety</div>
+    </div>
     <button id="btn-retry" class="btn">Retry</button>
     <div id="menurow2" style="display:flex;gap:9px;flex-wrap:wrap;justify-content:center;">
       <button id="btn-chars2"  class="btn ghost">Characters</button>
+      <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-awards2" class="btn ghost">Awards</button>
     </div>
     <div id="tapcue2" class="hint" style="color:#fff;opacity:.85;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">tap anywhere to hop again</div>
@@ -535,10 +592,21 @@ kbd{
   <div id="awards" class="screen sheet hidden">
     <div class="head">
       <h2>Awards</h2>
-      <span class="count" id="a-count">0 / 20</span>
+      <span class="count" id="a-count">0 / 26</span>
       <button class="close-btn" data-close="awards" aria-label="Close">✕</button>
     </div>
     <div class="body"><div class="awards" id="a-list"></div></div>
+  </div>
+
+  <!-- ===================== DAILY CHALLENGES ===================== -->
+  <div id="quests" class="screen sheet hidden">
+    <div class="head">
+      <h2>Today</h2>
+      <span class="count" id="q-count">0 / 3</span>
+      <button class="close-btn" data-close="quests" aria-label="Close">✕</button>
+    </div>
+    <div id="questday">fresh every day · finish them for coins</div>
+    <div class="body"><div class="awards" id="q-list"></div></div>
   </div>
 
   <!-- ===================== PRIZE REVEAL ===================== -->
@@ -641,6 +709,13 @@ const CFG = {
   CAM_LAG_Z:       9.0,
   CAM_LAG_X:       6.5,
   CAM_X_CLAMP:     3.6,    // how far sideways the camera will chase the player
+
+  /* --- progression juice --- */
+  REVIVE_COST:     25,     // coins for one second chance per run
+  REVIVE_IFRAME:   1.8,    // seconds of invulnerability after a revive
+  FEVER_AT:        10,     // streak that doubles coin payouts
+  FEVER_SUPER:     20,     // streak that triples them
+  STREAK_WINDOW:   1.15,   // seconds between hops that keep the chain alive
 };
 
 /* Device tiering. Phones lose the antialias pass, take a smaller shadow map and
@@ -855,6 +930,25 @@ const Sfx = (()=>{
       const t = ctx.currentTime;
       for(let i=0;i<9;i++) tone('triangle', 600 + Math.random()*900, 500, t + i*0.055, 0.07, 0.07);
       [659, 880, 1319].forEach((f,i)=> tone('triangle', f, f, t + 0.55 + i*0.09, 0.3, 0.14));
+    },
+    /** Fever ignites: a bright rising fanfare. */
+    fever(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      [523, 659, 784, 1047].forEach((f,i)=> tone('square', f, f*1.01, t + i*0.055, 0.18, 0.08));
+      tone('triangle', 1568, 2093, t + 0.28, 0.28, 0.12);
+    },
+    /** Second chance: a soft rebound chord. */
+    revive(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      [392, 523, 659, 784].forEach((f,i)=> tone('triangle', f, f, t + i*0.07, 0.28, 0.13));
+    },
+    /** Daily challenge complete. */
+    quest(){
+      if(!live()) return;
+      const t = ctx.currentTime;
+      [880, 1175, 1760].forEach((f,i)=> tone('triangle', f, f, t + i*0.08, 0.22, 0.12));
     },
     /** Continuous rail rumble, gain driven by how close the nearest train is. */
     startRumble(){
@@ -2024,6 +2118,7 @@ const player = {
   maxRow: 0,
   idle: 0,
   bump: 0,
+  iframe: 0,           // seconds of invulnerability after a revive
 };
 
 function resetPlayer(){
@@ -2033,6 +2128,7 @@ function resetPlayer(){
   player.hopping = false; player.hopT = 0;
   player.yaw = 0; player.yawTo = 0;
   player.ride = null; player.maxRow = 0; player.idle = 0; player.bump = 0;
+  player.iframe = 0;
   avatar.visible = true;
   avatar.scale.set(1,1,1);
   avatar.rotation.set(0,0,0);
@@ -2127,21 +2223,28 @@ function landed(){
     if(!support){ die('water'); return; }
     player.ride = support;
     player.y = row.top + (support.pad ? 0.09 : 0.34) + (worn().float || 0);
-    if(!row.credited){ row.credited = true; stats.logRows++; }
+    if(!row.credited){ row.credited = true; stats.logRows++; run.logs++; tickQuests(); }
     Sfx.land();
   } else {
     player.col = Math.round(player.x);
     player.y = row.top + (worn().float || 0);
     player.ride = null;
     Sfx.land();
-    if(row.type === 'rail' && !row.credited){ row.credited = true; stats.rails++; }
-    if(row.coin === player.col && !row.coinTaken){
-      row.coinTaken = true;
-      Sfx.coin();
-      buzz(14);
-      toast('+1 coin', player.x, player.y + 0.9, player.z);
-      spawnFeathers(player.x, player.y + 0.45, player.z, 7, COIN_C, 0.6);
-      addCoins(1);
+    if(row.type === 'rail' && !row.credited){ row.credited = true; stats.rails++; run.rails++; tickQuests(); }
+    // Fever magnet: a coin one column away snaps into your beak.
+    if(row.coin != null && !row.coinTaken){
+      const dist = Math.abs(row.coin - player.col);
+      if(dist === 0 || (run.fever && dist <= 1)){
+        row.coinTaken = true;
+        const pay = run.coinMult;
+        Sfx.coin();
+        buzz(14);
+        toast(pay > 1 ? `+${pay} coins` : '+1 coin', player.x, player.y + 0.9, player.z);
+        spawnFeathers(player.x, player.y + 0.45, player.z, 7, COIN_C, 0.6);
+        addCoins(pay);
+        run.coins += pay;
+        tickQuests();
+      }
     }
   }
 
@@ -2153,6 +2256,8 @@ function landed(){
     onProgress();
   } else {
     run.streak = 0;
+    _feverTier = 0;
+    endFever();
     hudStreak();
   }
 }
@@ -2190,6 +2295,13 @@ function hazards(dt){
 
 function updatePlayer(dt){
   if(state.mode === 'play'){
+    if(player.iframe > 0){
+      player.iframe = Math.max(0, player.iframe - dt);
+      // Blink so the free pass is obvious.
+      avatar.visible = player.iframe <= 0 || ((state.clock * 12) | 0) % 2 === 0;
+    } else {
+      avatar.visible = true;
+    }
     if(player.hopping){
       player.hopT += dt / CFG.HOP_TIME;
       if(player.hopT >= 1){ player.hopT = 1; landed(); }
@@ -2295,11 +2407,15 @@ const COIN_C    = [C(0xffc93c), C(0xffe89a), C(0xfff6cf)];
 
 function die(cause, sub){
   if(state.mode !== 'play') return;
+  // A freshly-revived critter gets a short free pass through hazards.
+  if(player.iframe > 0 && cause !== 'eagle') return;
   state.mode = 'dying';
   state.deathT = 0;
   state.cause = (cause === 'car' && sub && DEATHS[sub]) ? sub : cause;
   stats.deaths[state.cause] = (stats.deaths[state.cause] || 0) + 1;
   player.hopping = false;
+  player.iframe = 0;
+  endFever();
   run.streak = 0;
   hudStreak();
   alertEl.classList.remove('show');
@@ -2366,17 +2482,20 @@ function updateDying(dt){
   }
 }
 
-/* ============================================================================
+/* ==========================================================================
  * 10b. PROGRESSION — the reasons to press retry.
  *
  * Everything here is bookkeeping over `stats`, which is persisted: lifetime
- * totals feed the awards, coins feed the prize machine, and the per-run streak
- * and near-miss counters feed the little jolts of feedback during a run.
+ * totals feed the awards, coins feed the prize machine and second chances,
+ * and the per-run streak / fever / challenge counters feed the little jolts
+ * of feedback during a run.
  * ========================================================================== */
 const stats = {
   best: 0, coins: 0, coinsTotal: 0, runs: 0, hops: 0,
   logRows: 0, rails: 0, nearMisses: 0, bestStreak: 0,
   deaths: {}, owned: ['chicken'], char: 'chicken', ach: {}, gift: '',
+  loginStreak: 0, questsDay: '', quests: [], questDone: 0,
+  revives: 0, feverPeak: 0,
 };
 
 const AWARDS = [
@@ -2400,6 +2519,12 @@ const AWARDS = [
   { id:'zoo5',      name:'Zoo Keeper',     hint:'Own 5 characters',             goal:5,    get:()=>stats.owned.length },
   { id:'zooAll',    name:'Full House',     hint:'Own every character',          goal:CRITTERS.length, get:()=>stats.owned.length },
   { id:'allDeaths', name:'Every Which Way',hint:'Meet all 7 ends',              goal:7,    get:()=>Object.keys(stats.deaths).length },
+  { id:'revive1',   name:'Comeback Kid',   hint:'Take a second chance',         goal:1,    get:()=>stats.revives },
+  { id:'revive9',   name:'Nine Lives',     hint:'Revive 9 times',               goal:9,    get:()=>stats.revives },
+  { id:'fever1',    name:'Fever Dream',    hint:'Enter fever mode',             goal:10,   get:()=>stats.feverPeak },
+  { id:'fever20',   name:'Super Fever',    hint:'Chain 20 hops in fever',       goal:20,   get:()=>stats.feverPeak },
+  { id:'quest10',   name:'Daily Driver',   hint:'Finish 10 daily challenges',   goal:10,   get:()=>stats.questDone },
+  { id:'loyal7',    name:'Loyal Hopper',   hint:'Log in 7 days in a row',       goal:7,    get:()=>stats.loginStreak },
 ];
 
 const awardsDone = ()=> AWARDS.reduce((n,a)=> n + (stats.ach[a.id] ? 1 : 0), 0);
@@ -2416,38 +2541,86 @@ function checkAwards(silent){
 }
 
 /* --- run-scoped feedback ---------------------------------------------------- */
-const run = { streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0 };
+const run = {
+  streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0,
+  revived: false, fever: false, coinMult: 1,
+  coins: 0, rails: 0, logs: 0, nears: 0,
+};
 
 function resetRun(){
   run.streak = 0; run.lastHopT = -9; run.nearT = -9;
   run.milestone = 0; run.beatBest = false;
   run.gateRow = stats.best;
+  run.revived = false; run.fever = false; run.coinMult = 1;
+  run.coins = 0; run.rails = 0; run.logs = 0; run.nears = 0;
+  _feverTier = 0;
+  hudMult();
+}
+
+function endFever(){
+  if(run.fever) run.fever = false;
+  run.coinMult = 1;
+  _feverTier = 0;
+  hudMult();
+}
+
+let _feverTier = 0;
+function updateFeverTier(){
+  const tier = run.streak >= CFG.FEVER_SUPER ? 3 : run.streak >= CFG.FEVER_AT ? 2 : 0;
+  if(tier === _feverTier){
+    if(tier === 0) return;
+    run.coinMult = tier;
+    return;
+  }
+  const prev = _feverTier;
+  _feverTier = tier;
+  if(tier === 0){ endFever(); return; }
+  run.fever = true;
+  run.coinMult = tier;
+  if(prev === 0){
+    badge(tier >= 3 ? 'Super fever!' : 'Fever!', tier >= 3 ? 'coins pay triple' : 'coins pay double');
+    Sfx.fever();
+    buzz([12, 40, 12, 40, 18]);
+  } else if(tier > prev){
+    badge('Super fever!', 'coins pay triple');
+    Sfx.fever();
+  }
+  hudMult();
 }
 
 /** Called on every hop that lands on a new furthest row. */
 function onProgress(){
   const now = state.clock;
-  run.streak = (now - run.lastHopT < 1.15) ? run.streak + 1 : 1;
+  run.streak = (now - run.lastHopT < CFG.STREAK_WINDOW) ? run.streak + 1 : 1;
   run.lastHopT = now;
   if(run.streak > stats.bestStreak) stats.bestStreak = run.streak;
+  if(run.streak > stats.feverPeak) stats.feverPeak = run.streak;
+  updateFeverTier();
   if(run.streak >= 3) hudStreak();
   if(run.streak > 0 && run.streak % 10 === 0){
-    addCoins(1);
-    toast(`streak x${run.streak}  +1`, player.x, player.y + 1.05, player.z);
+    const pay = run.coinMult;
+    addCoins(pay);
+    run.coins += pay;
+    toast(`streak x${run.streak}  +${pay}`, player.x, player.y + 1.05, player.z);
     Sfx.streak();
+    tickQuests();
   }
   const m = player.maxRow;
   if(m >= 25 && m % 25 === 0 && m !== run.milestone){
     run.milestone = m;
-    addCoins(1);
-    toast(`${m} rows!  +1`, player.x, player.y + 1.05, player.z);
+    const pay = run.coinMult;
+    addCoins(pay);
+    run.coins += pay;
+    toast(`${m} rows!  +${pay}`, player.x, player.y + 1.05, player.z);
     Sfx.milestone();
+    tickQuests();
   }
   if(!run.beatBest && stats.best > 4 && m > stats.best){
     run.beatBest = true;
     badge('New best', `${m} rows and counting`);
     Sfx.milestone();
   }
+  tickQuests();
 }
 
 function addCoins(n){
@@ -2463,10 +2636,83 @@ function nearMiss(){
   if(state.clock - run.nearT < 0.4) return;
   run.nearT = state.clock;
   stats.nearMisses++;
+  run.nears++;
   toast('close!', player.x, player.y + 0.95, player.z);
   Sfx.whoosh();
   buzz(10);
   checkAwards();
+  tickQuests();
+}
+
+/* --- daily challenges ------------------------------------------------------ */
+/** Tiny seeded RNG so the three quests are stable for a given calendar day. */
+function dayHash(str){
+  let h = 2166136261 >>> 0;
+  for(let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+function todayISO(){ return new Date().toISOString().slice(0, 10); }
+function yesterdayISO(){
+  return new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+}
+
+const QUEST_POOL = [
+  { id:'score30',  name:'Morning Commute',  hint:'Reach 30 in one run',           goal:30, reward:12, get:()=>player.maxRow },
+  { id:'score60',  name:'Rush Hour',        hint:'Reach 60 in one run',           goal:60, reward:22, get:()=>player.maxRow },
+  { id:'coins5',   name:'Loose Change',     hint:'Pick up 5 coins in one run',    goal:5,  reward:10, get:()=>run.coins },
+  { id:'coins12',  name:'Coin Run',         hint:'Pick up 12 coins in one run',   goal:12, reward:18, get:()=>run.coins },
+  { id:'logs4',    name:'River Crossing',   hint:'Ride 4 river rows in one run',  goal:4,  reward:12, get:()=>run.logs },
+  { id:'rails2',   name:'Track Hopper',     hint:'Cross 2 railways in one run',   goal:2,  reward:12, get:()=>run.rails },
+  { id:'nears3',   name:'Brush With Death', hint:'Survive 3 near misses in a run',goal:3,  reward:14, get:()=>run.nears },
+  { id:'streak15', name:'Keep Hopping',     hint:'Chain a streak of 15',          goal:15, reward:16, get:()=>run.streak },
+  { id:'fever',    name:'Catch Fire',       hint:'Enter fever mode',              goal:10, reward:15, get:()=>run.streak },
+];
+
+function ensureQuests(){
+  const day = todayISO();
+  if(stats.questsDay === day && Array.isArray(stats.quests) && stats.quests.length === 3) return;
+  const pool = QUEST_POOL.slice();
+  let h = dayHash(day + ':quests');
+  const pickN = [];
+  while(pickN.length < 3 && pool.length){
+    h = (Math.imul(h, 1664525) + 1013904223) >>> 0;
+    const i = h % pool.length;
+    const q = pool.splice(i, 1)[0];
+    pickN.push({ id: q.id, progress: 0, done: 0 });
+  }
+  stats.questsDay = day;
+  stats.quests = pickN;
+  save();
+}
+
+function questSpec(id){ return QUEST_POOL.find(q => q.id === id); }
+
+function tickQuests(){
+  ensureQuests();
+  let paid = 0;
+  for(const q of stats.quests){
+    if(q.done) continue;
+    const spec = questSpec(q.id);
+    if(!spec) continue;
+    const at = Math.min(spec.get(), spec.goal);
+    if(at > q.progress) q.progress = at;
+    if(q.progress >= spec.goal){
+      q.done = 1;
+      q.progress = spec.goal;
+      stats.questDone = (stats.questDone | 0) + 1;
+      addCoins(spec.reward);
+      paid++;
+      badge('Challenge done', `+${spec.reward} coins · ${spec.name}`);
+      Sfx.quest();
+      buzz([14, 40, 14]);
+    }
+  }
+  if(paid){ checkAwards(); save(); if(state.panel === 'quests') renderQuests(); }
+}
+
+function questsDoneToday(){
+  ensureQuests();
+  return stats.quests.reduce((n,q)=> n + (q.done ? 1 : 0), 0);
 }
 
 /* --- the prize machine ----------------------------------------------------- */
@@ -2501,6 +2747,82 @@ function equip(id){
 }
 /** The critter currently worn, for hop feel and sound. */
 const worn = ()=> CRITTER_BY_ID[stats.char] || CRITTER_BY_ID.chicken;
+
+/* --- second chance --------------------------------------------------------- */
+function canRevive(){
+  return !run.revived && stats.coins >= CFG.REVIVE_COST && state.score > 0;
+}
+
+/** Find a clear grass cell near the death site to hop back onto. */
+function findSafeLanding(){
+  const prefer = [player.row, player.row - 1, player.row - 2, player.row + 1];
+  for(const ri of prefer){
+    const row = world.rows.get(ri);
+    if(!row || row.type !== 'grass') continue;
+    const cols = [0, -1, 1, -2, 2, player.col].map(c => clamp(Math.round(c), -CFG.COLS, CFG.COLS));
+    for(const c of cols){
+      if(!row.blocked.has(c)) return { row: ri, col: c, y: row.top + (worn().float || 0) };
+    }
+  }
+  // Absolute fallback: force a clear grass pad under the player.
+  let row = world.rows.get(player.row);
+  if(!row) row = world.rows.get(Math.max(world.loRow, player.maxRow - 1));
+  if(row){
+    row.type = 'grass';
+    row.top = CFG.TOP.grass;
+    row.vehicles = null; row.logs = null; row.pads = null; row.rail = null; row.ripple = false;
+    row.blocked.delete(0);
+    world.staticDirty = true;
+    return { row: row.idx, col: 0, y: row.top + (worn().float || 0) };
+  }
+  return { row: 0, col: 0, y: CFG.TOP.grass };
+}
+
+function doRevive(){
+  if(!canRevive() || state.mode !== 'over') return false;
+  stats.coins -= CFG.REVIVE_COST;
+  stats.revives = (stats.revives | 0) + 1;
+  run.revived = true;
+  hudCoins();
+  checkAwards();
+  save();
+
+  eagle.visible = false;
+  for(const p of partPool) p.life = 0;
+  queue.length = 0;
+  state.shake = 0;
+  state.deathT = 0;
+
+  const land = findSafeLanding();
+  player.row = land.row;
+  player.col = land.col;
+  player.x = land.col;
+  player.z = ROW_Z(land.row);
+  player.y = land.y;
+  player.hopping = false; player.hopT = 0;
+  player.ride = null; player.idle = 0; player.bump = 0;
+  player.iframe = CFG.REVIVE_IFRAME;
+  player.yaw = 0; player.yawTo = 0;
+  // Keep maxRow / score — the whole point of paying is to keep going.
+  avatar.visible = true;
+  avatar.scale.set(1,1,1);
+  avatar.rotation.set(0,0,0);
+  avatar.position.set(player.x, player.y, player.z);
+
+  _feverTier = 0;
+  endFever();
+  run.streak = 0;
+  hudStreak();
+  state.mode = 'play';
+  state.panel = null;
+  show(null);
+  $('revivewrap').classList.add('hidden');
+  Sfx.revive();
+  badge('Second chance', 'blink and hop');
+  buzz([18, 50, 18]);
+  spawnFeathers(player.x, player.y + 0.4, player.z, 10, COIN_C, 0.7);
+  return true;
+}
 
 /* ============================================================================
  * 11. CAMERA & SKY
@@ -2652,8 +2974,9 @@ const scoreEl = $('score'), bestEl = $('best'), coinEl = $('coinchip').querySele
 const streakEl = $('streak'), streakVal = streakEl.querySelector('.val');
 const screens = {
   start: $('start'), over: $('over'), pause: $('pause'),
-  chars: $('chars'), awards: $('awards'),
+  chars: $('chars'), awards: $('awards'), quests: $('quests'),
 };
+const multEl = $('multchip');
 const KEY = 'crossyhop.v1';
 
 function load(){
@@ -2671,6 +2994,12 @@ function load(){
     stats.deaths     = (raw.deaths && typeof raw.deaths === 'object') ? raw.deaths : {};
     stats.ach        = (raw.ach && typeof raw.ach === 'object') ? raw.ach : {};
     stats.gift       = raw.gift || '';
+    stats.loginStreak = raw.loginStreak | 0;
+    stats.questsDay  = raw.questsDay || '';
+    stats.quests     = Array.isArray(raw.quests) ? raw.quests : [];
+    stats.questDone  = raw.questDone | 0;
+    stats.revives    = raw.revives | 0;
+    stats.feverPeak  = raw.feverPeak | 0;
     // Only keep ids we still ship, and never lose the starter.
     const owned = Array.isArray(raw.owned) ? raw.owned.filter(id => CRITTER_BY_ID[id]) : [];
     stats.owned = [...new Set(['chicken', ...owned])];
@@ -2686,7 +3015,10 @@ function save(){
       runs: stats.runs, hops: stats.hops, logRows: stats.logRows, rails: stats.rails,
       nearMisses: stats.nearMisses, bestStreak: stats.bestStreak,
       deaths: stats.deaths, ach: stats.ach, owned: stats.owned, char: stats.char,
-      gift: stats.gift, muted: Sfx.muted, pad: padOn,
+      gift: stats.gift, loginStreak: stats.loginStreak,
+      questsDay: stats.questsDay, quests: stats.quests, questDone: stats.questDone,
+      revives: stats.revives, feverPeak: stats.feverPeak,
+      muted: Sfx.muted, pad: padOn,
     }));
   }catch(e){}
 }
@@ -2701,12 +3033,22 @@ const hudCoins = ()=>{
 function hudStreak(){
   const n = run.streak;
   streakEl.classList.toggle('hidden', n < 3);
-  if(n < 3) return;
-  streakVal.textContent = 'x' + n;
-  streakEl.classList.toggle('hot', n >= 10);
+  if(n < 3){ streakEl.classList.remove('fever', 'hot'); return; }
+  streakVal.textContent = run.fever ? ('fever x' + n) : ('x' + n);
+  streakEl.classList.toggle('hot', n >= 10 && !run.fever);
+  streakEl.classList.toggle('fever', !!run.fever);
   streakEl.classList.remove('pop');
   void streakEl.offsetWidth;              // restart the pop animation
   streakEl.classList.add('pop');
+}
+function hudMult(){
+  const on = run.fever && run.coinMult > 1 && state.mode === 'play';
+  multEl.classList.toggle('hidden', !on);
+  if(!on) return;
+  multEl.textContent = `×${run.coinMult} coins`;
+  multEl.classList.remove('pop');
+  void multEl.offsetWidth;
+  multEl.classList.add('pop');
 }
 
 /** Slide-in notification for an award or a new personal best. */
@@ -2806,9 +3148,37 @@ function renderAwards(){
   $('a-count').textContent = `${awardsDone()} / ${AWARDS.length}`;
 }
 
+function renderQuests(){
+  ensureQuests();
+  const list = $('q-list');
+  list.textContent = '';
+  for(const q of stats.quests){
+    const spec = questSpec(q.id);
+    if(!spec) continue;
+    const done = !!q.done;
+    const at = Math.min(q.progress | 0, spec.goal);
+    const el = document.createElement('div');
+    el.className = 'quest' + (done ? ' done' : '');
+    el.innerHTML = '<span class="medal"></span><span class="txt"><span class="n"></span>' +
+                   '<span class="h"></span><span class="bar"><i></i></span></span><span class="pay"></span>';
+    el.querySelector('.medal').textContent = done ? '✓' : '★';
+    el.querySelector('.n').textContent = spec.name;
+    el.querySelector('.h').textContent = done ? spec.hint : `${spec.hint} — ${at}/${spec.goal}`;
+    el.querySelector('.bar i').style.width = Math.round(at / spec.goal * 100) + '%';
+    el.querySelector('.pay').textContent = done ? 'claimed' : `+${spec.reward}`;
+    list.appendChild(el);
+  }
+  $('q-count').textContent = `${questsDoneToday()} / 3`;
+  $('questday').textContent = stats.loginStreak > 1
+    ? `day ${stats.loginStreak} streak · fresh every day`
+    : 'fresh every day · finish them for coins';
+}
+
 function openPanel(name){
   state.panel = name;
-  if(name === 'chars') renderChars(); else renderAwards();
+  if(name === 'chars') renderChars();
+  else if(name === 'quests') renderQuests();
+  else renderAwards();
   show(name);
   applyChrome();
 }
@@ -2842,19 +3212,38 @@ function pullPrize(){
   setTimeout(()=>{ rev.classList.add('hidden'); prizeBusy = false; }, 1900);
 }
 
-/** One free handful of coins per calendar day, to reward coming back. */
+/** One free handful of coins per calendar day, escalating with login streak. */
 function dailyGift(){
-  const today = new Date().toISOString().slice(0, 10);
-  if(stats.gift === today) return;
+  const today = todayISO();
+  if(stats.gift === today){
+    if(stats.loginStreak > 1){
+      const ls = $('loginstreak');
+      ls.textContent = `day ${stats.loginStreak} streak`;
+      ls.classList.remove('hidden');
+    }
+    return;
+  }
   const first = !stats.gift;
-  const amount = first ? 20 : 15;
+  if(stats.gift === yesterdayISO()) stats.loginStreak = (stats.loginStreak | 0) + 1;
+  else stats.loginStreak = 1;
+  // Day 1: 15 (20 on first ever), then +5 per consecutive day, capped at 50.
+  const amount = first ? 20 : Math.min(15 + (stats.loginStreak - 1) * 5, 50);
   stats.gift = today;
   addCoins(amount);
+  checkAwards();
+  save();
   // Shown as a chip on the title screen rather than a toast, so it cannot be
   // missed while the first frame is still going up.
   const el = $('gift');
   el.textContent = `daily gift +${amount} coins`;
   el.classList.remove('hidden');
+  const ls = $('loginstreak');
+  if(stats.loginStreak > 1){
+    ls.textContent = `day ${stats.loginStreak} streak`;
+    ls.classList.remove('hidden');
+  } else {
+    ls.classList.add('hidden');
+  }
 }
 
 function startGame(){
@@ -2879,6 +3268,9 @@ function startGame(){
   show(null);
   $('newbest').classList.add('hidden');
   $('gift').classList.add('hidden');
+  $('loginstreak').classList.add('hidden');
+  $('revivewrap').classList.add('hidden');
+  hudMult();
 }
 
 function gameOver(){
@@ -2889,6 +3281,7 @@ function gameOver(){
   checkAwards();
   save();
   hudBest();
+  hudMult();
   streakEl.classList.add('hidden');
   $('s-awards').textContent = awardsDone();
   const d = DEATHS[state.cause] || DEATHS.car;
@@ -2899,6 +3292,14 @@ function gameOver(){
   $('o-coins').textContent = stats.coins;
   $('newbest').classList.toggle('hidden', !beat);
   showNextAward();
+  // Dangle a second chance when the player can afford one and has not used it.
+  const wrap = $('revivewrap');
+  const offer = canRevive();
+  wrap.classList.toggle('hidden', !offer);
+  if(offer){
+    $('revive-cost').textContent = `${CFG.REVIVE_COST} coins · once per run · you have ${stats.coins}`;
+    $('btn-revive').disabled = false;
+  }
   alertEl.classList.remove('show');
   Sfx.over();
   show('over');
@@ -2949,15 +3350,28 @@ $('btn-pad').addEventListener('click', e=>{
   e.stopPropagation(); Sfx.click();
   padOn = !padOn; applyChrome(); save();
 });
-for(const [id, panel] of [['btn-chars','chars'], ['btn-chars2','chars'], ['btn-awards','awards'], ['btn-awards2','awards']]){
+for(const [id, panel] of [
+  ['btn-chars','chars'], ['btn-chars2','chars'],
+  ['btn-awards','awards'], ['btn-awards2','awards'],
+  ['btn-quests','quests'], ['btn-quests2','quests'],
+]){
   $(id).addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); openPanel(panel); });
 }
 for(const b of document.querySelectorAll('[data-close]')){
   b.addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); closePanel(); });
 }
 $('btn-prize').addEventListener('click', e=>{ e.stopPropagation(); pullPrize(); });
+$('btn-revive').addEventListener('click', e=>{
+  e.stopPropagation();
+  if(doRevive()) return;
+  Sfx.click();
+});
 screens.start.addEventListener('click', ()=>{ Sfx.click(); startGame(); });
-screens.over.addEventListener('click', ()=>{ if(state.overT > 0.9){ Sfx.click(); startGame(); } });
+screens.over.addEventListener('click', e=>{
+  // Don't restart if the tap was aiming at the second-chance offer.
+  if(e.target && e.target.closest && e.target.closest('#revivewrap')) return;
+  if(state.overT > 0.9){ Sfx.click(); startGame(); }
+});
 
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden && state.mode === 'play') togglePause();
@@ -2971,6 +3385,7 @@ checkAwards(true);          // credit anything a previous version already earned
 hudBest(); hudCoins(); hudScore();
 $('s-awards').textContent = awardsDone();
 dailyGift();
+ensureQuests();
 $('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
 $('btn-sound').classList.toggle('off', Sfx.muted);
 resize();
@@ -3012,8 +3427,9 @@ requestAnimationFrame(frame);
 /* A small handle for tweaking and driving the game from the console. */
 window.HOP = {
   CFG, state, stats, run, player, world, cam, camera, avatar, Sfx, THREE, scene, renderer,
-  CRITTERS, AWARDS, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
-  openPanel, closePanel, dailyGift, save, load, onProgress, nearMiss, addCoins,
+  CRITTERS, AWARDS, QUEST_POOL, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
+  openPanel, closePanel, dailyGift, ensureQuests, tickQuests, doRevive, canRevive,
+  save, load, onProgress, nearMiss, addCoins,
   move: tryMove, start: startGame,
 };
 
