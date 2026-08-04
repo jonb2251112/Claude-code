@@ -1,10 +1,10 @@
 # CROSSY HOP
 
-A voxel road-crossing game in 3D, built mobile-first. One chicken, endless
+A voxel road-crossing game in 3D, built mobile-first. Twelve critters, endless
 traffic, and an eagle with no patience.
 
 Everything lives in a single [`index.html`](index.html). There are no images,
-models, fonts or audio files: the cars, chicken, trees, logs and trains are
+models, fonts or audio files: the cars, critters, trees, logs and trains are
 assembled from boxes and cylinders at load time, the sky, lane markings and
 river ripples are painted into a `<canvas>`, and every sound is synthesised with
 the Web Audio API. The only external dependency is three.js, pulled from a CDN
@@ -32,8 +32,32 @@ python3 -m http.server 8000
 | `P` or `Esc` | Pause |
 | `M` | Mute |
 
-Score is the number of rows you get through. Coins persist between runs, as does
-your best score, the mute setting and whether the arrow pad is showing.
+Score is the number of rows you get through. Coins, characters, awards, lifetime
+stats, your best score, the mute setting and whether the arrow pad is showing all
+persist in `localStorage`.
+
+## Things to chase
+
+- **Characters.** Twelve critters — chicken, duck, pigeon, cat, bunny, penguin,
+  parrot, frog, panda, dino, robot, ghost — built by one parameterised voxel
+  function from a table of spec objects. Each retunes the hop blip, and a few
+  change how a run feels: the frog hops higher, the ghost has no legs and floats.
+- **Prize machine.** 40 coins for a random critter you do not own, weighted by
+  rarity, revealed with a sunburst and worn immediately. The character sheet
+  shows portraits rendered off-screen from the real geometry, viewed from the
+  front — the only place in the game you get to see a critter's face.
+- **Awards.** Twenty of them, tracking distance, coins, log rows, railways,
+  near misses, streaks, hops, runs, the size of your collection and the number of
+  distinct ways you have died. Each announces itself as it lands, and the score
+  card dangles whichever one you are closest to.
+- **Streaks.** Hops that land within 1.15 s of the last one chain; every tenth
+  link pays a coin. The chip under the score turns red at ten.
+- **Near misses.** A vehicle that passes within a whisker prints `close!` and
+  counts towards an award.
+- **Milestones and the record gate.** Every 25th row pays a coin, and your
+  previous best is drawn across the world as a gold stripe with flags either
+  side. Cross it and the run announces itself.
+- **Daily gift.** A handful of coins the first time you play on a given day.
 
 ## Rules of the road
 
@@ -59,7 +83,7 @@ full screen. That comes from batching aggressively:
 - Every static prop in the world — ground tiles, trees, boulders, sleepers,
   rails, signal posts, grass patches — is a tinted unit cube in a *single*
   `InstancedMesh`, coloured per instance. One draw call renders the terrain.
-- Vehicles, logs, coins, the chicken and the eagle are each merged into one
+- Vehicles, logs, coins, the player's critter and the eagle are each merged into one
   vertex-coloured `BufferGeometry` by a small `Vox` builder, so a car's body,
   glass, wheels, lights and bumper cost one draw call rather than ten. Traffic of
   the same variant shares an instanced pool.
@@ -91,6 +115,16 @@ antialiasing and halves the shadow map on low-core touch hardware. Pausing on
 
 Every knob worth turning is in the `CFG` block at the top of the script: hop
 timing, vehicle and train speeds, the minimum crossing gap, the eagle's patience,
-camera framing and fog distance. `window.HOP` exposes the state, the world, the
-player and `HOP.move('up' | 'down' | 'left' | 'right')` for poking at a live game
-from the console.
+camera framing and fog distance. The roster lives in `CRITTERS` and the awards in
+`AWARDS`, both plain tables — a new character is a spec object, a new award is a
+name, a goal and a getter.
+
+`window.HOP` exposes the state, the world, the player, the progression systems
+and `HOP.move('up' | 'down' | 'left' | 'right')` for poking at a live game from
+the console. Useful while tinkering:
+
+```js
+HOP.stats.coins = 500; HOP.save();   // fund the prize machine
+HOP.equip('robot');                  // wear something else
+HOP.openPanel('awards');             // open a sheet
+```

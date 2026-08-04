@@ -228,7 +228,8 @@ html,body{
 #start,#over{justify-content:flex-start;padding-top:calc(var(--safe-t) + 5vh);}
 /* Tight enough that the stack clears the critter posing in the lower third. */
 #start{gap:clamp(8px,1.8vh,15px);padding-top:calc(var(--safe-t) + 3vh);}
-#over{padding-top:calc(var(--safe-t) + 62px);}
+/* Clears the score column and the coin chip, whatever the death title reads. */
+#over{padding-top:calc(var(--safe-t) + 98px);}
 #start{background:radial-gradient(110% 55% at 50% 8%, rgba(12,38,62,.16), rgba(12,38,62,.44));}
 
 #title{
@@ -279,6 +280,17 @@ kbd{
 #stats .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);}
 #stats .v{font-size:clamp(26px,8vmin,42px);line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;}
 #stats .v.gold{color:var(--gold-dk);}
+/* The nearest unearned award, dangled on the score card. */
+#nextaward{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  margin-top:12px;padding-top:11px;border-top:2px solid rgba(18,52,80,.1);
+}
+#nextaward.hidden{display:none;}
+#nextaward .k{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);}
+#nextaward .n{font-size:14px;color:var(--ink);}
+#nextaward .h{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+#nextaward .bar{width:min(58vw,220px);margin:2px 0 1px;}
+
 #newbest,#gift{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#3c2500;
   background:var(--gold);border-radius:12px;padding:4px 12px;
@@ -488,6 +500,12 @@ kbd{
         <div class="stat"><span class="k">Score</span><span class="v" id="o-score">0</span></div>
         <div class="stat"><span class="k">Best</span><span class="v" id="o-best">0</span></div>
         <div class="stat"><span class="k">Coins</span><span class="v gold" id="o-coins">0</span></div>
+      </div>
+      <div id="nextaward">
+        <span class="k">Next award</span>
+        <span class="n">Hatchling</span>
+        <span class="bar"><i></i></span>
+        <span class="h">reach 10 — 4/10</span>
       </div>
     </div>
     <div id="newbest" class="hidden">new best!</div>
@@ -2754,6 +2772,22 @@ function renderChars(){
     : `${PRIZE_COST} coins per try · you have ${stats.coins}`;
 }
 
+/** Whichever award you are closest to, to give the retry a target. */
+function showNextAward(){
+  const el = $('nextaward');
+  let best = null, bestAt = -1;
+  for(const a of AWARDS){
+    if(stats.ach[a.id]) continue;
+    const at = a.get() / a.goal;
+    if(at > bestAt){ bestAt = at; best = a; }
+  }
+  el.classList.toggle('hidden', !best);
+  if(!best) return;
+  el.querySelector('.n').textContent = best.name;
+  el.querySelector('.h').textContent = `${best.hint} — ${Math.min(best.get(), best.goal)}/${best.goal}`;
+  el.querySelector('.bar i').style.width = Math.round(bestAt * 100) + '%';
+}
+
 function renderAwards(){
   const list = $('a-list');
   list.textContent = '';
@@ -2864,6 +2898,7 @@ function gameOver(){
   $('o-best').textContent = stats.best;
   $('o-coins').textContent = stats.coins;
   $('newbest').classList.toggle('hidden', !beat);
+  showNextAward();
   alertEl.classList.remove('show');
   Sfx.over();
   show('over');
