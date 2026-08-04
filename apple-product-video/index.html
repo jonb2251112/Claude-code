@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AURA — Aura One</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%236fa8ff' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --void: #000000;
+    --soft-white: #eceef1;
+    --mist: rgba(236, 238, 241, 0.55);
+    --accent: #6fa8ff;
+    --warm: #ffb98a;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--void);
+    overflow: hidden;
+    font-family: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    color: var(--soft-white);
+    -webkit-font-smoothing: antialiased;
+  }
+  #viewport {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+  }
+  #design {
+    position: relative;
+    width: 1920px; height: 1080px;
+    flex-shrink: 0;
+    transform-origin: center center;
+    overflow: hidden;
+    background: #000;
+  }
+  #gl {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  #overlays {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+  }
+  .reveal-run {
+    display: inline-block;
+    will-change: transform, opacity, filter;
+  }
+  .reveal-run.block { display: block; }
+  #ui {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 40;
+  }
+  #ui button, #ui .scrub, #play-overlay, #replay-overlay {
+    pointer-events: auto;
+  }
+  #play-overlay, #replay-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.72);
+    z-index: 50;
+    cursor: pointer;
+  }
+  #replay-overlay { display: none; background: #000; }
+  .cta {
+    appearance: none; border: none; background: transparent;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-weight: 200;
+    font-size: clamp(28px, 4vw, 52px);
+    letter-spacing: 0.28em;
+    text-indent: 0.28em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 48px 72px;
+    min-width: 280px;
+    min-height: 120px;
+    transition: opacity 0.35s ease, letter-spacing 0.45s ease;
+    opacity: 0.92;
+  }
+  .cta:hover { opacity: 1; letter-spacing: 0.34em; text-indent: 0.34em; }
+  .cta:focus-visible { outline: 1px solid rgba(255,255,255,0.35); outline-offset: 8px; }
+  #mute-btn {
+    position: absolute; top: 24px; right: 28px;
+    appearance: none; border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.82);
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    backdrop-filter: blur(8px);
+    display: none;
+  }
+  #mute-btn:hover { border-color: rgba(255,255,255,0.45); color: #fff; }
+  #scrubber {
+    position: absolute; left: 8%; right: 8%; bottom: 22px;
+    height: 28px;
+    display: none;
+    align-items: center;
+    cursor: pointer;
+  }
+  #scrubber .track {
+    width: 100%; height: 2px;
+    background: rgba(255,255,255,0.18);
+    position: relative;
+  }
+  #scrubber .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: rgba(255,255,255,0.72);
+  }
+  #scrubber:hover .track { height: 3px; }
+  .hidden { display: none !important; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://esm.sh/three@0.180.0"
+  }
+}
+</script>
+</head>
+<body>
+<div id="viewport">
+  <div id="design">
+    <canvas id="gl"></canvas>
+    <div id="overlays"></div>
+  </div>
+</div>
+<div id="ui">
+  <div id="play-overlay">
+    <button class="cta" id="play-btn" type="button">Play</button>
+  </div>
+  <div id="replay-overlay">
+    <button class="cta" id="replay-btn" type="button">Replay</button>
+  </div>
+  <button id="mute-btn" type="button">Mute</button>
+  <div id="scrubber" class="scrub" title="Seek">
+    <div class="track"><div class="fill" id="scrub-fill"></div></div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════════════════════════ */
+const FPS = 30;
+const SECONDS = 40;
+const DURATION = FPS * SECONDS; // 1200
+const s = (seconds) => Math.round(seconds * FPS);
+
+const SCENES = {
+  coldOpen: { start: s(0), end: s(4) },
+  hero: { start: s(4), end: s(12) },
+  features: { start: s(12), end: s(22) },
+  lifestyle: { start: s(22), end: s(32) },
+  logo: { start: s(32), end: s(40) },
+};
+
+const FEATURE_BEATS = [0, 1, 2].map((i) => {
+  const span = (SCENES.features.end - SCENES.features.start) / 3;
+  return {
+    index: i,
+    start: Math.round(SCENES.features.start + span * i),
+    end: Math.round(SCENES.features.start + span * (i + 1)),
+  };
+});
+
+const CUTS = [
+  SCENES.hero.start,
+  FEATURE_BEATS[0].start,
+  FEATURE_BEATS[1].start,
+  FEATURE_BEATS[2].start,
+  SCENES.logo.start,
+];
+
+const FADE_OUT = s(1.6);
+
+const PRODUCT = {
+  brand: 'AURA',
+  name: 'Aura One',
+  kicker: 'Introducing',
+  tagline: 'Light, given form.',
+  features: [
+    {
+      kicker: 'Unibody',
+      headline: 'Machined from a\nsingle block of aluminium.',
+      detail: 'A 0.4 mm diamond-cut chamfer, polished in six passes.',
+    },
+    {
+      kicker: 'Architecture',
+      headline: 'Every layer,\nengineered to disappear.',
+      detail: 'Nine components. One continuous surface.',
+    },
+    {
+      kicker: 'Presence',
+      headline: 'It knows when\nthe room changes.',
+      detail: 'Ambient sensing across the full spectrum of visible light.',
+    },
+  ],
+  lifestyleLine: 'It doesn\u2019t ask\nfor your attention.',
+  statement: 'Presence, perfected.',
+  footnote: 'Available in Titanium and Graphite.',
+  dimensions: {
+    size: 3.0,
+    cornerRadius: 0.86,
+    thickness: 0.3,
+    bevel: 0.055,
+    hover: 0.62,
+  },
+  audio: { enabled: true, masterVolume: 0.85 },
+};
+
+const COLORS = {
+  void: '#000000',
+  ink: '#050507',
+  ash: '#101218',
+  aluminium: '#c2c7cf',
+  graphite: '#2a2d33',
+  glass: '#05060a',
+  white: '#ffffff',
+  softWhite: '#eceef1',
+  mist: 'rgba(236,238,241,0.55)',
+  accent: '#6fa8ff',
+  warm: '#ffb98a',
+};
+
+const COLORS_3D = {
+  bodyMetal: '#b9bec7',
+  bodyMetalDark: '#6f747c',
+  chassis: '#1b1e23',
+  glass: '#04050a',
+  accent: COLORS.accent,
+  warm: COLORS.warm,
+  backdropTop: '#000000',
+  backdropHorizon: '#0e1015',
+  floor: '#07080b',
+};
+
+const FONT_FAMILY =
+  '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif';
+
+const TYPE = {
+  hero: { fontSize: 148, fontWeight: 200, letterSpacing: '0.012em', lineHeight: 1.02 },
+  headline: { fontSize: 62, fontWeight: 300, letterSpacing: '-0.018em', lineHeight: 1.14 },
+  statement: { fontSize: 76, fontWeight: 300, letterSpacing: '-0.02em', lineHeight: 1.16 },
+  kicker: {
+    fontSize: 19, fontWeight: 500, letterSpacing: '0.34em', lineHeight: 1,
+    textTransform: 'uppercase',
+  },
+  body: { fontSize: 27, fontWeight: 300, letterSpacing: '0.005em', lineHeight: 1.5 },
+  tagline: { fontSize: 34, fontWeight: 300, letterSpacing: '0.02em', lineHeight: 1.3 },
+};
+
+const DESIGN_WIDTH = 1920;
+const DESIGN_HEIGHT = 1080;
+const FORMING_COUNT = 4000;
+const DUST_COUNT = 900;
+const HOVER_HEIGHT = PRODUCT.dimensions.hover;
+const PIVOT_Y = PRODUCT.dimensions.hover;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIM HELPERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const lerp3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+const progress = (frame, start, end) => clamp((frame - start) / Math.max(1, end - start));
+const rad = (deg) => (deg * Math.PI) / 180;
+
+/** Cubic-bezier evaluator matching CSS / Remotion Easing.bezier */
+function cubicBezier(x1, y1, x2, y2) {
+  const NEWTON_ITER = 8;
+  const SAMPLE = 11;
+  const STEP = 1 / (SAMPLE - 1);
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+
+  const sampleX = new Float32Array(SAMPLE);
+  for (let i = 0; i < SAMPLE; i++) {
+    const t = i * STEP;
+    sampleX[i] = ((ax * t + bx) * t + cx) * t;
+  }
+
+  const calcX = (t) => ((ax * t + bx) * t + cx) * t;
+  const calcY = (t) => ((ay * t + by) * t + cy) * t;
+  const calcDX = (t) => (3 * ax * t + 2 * bx) * t + cx;
+
+  const solveT = (x) => {
+    let intervalStart = 0;
+    let current = 1;
+    for (; current !== SAMPLE && sampleX[current] <= x; current++) {
+      intervalStart += STEP;
+    }
+    current -= 1;
+    const dist = (x - sampleX[current]) / (sampleX[current + 1] - sampleX[current]);
+    let guess = intervalStart + dist * STEP;
+    for (let i = 0; i < NEWTON_ITER; i++) {
+      const dx = calcDX(guess);
+      if (Math.abs(dx) < 1e-6) break;
+      const err = calcX(guess) - x;
+      if (Math.abs(err) < 1e-6) return guess;
+      guess -= err / dx;
+    }
+    let a = intervalStart;
+    let b = intervalStart + STEP;
+    let t = guess;
+    for (let i = 0; i < 12; i++) {
+      const xEst = calcX(t) - x;
+      if (Math.abs(xEst) < 1e-6) return t;
+      if (xEst > 0) b = t;
+      else a = t;
+      t = (a + b) / 2;
+    }
+    return t;
+  };
+
+  return (t) => {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    return calcY(solveT(t));
+  };
+}
+
+const EASE = {
+  cinematic: cubicBezier(0.16, 1, 0.3, 1),
+  settle: cubicBezier(0.22, 1, 0.28, 1),
+  glide: cubicBezier(0.62, 0.02, 0.2, 1),
+  drift: cubicBezier(0.42, 0, 0.24, 1),
+  exit: cubicBezier(0.7, 0, 0.84, 0),
+  flash: cubicBezier(0.05, 0.9, 0.2, 1),
+  linear: (t) => t,
+};
+
+const interpolate = (frame, inputs, outputs, { easing = EASE.linear } = {}) => {
+  if (frame <= inputs[0]) return outputs[0];
+  if (frame >= inputs[inputs.length - 1]) return outputs[outputs.length - 1];
+  let i = 0;
+  while (i < inputs.length - 1 && !(frame >= inputs[i] && frame <= inputs[i + 1])) i++;
+  const t0 = inputs[i];
+  const t1 = inputs[i + 1];
+  const local = (frame - t0) / Math.max(1e-9, t1 - t0);
+  return lerp(outputs[i], outputs[i + 1], easing(clamp(local)));
+};
+
+const track = (frame, stops, easing = EASE.cinematic) => {
+  const inputs = [];
+  for (let i = 0; i < stops.length; i++) {
+    inputs.push(i === 0 ? stops[i][0] : Math.max(stops[i][0], inputs[i - 1] + 1e-4));
+  }
+  return interpolate(
+    frame,
+    inputs,
+    stops.map((st) => st[1]),
+    { easing },
+  );
+};
+
+const fadeInOut = (frame, start, end, inDuration = 14, outDuration = 14) =>
+  track(
+    frame,
+    [
+      [start, 0],
+      [start + inDuration, 1],
+      [end - outDuration, 1],
+      [end, 0],
+    ],
+    EASE.cinematic,
+  );
+
+const rand = (seed) => {
+  let t = (seed + 0x6d2b79f5) >>> 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+const noise1D = (x, seed = 0) => {
+  const i = Math.floor(x);
+  const f = x - i;
+  const u = f * f * (3 - 2 * f);
+  const a = rand(i * 374761393 + seed * 668265263);
+  const b = rand((i + 1) * 374761393 + seed * 668265263);
+  return lerp(a, b, u) * 2 - 1;
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GEOMETRY
+   ═══════════════════════════════════════════════════════════════════════════ */
+const roundedSquareShape = (size, radius, smoothing = 1.32) => {
+  const h = size / 2;
+  const r = Math.min(radius, h);
+  const c = r * (1 - 1 / smoothing);
+  const shape = new THREE.Shape();
+  shape.moveTo(-h + r, -h);
+  shape.lineTo(h - r, -h);
+  shape.bezierCurveTo(h - c, -h, h, -h + c, h, -h + r);
+  shape.lineTo(h, h - r);
+  shape.bezierCurveTo(h, h - c, h - c, h, h - r, h);
+  shape.lineTo(-h + r, h);
+  shape.bezierCurveTo(-h + c, h, -h, h - c, -h, h - r);
+  shape.lineTo(-h, -h + r);
+  shape.bezierCurveTo(-h, -h + c, -h + c, -h, -h + r, -h);
+  shape.closePath();
+  return shape;
+};
+
+const makeSlabGeometry = (size, cornerRadius, thickness, bevel, curveSegments = 24) => {
+  const shape = roundedSquareShape(size - bevel * 2, cornerRadius - bevel);
+  const depth = Math.max(0.001, thickness - bevel * 2);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: bevel > 0,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelOffset: 0,
+    bevelSegments: 4,
+    curveSegments,
+  });
+  geometry.rotateX(-Math.PI / 2);
+  geometry.center();
+  geometry.computeVertexNormals();
+  return geometry;
+};
+
+const makeFaceGeometry = (size, cornerRadius, curveSegments = 24) => {
+  const shape = roundedSquareShape(size, cornerRadius);
+  const geometry = new THREE.ShapeGeometry(shape, curveSegments);
+  geometry.rotateX(-Math.PI / 2);
+  geometry.center();
+  return geometry;
+};
+
+const sampleProductSurface = (size, cornerRadius, thickness, count, random) => {
+  const outline = roundedSquareShape(size, cornerRadius).getSpacedPoints(512);
+  const positions = new Float32Array(count * 3);
+  const halfT = thickness / 2;
+  for (let i = 0; i < count; i++) {
+    const r = random(i * 7 + 1);
+    let x, y, z;
+    if (r < 0.46) {
+      const p = outline[Math.floor(random(i * 7 + 2) * outline.length) % outline.length];
+      x = p.x;
+      z = p.y;
+      y = (random(i * 7 + 3) * 2 - 1) * halfT;
+    } else {
+      const p = outline[Math.floor(random(i * 7 + 4) * outline.length) % outline.length];
+      const k = Math.sqrt(random(i * 7 + 5));
+      x = p.x * k;
+      z = p.y * k;
+      y = random(i * 7 + 6) > 0.5 ? halfT : -halfT;
+    }
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+  }
+  return positions;
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEXTURES
+   ═══════════════════════════════════════════════════════════════════════════ */
+const makeCanvas = (w, h) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  return canvas;
+};
+
+const softBox = (ctx, x, y, w, h, intensity, feather = 0.35) => {
+  const box = makeCanvas(Math.ceil(w), Math.ceil(h));
+  const bctx = box.getContext('2d');
+  const vertical = bctx.createLinearGradient(0, 0, 0, h);
+  vertical.addColorStop(0, 'rgba(255,255,255,0)');
+  vertical.addColorStop(feather * 0.5, `rgba(255,255,255,${intensity})`);
+  vertical.addColorStop(1 - feather * 0.5, `rgba(255,255,255,${intensity})`);
+  vertical.addColorStop(1, 'rgba(255,255,255,0)');
+  bctx.fillStyle = vertical;
+  bctx.fillRect(0, 0, w, h);
+  const horizontal = bctx.createLinearGradient(0, 0, w, 0);
+  horizontal.addColorStop(0, 'rgba(0,0,0,0)');
+  horizontal.addColorStop(feather * 0.5, 'rgba(0,0,0,1)');
+  horizontal.addColorStop(1 - feather * 0.5, 'rgba(0,0,0,1)');
+  horizontal.addColorStop(1, 'rgba(0,0,0,0)');
+  bctx.globalCompositeOperation = 'destination-in';
+  bctx.fillStyle = horizontal;
+  bctx.fillRect(0, 0, w, h);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.drawImage(box, x, y);
+  ctx.restore();
+};
+
+const createStudioEnvironment = (accent = '#6fa8ff') => {
+  const W = 2048;
+  const H = 1024;
+  const canvas = makeCanvas(W, H);
+  const ctx = canvas.getContext('2d');
+  const base = ctx.createLinearGradient(0, 0, 0, H);
+  base.addColorStop(0.0, '#1a1f27');
+  base.addColorStop(0.34, '#2b323d');
+  base.addColorStop(0.48, '#39414e');
+  base.addColorStop(0.54, '#12151b');
+  base.addColorStop(0.72, '#06070a');
+  base.addColorStop(1.0, '#010102');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+  softBox(ctx, W * 0.06, H * 0.0, W * 0.4, H * 0.34, 1.0, 0.45);
+  softBox(ctx, W * 0.56, H * 0.2, W * 0.34, H * 0.075, 1.0, 0.22);
+  softBox(ctx, W * 0.16, H * 0.4, W * 0.5, H * 0.14, 0.3, 0.6);
+  softBox(ctx, W * 0.02, H * 0.3, W * 0.05, H * 0.05, 0.8, 0.3);
+  const tint = ctx.createRadialGradient(W * 0.82, H * 0.5, 0, W * 0.82, H * 0.5, W * 0.3);
+  tint.addColorStop(0, accent + '30');
+  tint.addColorStop(1, accent + '00');
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = tint;
+  ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'source-over';
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createRadialSprite = (power = 2.2, color = '#ffffff') => {
+  const S = 256;
+  const canvas = makeCanvas(S, S);
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(S, S);
+  const c = new THREE.Color(color);
+  for (let y = 0; y < S; y++) {
+    for (let x = 0; x < S; x++) {
+      const dx = (x + 0.5) / S - 0.5;
+      const dy = (y + 0.5) / S - 0.5;
+      const d = Math.min(1, Math.hypot(dx, dy) * 2);
+      const a = Math.pow(1 - d, power);
+      const i = (y * S + x) * 4;
+      img.data[i] = c.r * 255;
+      img.data[i + 1] = c.g * 255;
+      img.data[i + 2] = c.b * 255;
+      img.data[i + 3] = a * 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createBrushedRoughness = () => {
+  const W = 1024;
+  const H = 1024;
+  const canvas = makeCanvas(W, H);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 900; i++) {
+    const r = (i / 900) * W * 0.72 + rand(i * 3 + 1) * 3;
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(255,255,255,${0.012 + rand(i * 3 + 2) * 0.02})`;
+    ctx.lineWidth = 0.6 + rand(i * 3 + 3);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createLightPool = () => {
+  const S = 512;
+  const canvas = makeCanvas(S, S);
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+  g.addColorStop(0, 'rgba(255,255,255,0.30)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.10)');
+  g.addColorStop(0.7, 'rgba(255,255,255,0.02)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, S, S);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createContactShadow = () => {
+  const S = 512;
+  const canvas = makeCanvas(S, S);
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+  g.addColorStop(0, 'rgba(0,0,0,0.72)');
+  g.addColorStop(0.35, 'rgba(0,0,0,0.35)');
+  g.addColorStop(0.7, 'rgba(0,0,0,0.08)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, S, S);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAMERA
+   ═══════════════════════════════════════════════════════════════════════════ */
+const SHOTS = [
+  {
+    name: 'cold-open',
+    start: SCENES.coldOpen.start,
+    end: SCENES.coldOpen.end,
+    easing: EASE.drift,
+    from: { angle: -16, radius: 13.5, height: -0.12, target: [0, 0, 0], fov: 30 },
+    to: { angle: -5, radius: 8.8, height: 0.35, target: [0, 0.05, 0], fov: 27 },
+  },
+  {
+    name: 'hero-orbit',
+    start: SCENES.hero.start,
+    end: SCENES.hero.end,
+    easing: EASE.glide,
+    from: { angle: -54, radius: 8.4, height: 2.1, target: [0, 0.05, 0], fov: 32, roll: -0.5 },
+    to: { angle: 14, radius: 6.4, height: 0.55, target: [0, -0.18, 0], fov: 26, roll: 0 },
+  },
+  {
+    name: 'feature-edge',
+    start: FEATURE_BEATS[0].start,
+    end: FEATURE_BEATS[0].end,
+    easing: EASE.drift,
+    from: { angle: 212, radius: 6.0, height: 0.6, target: [0, 0.02, 0], fov: 20 },
+    to: { angle: 239, radius: 5.2, height: 0.34, target: [0, -0.02, 0], fov: 18 },
+  },
+  {
+    name: 'feature-architecture',
+    start: FEATURE_BEATS[1].start,
+    end: FEATURE_BEATS[1].end,
+    easing: EASE.glide,
+    from: { angle: 306, radius: 8.6, height: 2.5, target: [0, 0.3, 0], fov: 26, roll: 0.4 },
+    to: { angle: 338, radius: 7.2, height: 1.35, target: [0, 0.16, 0], fov: 24, roll: 0 },
+  },
+  {
+    name: 'feature-context',
+    start: FEATURE_BEATS[2].start,
+    end: FEATURE_BEATS[2].end,
+    easing: EASE.drift,
+    from: { angle: 34, radius: 9.8, height: 1.0, target: [0, 0.15, 0], fov: 34 },
+    to: { angle: 58, radius: 8.8, height: 0.68, target: [0, 0.3, 0], fov: 32 },
+  },
+  {
+    name: 'lifestyle',
+    start: SCENES.lifestyle.start,
+    end: SCENES.lifestyle.end,
+    easing: EASE.drift,
+    from: { angle: 58, radius: 8.8, height: 0.68, target: [0, 0.3, 0], fov: 32 },
+    to: { angle: 118, radius: 6.7, height: 0.3, target: [0, 0.42, 0], fov: 27 },
+  },
+  {
+    name: 'logo',
+    start: SCENES.logo.start,
+    end: SCENES.logo.end,
+    easing: EASE.cinematic,
+    from: { angle: 118, radius: 6.7, height: 0.3, target: [0, 0.42, 0], fov: 27 },
+    to: { angle: 133, radius: 17, height: 0.9, target: [0, 0.5, 0], fov: 24 },
+  },
+];
+
+const lerpKey = (a, b, t) => ({
+  angle: lerp(a.angle, b.angle, t),
+  radius: lerp(a.radius, b.radius, t),
+  height: lerp(a.height, b.height, t),
+  target: lerp3(a.target, b.target, t),
+  fov: lerp(a.fov, b.fov, t),
+  roll: lerp(a.roll ?? 0, b.roll ?? 0, t),
+});
+
+const handheld = (frame) => ({
+  x: noise1D(frame / 47, 11) * 0.022,
+  y: noise1D(frame / 39, 23) * 0.016,
+  z: noise1D(frame / 53, 37) * 0.018,
+  roll: noise1D(frame / 61, 41) * 0.14,
+  fov: noise1D(frame / 71, 53) * 0.07,
+});
+
+const getCameraState = (frame) => {
+  const shot = SHOTS.find((sh) => frame < sh.end) ?? SHOTS[SHOTS.length - 1];
+  const t = shot.easing(progress(frame, shot.start, shot.end));
+  const k = lerpKey(shot.from, shot.to, t);
+  const drift = handheld(frame);
+  const a = rad(k.angle);
+  return {
+    position: [
+      Math.sin(a) * k.radius + drift.x,
+      PIVOT_Y + k.height + drift.y,
+      Math.cos(a) * k.radius + drift.z,
+    ],
+    target: [k.target[0], PIVOT_Y + k.target[1], k.target[2]],
+    fov: k.fov + drift.fov,
+    roll: k.roll + drift.roll,
+  };
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STAGE GRADE
+   ═══════════════════════════════════════════════════════════════════════════ */
+const getStageState = (frame) => {
+  const f = frame;
+  return {
+    exposure: track(
+      f,
+      [
+        [0, 0.62],
+        [SCENES.coldOpen.end, 1.0],
+        [SCENES.logo.start, 1.0],
+        [SCENES.logo.start + s(2.2), 0.72],
+        [SCENES.logo.end - s(1.8), 0.0],
+      ],
+      EASE.glide,
+    ),
+    key: track(
+      f,
+      [
+        [0, 0.0],
+        [s(2.4), 0.15],
+        [SCENES.hero.start, 0.75],
+        [SCENES.hero.start + s(3), 1.15],
+        [FEATURE_BEATS[0].start, 1.3],
+        [FEATURE_BEATS[1].start, 1.05],
+        [SCENES.lifestyle.start, 0.85],
+        [SCENES.lifestyle.end, 0.7],
+        [SCENES.logo.start + s(2.6), 0.0],
+      ],
+      EASE.glide,
+    ),
+    fill: track(
+      f,
+      [
+        [0, 0.0],
+        [SCENES.hero.start, 0.1],
+        [SCENES.features.start, 0.16],
+        [SCENES.lifestyle.start, 0.24],
+        [SCENES.logo.start + s(2.6), 0.0],
+      ],
+      EASE.glide,
+    ),
+    rim: track(
+      f,
+      [
+        [0, 0.0],
+        [s(1.2), 0.9],
+        [s(3.4), 1.25],
+        [SCENES.hero.start + s(1), 0.75],
+        [FEATURE_BEATS[0].start, 1.0],
+        [SCENES.lifestyle.start, 0.7],
+        [SCENES.logo.start + s(2.6), 0.0],
+      ],
+      EASE.glide,
+    ),
+    env: track(
+      f,
+      [
+        [0, 0.04],
+        [SCENES.coldOpen.end, 0.5],
+        [SCENES.hero.start + s(2), 1.25],
+        [FEATURE_BEATS[0].start, 1.6],
+        [FEATURE_BEATS[1].start, 1.15],
+        [SCENES.lifestyle.start, 0.95],
+        [SCENES.logo.start + s(2.6), 0.0],
+      ],
+      EASE.glide,
+    ),
+    envRotation:
+      track(
+        f,
+        [
+          [0, 0],
+          [SCENES.hero.start, 0.18],
+          [SCENES.hero.end, 1.5],
+          [SCENES.features.end, 2.0],
+          [SCENES.lifestyle.end, 2.55],
+          [SCENES.logo.end, 3.0],
+        ],
+        EASE.glide,
+      ) +
+      track(
+        f,
+        [
+          [SCENES.hero.start + s(1.2), 0],
+          [SCENES.hero.start + s(4.4), 0.9],
+        ],
+        EASE.glide,
+      ),
+    warmth: track(
+      f,
+      [
+        [FEATURE_BEATS[2].start, 0],
+        [FEATURE_BEATS[2].start + s(2), 0.55],
+        [SCENES.lifestyle.start + s(3), 0.8],
+        [SCENES.lifestyle.end, 0.7],
+        [SCENES.logo.start + s(2.5), 0.15],
+      ],
+      EASE.glide,
+    ),
+    fog: track(
+      f,
+      [
+        [0, 0.055],
+        [SCENES.coldOpen.end, 0.03],
+        [SCENES.hero.end, 0.018],
+        [SCENES.lifestyle.start, 0.032],
+        [SCENES.lifestyle.end, 0.04],
+        [SCENES.logo.end, 0.07],
+      ],
+      EASE.glide,
+    ),
+    backdropLift: track(
+      f,
+      [
+        [0, 0.05],
+        [SCENES.hero.start + s(2), 0.55],
+        [SCENES.features.end, 0.6],
+        [SCENES.lifestyle.start + s(4), 0.55],
+        [SCENES.logo.start + s(3), 0.0],
+      ],
+      EASE.glide,
+    ),
+    dust: track(
+      f,
+      [
+        [SCENES.features.start, 0],
+        [FEATURE_BEATS[2].start, 0.5],
+        [SCENES.lifestyle.start + s(2), 1],
+        [SCENES.logo.start, 0.6],
+        [SCENES.logo.start + s(3), 0],
+      ],
+      EASE.glide,
+    ),
+    particleCollapse: track(f, [[0, 0], [s(3.8), 1]], EASE.drift),
+    particleOpacity: track(
+      f,
+      [
+        [0, 0],
+        [s(0.5), 1],
+        [s(3.6), 1],
+        [s(5.4), 0],
+      ],
+      EASE.glide,
+    ),
+    explode:
+      track(
+        f,
+        [
+          [FEATURE_BEATS[1].start + s(0.2), 0],
+          [FEATURE_BEATS[1].start + s(1.5), 1],
+        ],
+        EASE.cinematic,
+      ) *
+      track(
+        f,
+        [
+          [FEATURE_BEATS[1].end - s(1.5), 1],
+          [FEATURE_BEATS[1].end - s(0.1), 0],
+        ],
+        EASE.settle,
+      ),
+    ignite:
+      track(
+        f,
+        [
+          [SCENES.hero.start + s(1.6), 0],
+          [SCENES.hero.start + s(3.2), 0.55],
+          [FEATURE_BEATS[1].start, 0.35],
+          [FEATURE_BEATS[1].start + s(1.6), 0.9],
+          [FEATURE_BEATS[2].start, 0.6],
+          [FEATURE_BEATS[2].start + s(1.4), 1.0],
+          [SCENES.lifestyle.start, 0.7],
+          [SCENES.logo.start, 0.55],
+          [SCENES.logo.start + s(2.5), 0],
+        ],
+        EASE.glide,
+      ) *
+      (1 + Math.sin(f / 33) * 0.09),
+    seam: track(
+      f,
+      [
+        [SCENES.hero.start + s(2.4), 0],
+        [SCENES.hero.end - s(1), 0.5],
+        [FEATURE_BEATS[0].start + s(0.6), 0.6],
+        [FEATURE_BEATS[1].start, 0.4],
+        [FEATURE_BEATS[2].start + s(1.2), 1.0],
+        [SCENES.lifestyle.start + s(1), 0.45],
+        [SCENES.logo.start + s(2), 0],
+      ],
+      EASE.glide,
+    ),
+    bloom: track(
+      f,
+      [
+        [0, 0.9],
+        [SCENES.hero.start, 0.42],
+        [FEATURE_BEATS[0].start, 0.5],
+        [SCENES.lifestyle.start, 0.38],
+        [SCENES.logo.start, 0.55],
+        [SCENES.logo.end, 0.8],
+      ],
+      EASE.glide,
+    ),
+  };
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCENE BUILD (imperative three.js)
+   ═══════════════════════════════════════════════════════════════════════════ */
+const COOL = new THREE.Color('#dfe8ff');
+const WARM = new THREE.Color('#ffcfa4');
+const tintColor = (warmth) => COOL.clone().lerp(WARM, warmth);
+
+const canvasEl = document.getElementById('gl');
+const designEl = document.getElementById('design');
+const overlaysEl = document.getElementById('overlays');
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvasEl,
+  antialias: true,
+  powerPreference: 'high-performance',
+  alpha: false,
+});
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x000000, 1);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, DESIGN_WIDTH / DESIGN_HEIGHT, 0.08, 200);
+camera.position.set(0, 1, 12);
+
+const envMap = createStudioEnvironment(COLORS_3D.accent);
+scene.environment = envMap;
+scene.environmentIntensity = 1;
+
+/* Backdrop */
+const backdropUniforms = {
+  uHorizon: { value: new THREE.Color(COLORS_3D.backdropHorizon) },
+  uTop: { value: new THREE.Color(COLORS_3D.backdropTop) },
+  uLift: { value: 0 },
+  uWarmth: { value: 0 },
+  uWarmTint: { value: new THREE.Color('#ffb27a') },
+};
+const backdropMat = new THREE.ShaderMaterial({
+  uniforms: backdropUniforms,
+  vertexShader: /* glsl */ `
+    varying float vY;
+    void main() {
+      vec4 world = modelMatrix * vec4(position, 1.0);
+      vY = world.y;
+      gl_Position = projectionMatrix * viewMatrix * world;
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform vec3  uHorizon;
+    uniform vec3  uTop;
+    uniform float uLift;
+    uniform float uWarmth;
+    uniform vec3  uWarmTint;
+    varying float vY;
+    void main() {
+      float h = vY / 60.0;
+      float sky = smoothstep(0.62, -0.06, h);
+      float band = exp(-pow(h * 4.2, 2.0)) * 0.8;
+      float below = smoothstep(0.04, -0.7, h);
+      vec3 col = mix(uTop, uHorizon, sky) * uLift;
+      col += uHorizon * band * uLift * 1.4;
+      col *= 1.0 - below * 0.62;
+      col = mix(col, col * uWarmTint, uWarmth);
+      gl_FragColor = vec4(col, 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }
+  `,
+  side: THREE.BackSide,
+  fog: false,
+  depthWrite: false,
+});
+const backdrop = new THREE.Mesh(new THREE.SphereGeometry(60, 96, 64), backdropMat);
+scene.add(backdrop);
+
+/* Lights */
+const keyLight = new THREE.DirectionalLight('#dfe8ff', 0);
+keyLight.position.set(-6.5, 9, 4.5);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.left = -5;
+keyLight.shadow.camera.right = 5;
+keyLight.shadow.camera.top = 5;
+keyLight.shadow.camera.bottom = -5;
+keyLight.shadow.camera.near = 0.5;
+keyLight.shadow.camera.far = 26;
+keyLight.shadow.bias = -0.0006;
+keyLight.shadow.normalBias = 0.02;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight('#dfe8ff', 0);
+fillLight.position.set(7, 3.2, 6);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight('#cfe0ff', 0);
+rimLight.position.set(2.5, 3.4, -9);
+scene.add(rimLight);
+
+const hemiLight = new THREE.HemisphereLight('#22262e', '#000000', 0.18);
+scene.add(hemiLight);
+
+/* Floor */
+const { size, cornerRadius, thickness, bevel } = PRODUCT.dimensions;
+const poolTex = createLightPool();
+const shadowTex = createContactShadow();
+const roughnessMap = createBrushedRoughness();
+
+const floorMat = new THREE.MeshStandardMaterial({
+  color: COLORS_3D.floor,
+  metalness: 0.35,
+  roughness: 0.22,
+  envMapIntensity: 0.12,
+});
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), floorMat);
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+
+const poolMat = new THREE.MeshBasicMaterial({
+  map: poolTex,
+  color: '#dfe8ff',
+  transparent: true,
+  opacity: 0.03,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  toneMapped: false,
+});
+const pool = new THREE.Mesh(new THREE.PlaneGeometry(11, 11), poolMat);
+pool.rotation.x = -Math.PI / 2;
+pool.position.set(-0.35, 0.004, 0.2);
+scene.add(pool);
+
+const contactMat = new THREE.MeshBasicMaterial({
+  map: shadowTex,
+  transparent: true,
+  opacity: 0.55,
+  depthWrite: false,
+  color: '#000000',
+});
+const contactShadow = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 6.2), contactMat);
+contactShadow.rotation.x = -Math.PI / 2;
+contactShadow.position.set(0, 0.006, 0);
+scene.add(contactShadow);
+
+/* Product */
+const chassisGeo = makeSlabGeometry(size, cornerRadius, thickness, bevel, 28);
+const glassGeo = makeSlabGeometry(size - 0.16, cornerRadius - 0.08, 0.055, 0.012, 28);
+const coreGeo = makeSlabGeometry(size - 0.44, cornerRadius - 0.22, 0.15, 0.02, 24);
+const displayGeo = makeFaceGeometry(size - 0.3, cornerRadius - 0.15, 28);
+const seamGeo = makeSlabGeometry(size + 0.004, cornerRadius, 0.011, 0, 28);
+
+const productGroup = new THREE.Group();
+scene.add(productGroup);
+
+const chassisMat = new THREE.MeshStandardMaterial({
+  color: COLORS_3D.bodyMetal,
+  metalness: 0.88,
+  roughness: 0.24,
+  roughnessMap,
+  envMapIntensity: 1.5,
+});
+const chassisMesh = new THREE.Mesh(chassisGeo, chassisMat);
+chassisMesh.castShadow = true;
+chassisMesh.receiveShadow = true;
+productGroup.add(chassisMesh);
+
+const coreMat = new THREE.MeshStandardMaterial({
+  color: COLORS_3D.chassis,
+  metalness: 0.85,
+  roughness: 0.42,
+  envMapIntensity: 0.9,
+});
+const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+coreMesh.castShadow = true;
+productGroup.add(coreMesh);
+
+const displayUniforms = {
+  uTime: { value: 0 },
+  uIgnite: { value: 0 },
+  uHalf: { value: (size - 0.3) / 2 },
+  uAccent: { value: new THREE.Color(COLORS_3D.accent) },
+};
+const displayMat = new THREE.ShaderMaterial({
+  uniforms: displayUniforms,
+  vertexShader: /* glsl */ `
+    varying vec2 vPos;
+    void main() {
+      vPos = vec2(position.x, position.z);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform float uTime;
+    uniform float uIgnite;
+    uniform float uHalf;
+    uniform vec3  uAccent;
+    varying vec2 vPos;
+    void main() {
+      vec2 p = vPos / uHalf;
+      float r = length(p);
+      float d = pow(pow(abs(p.x), 4.0) + pow(abs(p.y), 4.0), 0.25);
+      vec3 col = mix(vec3(0.002, 0.003, 0.008), uAccent * 0.14, smoothstep(1.3, 0.0, r));
+      float band = sin(p.x * 2.1 + uTime * 0.34) * cos(p.y * 1.6 - uTime * 0.21);
+      col += uAccent * (0.055 + 0.045 * band) * smoothstep(1.05, 0.05, r);
+      col += uAccent * 0.55 * pow(smoothstep(0.95, 0.0, r), 3.0);
+      col *= smoothstep(1.0, 0.72, d);
+      col *= uIgnite;
+      gl_FragColor = vec4(col, 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }
+  `,
+});
+const displayMesh = new THREE.Mesh(displayGeo, displayMat);
+productGroup.add(displayMesh);
+
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: COLORS_3D.glass,
+  metalness: 0.15,
+  roughness: 0.055,
+  clearcoat: 1,
+  clearcoatRoughness: 0.02,
+  reflectivity: 0.9,
+  envMapIntensity: 1.15,
+});
+const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+glassMesh.castShadow = true;
+productGroup.add(glassMesh);
+
+const seamMat = new THREE.MeshBasicMaterial({
+  color: COLORS_3D.accent,
+  toneMapped: false,
+  transparent: true,
+  opacity: 0,
+  depthWrite: false,
+});
+const seamMesh = new THREE.Mesh(seamGeo, seamMat);
+productGroup.add(seamMesh);
+
+/* FormingParticles */
+const particleSprite = createRadialSprite(2.6);
+const formingTargets = sampleProductSurface(size, cornerRadius, thickness, FORMING_COUNT, rand);
+const formingOrigins = new Float32Array(FORMING_COUNT * 3);
+const formingDelays = new Float32Array(FORMING_COUNT);
+const formingPositions = new Float32Array(FORMING_COUNT * 3);
+
+for (let i = 0; i < FORMING_COUNT; i++) {
+  const theta = rand(i * 11 + 1) * Math.PI * 2;
+  const phi = Math.acos(rand(i * 11 + 2) * 2 - 1);
+  const r = 5 + Math.pow(rand(i * 11 + 3), 0.6) * 11;
+  formingOrigins[i * 3] = Math.sin(phi) * Math.cos(theta) * r;
+  formingOrigins[i * 3 + 1] = Math.cos(phi) * r * 0.34 + 0.7;
+  formingOrigins[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * r;
+  formingDelays[i] = Math.pow(rand(i * 11 + 4), 1.7) * 0.45;
+}
+
+const formingGeo = new THREE.BufferGeometry();
+formingGeo.setAttribute('position', new THREE.BufferAttribute(formingPositions, 3));
+const formingMat = new THREE.PointsMaterial({
+  map: particleSprite,
+  color: COLORS_3D.accent,
+  size: 0.062,
+  sizeAttenuation: true,
+  transparent: true,
+  opacity: 0,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  toneMapped: false,
+});
+const formingPoints = new THREE.Points(formingGeo, formingMat);
+formingPoints.frustumCulled = false;
+scene.add(formingPoints);
+
+/* DustMotes */
+const dustSprite = createRadialSprite(3.2);
+const dustSeeds = new Float32Array(DUST_COUNT * 3);
+const dustPositions = new Float32Array(DUST_COUNT * 3);
+for (let i = 0; i < DUST_COUNT; i++) {
+  dustSeeds[i * 3] = (rand(i * 5 + 1) * 2 - 1) * 9;
+  dustSeeds[i * 3 + 1] = rand(i * 5 + 2) * 4.5;
+  dustSeeds[i * 3 + 2] = (rand(i * 5 + 3) * 2 - 1) * 9;
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+const dustMat = new THREE.PointsMaterial({
+  map: dustSprite,
+  color: '#ffffff',
+  size: 0.021,
+  sizeAttenuation: true,
+  transparent: true,
+  opacity: 0,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  toneMapped: false,
+});
+const dustPoints = new THREE.Points(dustGeo, dustMat);
+dustPoints.frustumCulled = false;
+dustPoints.visible = false;
+scene.add(dustPoints);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOM OVERLAY BUILDERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+const styleObj = (el, styles) => {
+  Object.assign(el.style, styles);
+  return el;
+};
+
+const emOf = (value) => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string' && value.endsWith('em')) return parseFloat(value);
+  return 0;
+};
+
+const applyType = (el, typeToken) => {
+  if (!typeToken) return;
+  if (typeToken.fontSize != null) el.style.fontSize = typeToken.fontSize + 'px';
+  if (typeToken.fontWeight != null) el.style.fontWeight = String(typeToken.fontWeight);
+  if (typeToken.letterSpacing != null) el.style.letterSpacing = typeToken.letterSpacing;
+  if (typeToken.lineHeight != null) el.style.lineHeight = String(typeToken.lineHeight);
+  if (typeToken.textTransform) el.style.textTransform = typeToken.textTransform;
+};
+
+/** RevealText — opacity faster than motion, blur + tracking on EASE.settle */
+const createRevealText = ({
+  text,
+  delay = 0,
+  duration = 30,
+  y = 18,
+  blur = 8,
+  trackingFrom = 0.18,
+  stagger = 'line',
+  staggerStep = 5,
+  typeToken,
+  color,
+  extraStyle = {},
+  as = 'div',
+}) => {
+  const root = document.createElement(as);
+  root.style.fontFamily = FONT_FAMILY;
+  root.style.margin = '0';
+  applyType(root, typeToken);
+  if (color) root.style.color = color;
+  Object.assign(root.style, extraStyle);
+  // letterSpacing lives on runs
+  const baseTracking = emOf(typeToken?.letterSpacing ?? extraStyle.letterSpacing);
+  root.style.letterSpacing = '';
+
+  const runs = [];
+  const makeRun = (str, start, block) => {
+    const span = document.createElement('span');
+    span.className = 'reveal-run' + (block ? ' block' : '');
+    span.textContent = str;
+    root.appendChild(span);
+    runs.push({ el: span, start, baseTracking, y, blur, trackingFrom, duration });
+    return span;
+  };
+
+  if (stagger === 'none') {
+    makeRun(text, delay, true);
+  } else if (stagger === 'word') {
+    const words = text.split(' ');
+    words.forEach((word, i) => {
+      makeRun(word, delay + i * staggerStep, false);
+      if (i < words.length - 1) root.appendChild(document.createTextNode(' '));
+    });
+  } else {
+    text.split('\n').forEach((line, i) => {
+      makeRun(line, delay + i * staggerStep, true);
+    });
+  }
+
+  return {
+    el: root,
+    update(frame, opacityMul = 1) {
+      for (const run of runs) {
+        const t = track(frame, [[run.start, 0], [run.start + run.duration, 1]], EASE.settle);
+        const o = track(
+          frame,
+          [[run.start, 0], [run.start + run.duration * 0.62, 1]],
+          EASE.cinematic,
+        );
+        run.el.style.opacity = String(clamp(o * opacityMul));
+        run.el.style.transform = `translate3d(0, ${(1 - t) * run.y}px, 0)`;
+        run.el.style.filter = t < 0.999 ? `blur(${(1 - t) * run.blur}px)` : 'none';
+        run.el.style.letterSpacing = `${run.baseTracking + (1 - t) * run.trackingFrom}em`;
+      }
+    },
+  };
+};
+
+const createHairRule = ({ delay = 0, width = 64, color = 'rgba(255,255,255,0.34)', duration = 34 }) => {
+  const el = document.createElement('div');
+  styleObj(el, {
+    width: '0px',
+    height: '1px',
+    background: color,
+    opacity: '0',
+    transformOrigin: 'center',
+  });
+  return {
+    el,
+    update(frame, opacityMul = 1) {
+      const t = track(frame, [[delay, 0], [delay + duration, 1]], EASE.cinematic);
+      el.style.width = `${width * t}px`;
+      el.style.opacity = String(clamp(t * 1.4) * opacityMul);
+    },
+  };
+};
+
+/* --- Scene DOM layers --- */
+const coldOpenLayer = document.createElement('div');
+coldOpenLayer.className = 'layer';
+const coldBloom = document.createElement('div');
+styleObj(coldBloom, {
+  position: 'absolute', inset: '0', mixBlendMode: 'screen', opacity: '0',
+  background: `radial-gradient(ellipse 40% 34% at 50% 52%,
+    ${COLORS.accent}3d 0%, ${COLORS.accent}14 38%, rgba(0,0,0,0) 68%)`,
+});
+const coldCore = document.createElement('div');
+styleObj(coldCore, {
+  position: 'absolute', inset: '0', mixBlendMode: 'screen', opacity: '0',
+  background: `radial-gradient(ellipse 16% 13% at 50% 52%,
+    rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 72%)`,
+});
+coldOpenLayer.append(coldBloom, coldCore);
+
+const heroLayer = document.createElement('div');
+heroLayer.className = 'layer';
+const heroScrim = document.createElement('div');
+styleObj(heroScrim, {
+  position: 'absolute', inset: '0', opacity: '0',
+  background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.18) 26%, rgba(0,0,0,0) 52%)',
+});
+const heroStack = document.createElement('div');
+styleObj(heroStack, {
+  position: 'absolute', left: '0', right: '0', bottom: '118px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px',
+});
+const heroKicker = createRevealText({
+  text: PRODUCT.kicker, delay: 30, duration: 30, y: 12, blur: 5, trackingFrom: 0.14,
+  stagger: 'none', typeToken: TYPE.kicker, color: COLORS.mist,
+});
+const heroName = createRevealText({
+  text: PRODUCT.name, delay: 42, duration: 42, y: 26, blur: 12, trackingFrom: 0.2,
+  stagger: 'none', as: 'h1', typeToken: TYPE.hero, color: COLORS.white,
+  extraStyle: { textShadow: '0 0 60px rgba(160,190,255,0.18), 0 2px 30px rgba(0,0,0,0.5)' },
+});
+const heroRuleWrap = document.createElement('div');
+const heroRule = createHairRule({ delay: 66, width: 72 });
+heroRuleWrap.appendChild(heroRule.el);
+const heroTag = createRevealText({
+  text: PRODUCT.tagline, delay: 78, duration: 34, y: 14, blur: 6, trackingFrom: 0.06,
+  stagger: 'none', typeToken: TYPE.tagline, color: COLORS.mist,
+  extraStyle: { marginTop: '4px' },
+});
+heroStack.append(heroKicker.el, heroName.el, heroRuleWrap, heroTag.el);
+heroLayer.append(heroScrim, heroStack);
+
+const featuresLayer = document.createElement('div');
+featuresLayer.className = 'layer';
+const featureBeats = FEATURE_BEATS.map((beat) => {
+  const feature = PRODUCT.features[beat.index];
+  const length = beat.end - beat.start;
+  const layer = document.createElement('div');
+  styleObj(layer, { position: 'absolute', inset: '0', display: 'none' });
+  const scrim = document.createElement('div');
+  styleObj(scrim, {
+    position: 'absolute', inset: '0', opacity: '0',
+    background: 'linear-gradient(105deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.28) 34%, rgba(0,0,0,0) 62%)',
+  });
+  const stack = document.createElement('div');
+  styleObj(stack, {
+    position: 'absolute', left: '120px', bottom: '120px', maxWidth: '900px',
+    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '18px',
+  });
+  const kickerRow = document.createElement('div');
+  styleObj(kickerRow, { display: 'flex', alignItems: 'center', gap: '18px' });
+  const tick = document.createElement('div');
+  styleObj(tick, {
+    width: '2px', height: '0px', background: COLORS.accent, opacity: '0',
+    boxShadow: `0 0 12px ${COLORS.accent}`,
+  });
+  const kicker = createRevealText({
+    text: feature.kicker, delay: 8, duration: 26, y: 10, blur: 4, trackingFrom: 0.1,
+    stagger: 'none', typeToken: TYPE.kicker, color: COLORS.softWhite,
+  });
+  kickerRow.append(tick, kicker.el);
+  const headline = createRevealText({
+    text: feature.headline, delay: 16, duration: 38, y: 22, blur: 9, trackingFrom: 0.05,
+    stagger: 'line', staggerStep: 6, as: 'h2', typeToken: TYPE.headline, color: COLORS.softWhite,
+  });
+  const rule = createHairRule({ delay: 34, width: 54, duration: 30 });
+  const detail = createRevealText({
+    text: feature.detail, delay: 38, duration: 32, y: 12, blur: 5, trackingFrom: 0.03,
+    stagger: 'none', typeToken: TYPE.body, color: COLORS.mist,
+    extraStyle: { maxWidth: '640px' },
+  });
+  stack.append(kickerRow, headline.el, rule.el, detail.el);
+  const counter = document.createElement('div');
+  styleObj(counter, {
+    position: 'absolute', right: '120px', bottom: '132px',
+    display: 'flex', gap: '10px', opacity: '0',
+  });
+  const ticks = [0, 1, 2].map((i) => {
+    const d = document.createElement('div');
+    styleObj(d, {
+      width: i === beat.index ? '26px' : '6px',
+      height: '2px',
+      borderRadius: '1px',
+      background: i === beat.index ? COLORS.softWhite : 'rgba(255,255,255,0.28)',
+    });
+    counter.appendChild(d);
+    return d;
+  });
+  layer.append(scrim, stack, counter);
+  featuresLayer.appendChild(layer);
+  return { layer, scrim, tick, kicker, headline, rule, detail, counter, length, beat };
+});
+
+const lifestyleLayer = document.createElement('div');
+lifestyleLayer.className = 'layer';
+const lifeWrap = document.createElement('div');
+styleObj(lifeWrap, {
+  position: 'absolute', inset: '0',
+  display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+});
+const lifeInner = document.createElement('div');
+styleObj(lifeInner, { marginBottom: '560px' });
+const lifeText = createRevealText({
+  text: PRODUCT.lifestyleLine, delay: s(1.2), duration: 46, y: 20, blur: 10, trackingFrom: 0.08,
+  stagger: 'line', staggerStep: 8, typeToken: TYPE.statement, color: COLORS.softWhite,
+  extraStyle: { textAlign: 'center', textShadow: '0 2px 40px rgba(0,0,0,0.55)' },
+});
+lifeInner.appendChild(lifeText.el);
+lifeWrap.appendChild(lifeInner);
+lifestyleLayer.appendChild(lifeWrap);
+
+const logoLayer = document.createElement('div');
+logoLayer.className = 'layer';
+const logoHalo = document.createElement('div');
+styleObj(logoHalo, {
+  position: 'absolute', inset: '0', mixBlendMode: 'screen', opacity: '0',
+  background: `radial-gradient(ellipse 34% 42% at 50% 46%,
+    rgba(190,214,255,0.16) 0%, rgba(0,0,0,0) 66%)`,
+});
+const logoStack = document.createElement('div');
+styleObj(logoStack, {
+  position: 'absolute', inset: '0',
+  display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+  gap: '30px', paddingBottom: '150px',
+});
+const R_OUTER = 52;
+const R_INNER = 34;
+const cOuter = 2 * Math.PI * R_OUTER;
+const cInner = 2 * Math.PI * R_INNER;
+const markSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+markSvg.setAttribute('width', '132');
+markSvg.setAttribute('height', '132');
+markSvg.setAttribute('viewBox', '0 0 132 132');
+markSvg.innerHTML = `
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${COLORS.white}" />
+      <stop offset="100%" stop-color="#9aa2ad" />
+    </linearGradient>
+  </defs>
+  <circle id="mark-outer" cx="66" cy="66" r="${R_OUTER}" fill="none" stroke="url(#markGrad)"
+    stroke-width="1.6" stroke-linecap="round" stroke-dasharray="${cOuter}" stroke-dashoffset="${cOuter}"
+    transform="rotate(-90 66 66)" />
+  <circle id="mark-inner" cx="66" cy="66" r="${R_INNER}" fill="none" stroke="${COLORS.accent}"
+    stroke-opacity="0.85" stroke-width="1.2" stroke-linecap="round"
+    stroke-dasharray="${cInner}" stroke-dashoffset="${-cInner}"
+    transform="rotate(90 66 66)" />
+  <circle id="mark-dot" cx="66" cy="66" r="0" fill="${COLORS.white}" opacity="0" />
+`;
+styleObj(markSvg, { filter: `drop-shadow(0 0 18px ${COLORS.accent}33)` });
+const markOuter = () => markSvg.querySelector('#mark-outer');
+const markInner = () => markSvg.querySelector('#mark-inner');
+const markDot = () => markSvg.querySelector('#mark-dot');
+
+const logoBrand = createRevealText({
+  text: PRODUCT.brand, delay: 54, duration: 42, y: 14, blur: 7, trackingFrom: 0.22,
+  stagger: 'none',
+  extraStyle: {
+    fontSize: '54px', fontWeight: '300', letterSpacing: '0.42em',
+    textIndent: '0.42em', color: COLORS.white,
+  },
+});
+const logoRule = createHairRule({ delay: 78, width: 120, duration: 40 });
+const logoStatement = createRevealText({
+  text: PRODUCT.statement, delay: 92, duration: 40, y: 16, blur: 7, trackingFrom: 0.07,
+  stagger: 'none', typeToken: { ...TYPE.statement, fontSize: 46 }, color: COLORS.softWhite,
+  extraStyle: { textAlign: 'center' },
+});
+const logoFoot = createRevealText({
+  text: PRODUCT.footnote, delay: 118, duration: 34, y: 10, blur: 4, trackingFrom: 0.1,
+  stagger: 'none', typeToken: { ...TYPE.kicker, fontSize: 15 }, color: COLORS.mist,
+  extraStyle: { marginTop: '14px' },
+});
+logoStack.append(markSvg, logoBrand.el, logoRule.el, logoStatement.el, logoFoot.el);
+logoLayer.append(logoHalo, logoStack);
+
+/* Post stack */
+const postLayer = document.createElement('div');
+postLayer.className = 'layer';
+const gradeWarm = document.createElement('div');
+styleObj(gradeWarm, {
+  position: 'absolute', inset: '0', pointerEvents: 'none', mixBlendMode: 'soft-light',
+  opacity: '0',
+  background: `radial-gradient(ellipse 90% 80% at 22% 78%, ${COLORS.warm}cc 0%, rgba(0,0,0,0) 62%)`,
+});
+const gradeCool = document.createElement('div');
+styleObj(gradeCool, {
+  position: 'absolute', inset: '0', pointerEvents: 'none', mixBlendMode: 'soft-light',
+  opacity: '0.22',
+  background: `radial-gradient(ellipse 80% 70% at 82% 12%, ${COLORS.accent}99 0%, rgba(0,0,0,0) 58%)`,
+});
+const flaresRoot = document.createElement('div');
+styleObj(flaresRoot, { position: 'absolute', inset: '0', pointerEvents: 'none' });
+const flareEls = CUTS.map((cut) => {
+  const wrap = document.createElement('div');
+  styleObj(wrap, {
+    position: 'absolute', inset: '0', pointerEvents: 'none', mixBlendMode: 'screen',
+    display: 'none',
+  });
+  const streak = document.createElement('div');
+  styleObj(streak, {
+    position: 'absolute', left: '-10%', top: '48%', width: '120%', height: '3px',
+  });
+  const core = document.createElement('div');
+  styleObj(core, { position: 'absolute', inset: '0' });
+  const lift = document.createElement('div');
+  styleObj(lift, { position: 'absolute', inset: '0' });
+  wrap.append(streak, core, lift);
+  flaresRoot.appendChild(wrap);
+  return { cut, wrap, streak, core, lift };
+});
+const grainWrap = document.createElement('div');
+styleObj(grainWrap, {
+  position: 'absolute', inset: '0', mixBlendMode: 'overlay', opacity: '0.05', pointerEvents: 'none',
+});
+const grainSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+grainSvg.setAttribute('width', '100%');
+grainSvg.setAttribute('height', '100%');
+grainSvg.style.display = 'block';
+grainSvg.innerHTML = `
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="2" stitchTiles="stitch" seed="0" />
+    <feColorMatrix type="saturate" values="0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grain)" />
+`;
+grainWrap.appendChild(grainSvg);
+const vignette = document.createElement('div');
+styleObj(vignette, {
+  position: 'absolute', inset: '0', pointerEvents: 'none',
+  background: `
+    radial-gradient(ellipse 76% 68% at 50% 48%,
+      rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 82%, rgba(0,0,0,0.62) 100%),
+    radial-gradient(ellipse 120% 120% at 50% 50%,
+      rgba(0,0,0,0) 70%, rgba(0,0,0,0.35) 100%)`,
+});
+const fadeBlack = document.createElement('div');
+styleObj(fadeBlack, {
+  position: 'absolute', inset: '0', backgroundColor: COLORS.void,
+  opacity: '1', pointerEvents: 'none',
+});
+postLayer.append(gradeWarm, gradeCool, flaresRoot, grainWrap, vignette, fadeBlack);
+
+overlaysEl.append(
+  coldOpenLayer, heroLayer, featuresLayer, lifestyleLayer, logoLayer, postLayer,
+);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUDIO (Web Audio API)
+   ═══════════════════════════════════════════════════════════════════════════ */
+let audioCtx = null;
+let masterGain = null;
+let padGain = null;
+let muted = false;
+let audioStarted = false;
+const whooshPlayed = new Set();
+let chimePlayed = false;
+
+const ensureAudio = async () => {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = PRODUCT.audio.masterVolume;
+  masterGain.connect(audioCtx.destination);
+
+  padGain = audioCtx.createGain();
+  padGain.gain.value = 0;
+  padGain.connect(masterGain);
+
+  // Soft pad: stacked sine partials
+  const partials = [
+    { f: 55.0, a: 0.18 },
+    { f: 82.4, a: 0.11 },
+    { f: 110.0, a: 0.09 },
+    { f: 164.8, a: 0.05 },
+    { f: 220.0, a: 0.035 },
+  ];
+  for (const p of partials) {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = p.f;
+    g.gain.value = p.a;
+    osc.connect(g);
+    g.connect(padGain);
+    osc.start();
+  }
+  // Filtered noise air
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.04;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 800;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.12;
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(padGain);
+  noise.start();
+
+  audioStarted = true;
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+};
+
+const playWhoosh = () => {
+  if (!audioCtx || muted) return;
+  const now = audioCtx.currentTime;
+  const dur = 0.55;
+  const buffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * dur), audioCtx.sampleRate);
+  const ch = buffer.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) {
+    const t = i / audioCtx.sampleRate;
+    const env = Math.sin(Math.PI * (t / dur)) * Math.exp(-t * 3.2);
+    ch[i] = (Math.random() * 2 - 1) * env * 0.55;
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(400, now);
+  filter.frequency.exponentialRampToValueAtTime(2400, now + dur);
+  filter.Q.value = 0.7;
+  const g = audioCtx.createGain();
+  g.gain.value = 0.28 * PRODUCT.audio.masterVolume;
+  src.connect(filter);
+  filter.connect(g);
+  g.connect(masterGain);
+  src.start();
+};
+
+const playChime = () => {
+  if (!audioCtx || muted) return;
+  const now = audioCtx.currentTime;
+  const freqs = [523.25, 659.25, 783.99];
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(0.12 * (1 - i * 0.2), now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
+    osc.connect(g);
+    g.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + 3);
+  });
+};
+
+const updateAudio = (frame) => {
+  if (!audioStarted || !padGain) return;
+  const vol = clamp(
+    track(
+      frame,
+      [
+        [0, 0],
+        [s(1.5), 0.5],
+        [SCENES.hero.start, 0.72],
+        [SCENES.features.start, 0.62],
+        [SCENES.lifestyle.start, 0.8],
+        [SCENES.logo.start, 0.68],
+        [SCENES.logo.end - s(0.4), 0],
+      ],
+      EASE.glide,
+    ),
+  );
+  padGain.gain.setTargetAtTime(muted ? 0 : vol * 0.55, audioCtx.currentTime, 0.05);
+
+  for (const cut of CUTS) {
+    if (frame >= cut - 4 && frame < cut + 2 && !whooshPlayed.has(cut)) {
+      whooshPlayed.add(cut);
+      playWhoosh();
+    }
+  }
+  if (frame >= SCENES.logo.start + 50 && !chimePlayed) {
+    chimePlayed = true;
+    playChime();
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FRAME UPDATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+const updateFormingParticles = (frame, collapse, opacity) => {
+  if (opacity <= 0.001) {
+    formingPoints.visible = false;
+    return;
+  }
+  formingPoints.visible = true;
+  for (let i = 0; i < FORMING_COUNT; i++) {
+    const d = formingDelays[i];
+    const t = clamp((collapse - d) / (1 - d));
+    const e = 1 - Math.pow(1 - t, 5);
+    const ox = formingOrigins[i * 3];
+    const oy = formingOrigins[i * 3 + 1];
+    const oz = formingOrigins[i * 3 + 2];
+    const tx = formingTargets[i * 3];
+    const ty = formingTargets[i * 3 + 1] + HOVER_HEIGHT;
+    const tz = formingTargets[i * 3 + 2];
+    const arc = Math.sin(e * Math.PI) * (1 - collapse * 0.55);
+    const swirl = noise1D(i * 0.37, 7) * 2.4 * arc;
+    const lift = noise1D(i * 0.61, 13) * 1.6 * arc;
+    formingPositions[i * 3] = lerp(ox, tx, e) + swirl;
+    formingPositions[i * 3 + 1] = lerp(oy, ty, e) + lift + arc * 0.5;
+    formingPositions[i * 3 + 2] = lerp(oz, tz, e) + swirl * 0.7;
+    if (e > 0.98) {
+      const j = Math.sin(frame * 0.08 + i) * 0.006;
+      formingPositions[i * 3] += j;
+      formingPositions[i * 3 + 1] += Math.cos(frame * 0.07 + i) * 0.006;
+    }
+  }
+  formingGeo.attributes.position.needsUpdate = true;
+  formingMat.opacity = opacity * 0.85;
+};
+
+const updateDust = (frame, amount) => {
+  if (amount <= 0.001) {
+    dustPoints.visible = false;
+    return;
+  }
+  dustPoints.visible = true;
+  for (let i = 0; i < DUST_COUNT; i++) {
+    const t = frame / 90;
+    dustPositions[i * 3] = dustSeeds[i * 3] + noise1D(t + i * 0.13, i) * 0.55;
+    dustPositions[i * 3 + 1] = ((dustSeeds[i * 3 + 1] + frame * 0.0028 + i * 0.001) % 4.5) + 0.1;
+    dustPositions[i * 3 + 2] = dustSeeds[i * 3 + 2] + noise1D(t + i * 0.17, i + 999) * 0.55;
+  }
+  dustGeo.attributes.position.needsUpdate = true;
+  dustMat.opacity = amount * 0.28;
+};
+
+const updateScene3D = (frame) => {
+  const stage = getStageState(frame);
+  const cam = getCameraState(frame);
+
+  camera.position.set(cam.position[0], cam.position[1], cam.position[2]);
+  camera.up.set(0, 1, 0);
+  camera.lookAt(cam.target[0], cam.target[1], cam.target[2]);
+  camera.rotateZ(rad(cam.roll));
+  if (Math.abs(camera.fov - cam.fov) > 0.001) {
+    camera.fov = cam.fov;
+    camera.updateProjectionMatrix();
+  }
+
+  const warm = tintColor(stage.warmth);
+  if (!scene.environmentRotation) scene.environmentRotation = new THREE.Euler();
+  scene.environmentRotation.set(0, stage.envRotation, 0);
+  const fogColor = warm.clone().multiplyScalar(0.045);
+  if (!scene.fog) scene.fog = new THREE.FogExp2(fogColor.getHex(), stage.fog);
+  else {
+    scene.fog.color.copy(fogColor);
+    scene.fog.density = stage.fog;
+  }
+  renderer.toneMappingExposure = stage.exposure;
+
+  keyLight.color.copy(warm);
+  keyLight.intensity = stage.key * 2.6;
+  fillLight.color.copy(warm);
+  fillLight.intensity = stage.fill * 1.4;
+  rimLight.color.set(stage.warmth > 0.5 ? warm.getStyle() : '#cfe0ff');
+  if (stage.warmth > 0.5) rimLight.color.copy(warm);
+  else rimLight.color.set('#cfe0ff');
+  rimLight.intensity = stage.rim * 2.2;
+  hemiLight.intensity = 0.18 + stage.fill * 0.3;
+
+  backdropUniforms.uLift.value = stage.backdropLift;
+  backdropUniforms.uWarmth.value = stage.warmth;
+
+  floorMat.envMapIntensity = stage.env * 0.12;
+  poolMat.color.copy(warm);
+  poolMat.opacity = 0.03 + stage.key * 0.055;
+  contactMat.opacity = 0.42 + stage.key * 0.34;
+
+  const { explode, ignite, seam, env } = stage;
+  const yGlass = 0.132 + 0.62 * explode;
+  const yDisplay = 0.116 + 0.42 * explode;
+  const yCore = -0.02 - 0.52 * explode;
+  const ySeam = 0.074 + 0.05 * explode;
+  const spin = 0.2 + frame * 0.00042;
+  const bob = Math.sin(frame / 52) * 0.018;
+
+  productGroup.position.set(0, HOVER_HEIGHT + bob, 0);
+  productGroup.rotation.set(0, spin, 0);
+  coreMesh.position.set(0, yCore, 0);
+  coreMesh.rotation.set(0, -0.05 * explode, 0);
+  displayMesh.position.set(0, yDisplay, 0);
+  glassMesh.position.set(0, yGlass, 0);
+  glassMesh.rotation.set(0, 0.03 * explode, 0);
+  seamMesh.position.set(0, ySeam, 0);
+
+  chassisMat.envMapIntensity = env * 1.5;
+  coreMat.envMapIntensity = env * 0.9;
+  glassMat.envMapIntensity = env * 1.15;
+  displayUniforms.uTime.value = frame / 30;
+  displayUniforms.uIgnite.value = ignite;
+  seamMat.opacity = Math.min(1, seam) * 0.62;
+
+  updateFormingParticles(frame, stage.particleCollapse, stage.particleOpacity);
+  updateDust(frame, stage.dust);
+
+  return stage;
+};
+
+const updateOverlays = (frame, stage) => {
+  // Cold open (local 0–120)
+  const inCold = frame >= SCENES.coldOpen.start && frame < SCENES.coldOpen.end + s(0.6);
+  coldOpenLayer.style.display = inCold || frame < s(5) ? 'block' : 'none';
+  {
+    const local = frame - SCENES.coldOpen.start;
+    const bloom = track(
+      local,
+      [[0, 0], [s(2.4), 0.5], [s(3.5), 1], [s(4.6), 0.12]],
+      EASE.glide,
+    );
+    const scale = 0.82 + bloom * 0.5;
+    coldBloom.style.opacity = String(bloom);
+    coldBloom.style.transform = `scale(${scale})`;
+    coldCore.style.opacity = String(bloom * 0.7);
+    coldCore.style.transform = `scale(${0.9 + bloom * 0.25})`;
+  }
+
+  // Hero
+  const inHero = frame >= SCENES.hero.start && frame < SCENES.hero.end;
+  heroLayer.style.display = inHero ? 'block' : 'none';
+  if (inHero) {
+    const local = frame - SCENES.hero.start;
+    const out = fadeInOut(local, 0, 240, 0, 26);
+    heroScrim.style.opacity = String(out);
+    heroRuleWrap.style.opacity = String(out);
+    heroKicker.update(local, out);
+    heroName.update(local, out);
+    heroRule.update(local, out);
+    heroTag.update(local, out);
+  }
+
+  // Features
+  const inFeatures = frame >= SCENES.features.start && frame < SCENES.features.end;
+  featuresLayer.style.display = inFeatures ? 'block' : 'none';
+  for (const fb of featureBeats) {
+    const active = frame >= fb.beat.start && frame < fb.beat.end;
+    fb.layer.style.display = active ? 'block' : 'none';
+    if (!active) continue;
+    const local = frame - fb.beat.start;
+    const out = fadeInOut(local, 0, fb.length - 6, 0, 20);
+    const tickT = track(local, [[8, 0], [26, 1]], EASE.cinematic);
+    fb.scrim.style.opacity = String(out);
+    fb.tick.style.height = `${20 * tickT}px`;
+    fb.tick.style.opacity = String(out * 0.9);
+    fb.counter.style.opacity = String(out * 0.8);
+    fb.kicker.update(local, out);
+    fb.headline.update(local, out);
+    fb.rule.update(local, out * 0.7);
+    fb.detail.update(local, out * 0.92);
+  }
+
+  // Lifestyle
+  const inLife = frame >= SCENES.lifestyle.start && frame < SCENES.lifestyle.end;
+  lifestyleLayer.style.display = inLife ? 'block' : 'none';
+  if (inLife) {
+    const local = frame - SCENES.lifestyle.start;
+    const length = s(10);
+    const out = fadeInOut(local, s(1.2), length - s(0.6), 6, 34);
+    const drift = track(local, [[0, 0], [length, -26]], EASE.linear);
+    lifeWrap.style.transform = `translateY(${drift}px)`;
+    lifeText.update(local, out);
+  }
+
+  // Logo
+  const inLogo = frame >= SCENES.logo.start && frame < SCENES.logo.end;
+  logoLayer.style.display = inLogo ? 'block' : 'none';
+  if (inLogo) {
+    const local = frame - SCENES.logo.start;
+    const length = s(8);
+    const out = fadeInOut(local, 0, length - s(0.7), 0, 30);
+    const halo = track(
+      local,
+      [[s(0.3), 0], [s(2.2), 1], [s(6.4), 0.25]],
+      EASE.glide,
+    );
+    logoHalo.style.opacity = String(clamp(halo * out) * 0.75);
+    const delay = 12;
+    const drawOuter = track(local, [[delay, 0], [delay + 38, 1]], EASE.cinematic);
+    const drawInner = track(local, [[delay + 10, 0], [delay + 46, 1]], EASE.cinematic);
+    const dot = track(local, [[delay + 30, 0], [delay + 52, 1]], EASE.settle);
+    const spin = (1 - drawOuter) * 3;
+    markSvg.style.opacity = String(out);
+    markSvg.style.transform = `rotate(${spin}deg)`;
+    markOuter().setAttribute('stroke-dashoffset', String(cOuter * (1 - drawOuter)));
+    markInner().setAttribute('stroke-dashoffset', String(-cInner * (1 - drawInner)));
+    markDot().setAttribute('r', String(4.5 * dot));
+    markDot().setAttribute('opacity', String(dot));
+    logoBrand.update(local, out);
+    logoRule.update(local, out * 0.45);
+    logoStatement.update(local, out);
+    logoFoot.update(local, out * 0.6);
+  }
+
+  // Post: grade
+  gradeWarm.style.opacity = String(stage.warmth * 0.38);
+
+  // Cut flares
+  for (const fl of flareEls) {
+    const life = 11;
+    const at = fl.cut;
+    if (frame < at - 3 || frame > at + life) {
+      fl.wrap.style.display = 'none';
+      continue;
+    }
+    fl.wrap.style.display = 'block';
+    const t = progress(frame, at - 3, at + life);
+    const intensity = t < 0.24 ? EASE.flash(t / 0.24) : Math.pow(1 - (t - 0.24) / 0.76, 2.4);
+    const streak = clamp(intensity * 1.15);
+    fl.streak.style.transform = `translateY(-50%) scaleY(${1 + streak * 26})`;
+    fl.streak.style.filter = `blur(${8 + streak * 14}px)`;
+    fl.streak.style.background = `linear-gradient(90deg,
+      rgba(120,170,255,0) 0%,
+      rgba(180,210,255,${streak * 0.5}) 32%,
+      rgba(255,255,255,${streak * 0.85}) 50%,
+      rgba(180,210,255,${streak * 0.5}) 68%,
+      rgba(120,170,255,0) 100%)`;
+    fl.core.style.background = `radial-gradient(ellipse 44% 30% at 50% 48%,
+      rgba(255,255,255,${streak * 0.34}) 0%,
+      rgba(150,190,255,${streak * 0.12}) 42%,
+      rgba(0,0,0,0) 72%)`;
+    fl.lift.style.backgroundColor = `rgba(226,238,255,${streak * 0.13})`;
+  }
+
+  // Grain
+  const turb = grainSvg.querySelector('feTurbulence');
+  if (turb) turb.setAttribute('seed', String(frame % 24));
+
+  // Fade to black
+  const fadeOp = track(
+    frame,
+    [
+      [0, 1],
+      [s(0.6), 0],
+      [DURATION - FADE_OUT, 0],
+      [DURATION - s(0.2), 1],
+    ],
+    EASE.exit,
+  );
+  fadeBlack.style.opacity = String(fadeOp);
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOOT / LOOP / UI
+   ═══════════════════════════════════════════════════════════════════════════ */
+let playing = false;
+let ended = false;
+let elapsed = 0;
+let lastTs = 0;
+let rafId = 0;
+
+const playOverlay = document.getElementById('play-overlay');
+const replayOverlay = document.getElementById('replay-overlay');
+const muteBtn = document.getElementById('mute-btn');
+const scrubber = document.getElementById('scrubber');
+const scrubFill = document.getElementById('scrub-fill');
+
+const layout = () => {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scale = Math.min(vw / DESIGN_WIDTH, vh / DESIGN_HEIGHT);
+  designEl.style.transform = `scale(${scale})`;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  renderer.setPixelRatio(dpr);
+  renderer.setSize(DESIGN_WIDTH, DESIGN_HEIGHT, false);
+  camera.aspect = DESIGN_WIDTH / DESIGN_HEIGHT;
+  camera.updateProjectionMatrix();
+};
+
+const renderFrame = (frame) => {
+  const f = Math.min(DURATION - 1, Math.max(0, Math.floor(frame)));
+  const stage = updateScene3D(f);
+  updateOverlays(f, stage);
+  updateAudio(f);
+  renderer.render(scene, camera);
+  scrubFill.style.width = `${(f / (DURATION - 1)) * 100}%`;
+  return f;
+};
+
+const tick = (ts) => {
+  if (!playing) return;
+  if (!lastTs) lastTs = ts;
+  const dt = Math.min(0.05, (ts - lastTs) / 1000);
+  lastTs = ts;
+  elapsed += dt;
+  const frame = Math.min(DURATION - 1, Math.floor(elapsed * FPS));
+  renderFrame(frame);
+  if (frame >= DURATION - 1) {
+    playing = false;
+    ended = true;
+    replayOverlay.style.display = 'flex';
+    muteBtn.style.display = 'none';
+    scrubber.style.display = 'none';
+    return;
+  }
+  rafId = requestAnimationFrame(tick);
+};
+
+const startPlayback = async (fromFrame = 0) => {
+  await ensureAudio();
+  whooshPlayed.clear();
+  chimePlayed = false;
+  // Mark whooshes already past so seeking mid-film doesn't dump them all
+  for (const cut of CUTS) {
+    if (fromFrame > cut + 2) whooshPlayed.add(cut);
+  }
+  if (fromFrame > SCENES.logo.start + 50) chimePlayed = true;
+
+  elapsed = fromFrame / FPS;
+  lastTs = 0;
+  playing = true;
+  ended = false;
+  playOverlay.classList.add('hidden');
+  playOverlay.style.display = 'none';
+  replayOverlay.style.display = 'none';
+  muteBtn.style.display = 'block';
+  scrubber.style.display = 'flex';
+  renderFrame(fromFrame);
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(tick);
+};
+
+const bindStart = (el) => {
+  el.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startPlayback(0);
+  });
+};
+bindStart(document.getElementById('play-btn'));
+bindStart(document.getElementById('replay-btn'));
+// Whole overlay is also a hit target (thin letterspaced type is easy to miss)
+playOverlay.addEventListener('click', (e) => {
+  if (e.target === playOverlay) startPlayback(0);
+});
+replayOverlay.addEventListener('click', (e) => {
+  if (e.target === replayOverlay) startPlayback(0);
+});
+
+muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  muteBtn.textContent = muted ? 'Unmute' : 'Mute';
+  if (masterGain && audioCtx) {
+    masterGain.gain.setTargetAtTime(
+      muted ? 0 : PRODUCT.audio.masterVolume,
+      audioCtx.currentTime,
+      0.03,
+    );
+  }
+});
+
+scrubber.addEventListener('click', (e) => {
+  if (!playing && !ended && playOverlay.style.display !== 'none' && !playOverlay.classList.contains('hidden')) return;
+  const rect = scrubber.getBoundingClientRect();
+  const t = clamp((e.clientX - rect.left) / rect.width);
+  const frame = Math.floor(t * (DURATION - 1));
+  if (ended || !playing) {
+    startPlayback(frame);
+  } else {
+    elapsed = frame / FPS;
+    whooshPlayed.clear();
+    chimePlayed = false;
+    for (const cut of CUTS) {
+      if (frame > cut + 2) whooshPlayed.add(cut);
+    }
+    if (frame > SCENES.logo.start + 50) chimePlayed = true;
+    renderFrame(frame);
+  }
+});
+
+window.addEventListener('resize', () => {
+  layout();
+  if (!playing) {
+    const f = Math.min(DURATION - 1, Math.floor(elapsed * FPS));
+    renderFrame(ended ? DURATION - 1 : f);
+  }
+});
+
+layout();
+// Pre-render frame 0 under the play overlay (black fade covers it)
+renderFrame(0);
+
+console.info('AURA film ready —', DURATION, 'frames @', FPS, 'fps · FormingParticles', FORMING_COUNT);
+</script>
+</body>
+</html>
