@@ -810,13 +810,31 @@ function ballTexture(){
  * ========================================================================== */
 const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({
-  canvas, antialias: QUALITY.antialias, powerPreference:'high-performance', stencil:false
+  canvas, antialias: QUALITY.antialias, powerPreference:'high-performance', stencil:false,
+  failIfMajorPerformanceCaveat: false,
 });
 renderer.setPixelRatio(Math.min(devicePixelRatio||1, QUALITY.dprCap));
 renderer.shadowMap.enabled = QUALITY.shadows;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.06;
+
+/* Soft / software GL: drop the heavy features that stall (PMREM, shadows, bloom). */
+(()=>{
+  try{
+    const gl = renderer.getContext();
+    const info = (gl.getParameter(gl.RENDERER)||'') + ' ' + (gl.getParameter(gl.VENDOR)||'');
+    if(/SwiftShader|llvmpipe|Software|Microsoft Basic/i.test(info)){
+      QUALITY.shadows = false;
+      QUALITY.bloom = false;
+      QUALITY.dprCap = 1.0;
+      QUALITY.antialias = false;
+      QUALITY.particles = Math.min(QUALITY.particles, 120);
+      renderer.shadowMap.enabled = false;
+      renderer.setPixelRatio(1);
+    }
+  }catch(_){}
+})();
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x04050c);
@@ -922,16 +940,18 @@ const matPin  = new CANNON.Material('pin');
 const matWall = new CANNON.Material('wall');
 
 function contact(a,b,[friction,restitution],extra={}){
-  world.addContactMaterial(new CANNON.ContactMaterial(a,b,{
+  const cm = new CANNON.ContactMaterial(a,b,{
     friction, restitution,
     contactEquationStiffness: 1e8,
     contactEquationRelaxation: 3,
     frictionEquationStiffness: 1e8,
     frictionEquationRelaxation: 3,
     ...extra
-  }));
+  });
+  world.addContactMaterial(cm);
+  return cm;
 }
-contact(matBall, matLane, CFG.C_BALL_LANE);
+let ballLaneCM = contact(matBall, matLane, CFG.C_BALL_LANE);
 contact(matPin,  matLane, CFG.C_PIN_LANE);
 contact(matBall, matPin,  CFG.C_BALL_PIN, {
   contactEquationStiffness: 1.4e8,
@@ -943,15 +963,7 @@ contact(matPin,  matPin,  CFG.C_PIN_PIN, {
 });
 contact(matBall, matWall, [0.16, 0.08]);   // low bounce: no rattling in the gutter
 contact(matPin,  matWall, [0.22, 0.45]);
-
-/** Live ball↔lane contact material — friction ramps with the oil pattern. */
-let ballLaneCM = null;
-for(const cm of world.contactMaterials){
-  if(cm.materials[0]===matBall && cm.materials[1]===matLane ||
-     cm.materials[0]===matLane && cm.materials[1]===matBall){
-    ballLaneCM = cm; break;
-  }
-}
+// ballLaneCM is the live ball↔lane material — friction ramps with the oil pattern.
 
 /** Helper: static box body. */
 function staticBox(hx,hy,hz, x,y,z, material){
