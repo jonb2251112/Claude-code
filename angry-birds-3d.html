@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Angry Birds 3D</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a0a00;
+      font-family: 'Nunito', system-ui, sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #game-canvas.aiming { cursor: grabbing; }
+
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 18px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #ffe566 0%, #f5a623 100%);
+      border: 3px solid #8b4513;
+      border-radius: 16px;
+      padding: 8px 16px;
+      box-shadow: 0 4px 0 #5c2e0a, 0 6px 16px rgba(0,0,0,0.35);
+      color: #5c2e0a;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    #score-panel { min-width: 140px; text-align: center; }
+    #score-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+    #score-value { font-family: 'Fredoka One', cursive; font-size: 28px; line-height: 1.1; }
+
+    #birds-panel {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 8px 12px;
+    }
+
+    .bird-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ff6b5a, #c41e1e 70%);
+      border: 2px solid #5c1010;
+      position: relative;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2);
+      opacity: 0.35;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .bird-icon.ready { opacity: 1; transform: scale(1.05); }
+    .bird-icon.used { opacity: 0.2; filter: grayscale(1); }
+
+    #level-title {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(18px, 3vw, 28px);
+      color: #fff;
+      text-shadow:
+        0 2px 0 #8b4513,
+        0 4px 8px rgba(0,0,0,0.45);
+      white-space:nowrap;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      opacity: 1;
+      transition: opacity 0.6s;
+      backdrop-filter: blur(4px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    #hint.hidden { opacity: 0; pointer-events: none; }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,200,80,0.25), transparent 55%),
+        rgba(20, 8, 0, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    #overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: linear-gradient(180deg, #fff8e0 0%, #f5d78a 55%, #e8b84a 100%);
+      border: 5px solid #8b4513;
+      border-radius: 28px;
+      padding: 36px 44px 32px;
+      text-align: center;
+      box-shadow:
+        0 8px 0 #5c2e0a,
+        0 20px 50px rgba(0,0,0,0.45),
+        inset 0 2px 0 rgba(255,255,255,0.6);
+      max-width: 92vw;
+      width: 420px;
+      transform: scale(0.85);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #overlay.visible .modal { transform: scale(1); }
+
+    .modal h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(28px, 6vw, 42px);
+      color: #c41e1e;
+      text-shadow: 0 3px 0 #5c1010;
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+    .modal.fail h1 { color: #4a5568; text-shadow: 0 3px 0 #1a202c; }
+    .modal p {
+      color: #5c2e0a;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    #stars {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 8px 0 22px;
+      min-height: 56px;
+    }
+    .star {
+      font-size: 48px;
+      filter: grayscale(1) brightness(0.7);
+      transform: scale(0.7);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+    .star.lit {
+      filter: none;
+      transform: scale(1) rotate(-8deg);
+      color: transparent;
+      background: linear-gradient(180deg, #ffe566, #f5a623);
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 3px 0 #b45309);
+    }
+    .star.lit:nth-child(2) { transform: scale(1.15) rotate(0deg); }
+    .star.lit:nth-child(3) { transform: scale(1) rotate(8deg); }
+
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    button.game-btn {
+      pointer-events: auto;
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      padding: 12px 28px;
+      border: 3px solid #5c2e0a;
+      border-radius: 16px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(180deg, #7ed957 0%, #3a9e1e 100%);
+      box-shadow: 0 4px 0 #1f5c0a, 0 6px 12px rgba(0,0,0,0.25);
+      text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button.game-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #1f5c0a, 0 8px 16px rgba(0,0,0,0.3); }
+    button.game-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1f5c0a; }
+    button.game-btn.secondary {
+      background: linear-gradient(180deg, #ff8a65 0%, #d84315 100%);
+      box-shadow: 0 4px 0 #8b2500, 0 6px 12px rgba(0,0,0,0.25);
+    }
+    button.game-btn.secondary:hover { box-shadow: 0 6px 0 #8b2500, 0 8px 16px rgba(0,0,0,0.3); }
+
+    #title-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, #5ec8d8 0%, #87ceeb 35%, #a8e6a0 70%, #6bbf4a 100%);
+      overflow: hidden;
+    }
+    #title-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 0 8%, transparent 9%),
+        radial-gradient(circle at 70% 75%, rgba(255,255,255,0.12) 0 12%, transparent 13%),
+        radial-gradient(circle at 45% 85%, rgba(255,255,255,0.1) 0 6%, transparent 7%);
+      pointer-events: none;
+    }
+    #title-screen.hidden { display: none; }
+
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(42px, 10vw, 80px);
+      color: #c41e1e;
+      text-shadow:
+        0 4px 0 #5c1010,
+        0 8px 0 #3a0a0a,
+        0 12px 24px rgba(0,0,0,0.35);
+      letter-spacing: 2px;
+      line-height: 0.95;
+      text-align: center;
+      z-index: 1;
+      animation: bounce-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .logo span {
+      display: block;
+      font-size: 0.45em;
+      color: #f5a623;
+      text-shadow:
+        0 3px 0 #8b4513,
+        0 6px 12px rgba(0,0,0,0.3);
+      letter-spacing: 6px;
+      margin-top: 4px;
+    }
+    .logo-sub {
+      margin-top: 12px;
+      color: #5c2e0a;
+      font-weight: 900;
+      font-size: 18px;
+      z-index: 1;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    }
+    #play-btn {
+      margin-top: 36px;
+      font-size: 28px;
+      padding: 16px 48px;
+      z-index: 1;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes bounce-in {
+      from { transform: scale(0) rotate(-12deg); opacity: 0; }
+      to { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    #floating-score {
+      position: fixed;
+      pointer-events: none;
+      z-index: 15;
+      font-family: 'Fredoka One', cursive;
+      font-size: 28px;
+      color: #ffe566;
+      text-shadow: 0 2px 0 #8b4513, 0 4px 8px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: none;
+    }
+
+    #power-bar-wrap {
+      position: absolute;
+      bottom: 80px;
+      left: 24px;
+      width: 18px;
+      height: 120px;
+      background: rgba(0,0,0,0.35);
+      border: 3px solid #8b4513;
+      border-radius: 10px;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #power-bar-wrap.visible { opacity: 1; }
+    #power-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      background: linear-gradient(0deg, #c41e1e, #f5a623, #7ed957);
+      border-radius: 6px;
+      transition: height 0.05s linear;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <div id="title-screen">
+    <div class="logo">ANGRY BIRDS<span>3D CLASSIC</span></div>
+    <p class="logo-sub">Pull back · Aim · Launch!</p>
+    <button class="game-btn" id="play-btn">PLAY!</button>
+  </div>
+
+  <div id="hud">
+    <div id="top-bar">
+      <div class="panel" id="score-panel">
+        <div id="score-label">Score</div>
+        <div id="score-value">0</div>
+      </div>
+      <div id="level-title">Poached Eggs — 1-1</div>
+      <div class="panel" id="birds-panel"></div>
+    </div>
+    <div id="hint">Drag the bird back to aim, release to launch!</div>
+    <div id="power-bar-wrap"><div id="power-bar"></div></div>
+  </div>
+
+  <div id="floating-score"></div>
+
+  <div id="overlay">
+    <div class="modal" id="result-modal">
+      <h1 id="result-title">Level Cleared!</h1>
+      <p id="result-sub">Great shot!</p>
+      <div id="stars">
+        <div class="star">★</div>
+        <div class="star">★</div>
+        <div class="star">★</div>
+      </div>
+      <div class="btn-row">
+        <button class="game-btn secondary" id="retry-btn">Retry</button>
+        <button class="game-btn" id="next-btn">Next Level</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
+
+/* ============================================================
+   ANGRY BIRDS 3D — Classic Style
+   ============================================================ */
+
+const canvas = document.getElementById('game-canvas');
+const scoreEl = document.getElementById('score-value');
+const birdsPanel = document.getElementById('birds-panel');
+const hintEl = document.getElementById('hint');
+const overlay = document.getElementById('overlay');
+const resultModal = document.getElementById('result-modal');
+const resultTitle = document.getElementById('result-title');
+const resultSub = document.getElementById('result-sub');
+const nextBtn = document.getElementById('next-btn');
+const retryBtn = document.getElementById('retry-btn');
+const titleScreen = document.getElementById('title-screen');
+const playBtn = document.getElementById('play-btn');
+const levelTitle = document.getElementById('level-title');
+const powerWrap = document.getElementById('power-bar-wrap');
+const powerBar = document.getElementById('power-bar');
+const floatingScore = document.getElementById('floating-score');
+const starEls = [...document.querySelectorAll('#stars .star')];
+
+/* ---------- Renderer / Scene ---------- */
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x87ceeb, 55, 120);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(-2, 8, 22);
+camera.lookAt(8, 3, 0);
+
+/* ---------- Lighting ---------- */
+const hemi = new THREE.HemisphereLight(0xb1e1ff, 0x6bbf4a, 0.7);
+scene.add(hemi);
+
+const sun = new THREE.DirectionalLight(0xfff2d6, 1.35);
+sun.position.set(-20, 35, 20);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 90;
+sun.shadow.camera.left = -40;
+sun.shadow.camera.right = 40;
+sun.shadow.camera.top = 40;
+sun.shadow.camera.bottom = -40;
+sun.shadow.bias = -0.0003;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xa0d8ff, 0.35);
+fill.position.set(15, 10, -10);
+scene.add(fill);
+
+/* ---------- Physics World ---------- */
+const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -22, 0) });
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
+world.defaultContactMaterial.friction = 0.45;
+world.defaultContactMaterial.restitution = 0.15;
+
+const materials = {
+  bird: new CANNON.Material('bird'),
+  wood: new CANNON.Material('wood'),
+  glass: new CANNON.Material('glass'),
+  stone: new CANNON.Material('stone'),
+  pig: new CANNON.Material('pig'),
+  ground: new CANNON.Material('ground'),
+};
+
+function addCM(a, b, friction, restitution) {
+  world.addContactMaterial(new CANNON.ContactMaterial(a, b, { friction, restitution }));
+}
+addCM(materials.bird, materials.wood, 0.35, 0.2);
+addCM(materials.bird, materials.glass, 0.2, 0.25);
+addCM(materials.bird, materials.stone, 0.4, 0.1);
+addCM(materials.bird, materials.pig, 0.3, 0.2);
+addCM(materials.bird, materials.ground, 0.5, 0.15);
+addCM(materials.wood, materials.wood, 0.4, 0.1);
+addCM(materials.wood, materials.ground, 0.55, 0.05);
+addCM(materials.glass, materials.ground, 0.3, 0.1);
+addCM(materials.stone, materials.ground, 0.6, 0.05);
+addCM(materials.pig, materials.ground, 0.5, 0.2);
+addCM(materials.wood, materials.pig, 0.35, 0.15);
+addCM(materials.stone, materials.pig, 0.4, 0.1);
+addCM(materials.glass, materials.pig, 0.25, 0.2);
+
+/* ---------- Game State ---------- */
+const SLING_ORIGIN = new THREE.Vector3(-10, 2.15, 0);
+const MAX_PULL = 3.2;
+const LAUNCH_POWER = 14.5;
+
+let score = 0;
+let levelIndex = 0;
+let birdsLeft = 0;
+let currentBird = null;
+let aiming = false;
+let launched = false;
+let settledTimer = 0;
+let waitingSettle = false;
+let gameActive = false;
+let levelComplete = false;
+let pullOffset = new THREE.Vector3();
+let trajectoryLine = null;
+let particles = [];
+let entities = []; // { mesh, body, type, hp, broken }
+let pigsAlive = 0;
+let hintShown = true;
+let cameraBase = new THREE.Vector3(-2, 8, 22);
+let cameraLook = new THREE.Vector3(8, 3, 0);
+let camShake = 0;
+
+/* ---------- Materials (visual) ---------- */
+const matWood = new THREE.MeshStandardMaterial({
+  color: 0xc4843a, roughness: 0.85, metalness: 0.05,
+});
+const matWoodDark = new THREE.MeshStandardMaterial({
+  color: 0x8b5a2b, roughness: 0.9, metalness: 0.05,
+});
+const matGlass = new THREE.MeshStandardMaterial({
+  color: 0x7ec8e8, roughness: 0.15, metalness: 0.1,
+  transparent: true, opacity: 0.55, side: THREE.DoubleSide,
+});
+const matStone = new THREE.MeshStandardMaterial({
+  color: 0x8a8f98, roughness: 0.95, metalness: 0.15,
+});
+const matGrass = new THREE.MeshStandardMaterial({
+  color: 0x5cb83a, roughness: 0.95, metalness: 0,
+});
+const matDirt = new THREE.MeshStandardMaterial({
+  color: 0x8b6914, roughness: 1, metalness: 0,
+});
+const matSling = new THREE.MeshStandardMaterial({
+  color: 0x6b3a1f, roughness: 0.8, metalness: 0.05,
+});
+
+/* ---------- Environment ---------- */
+function buildSky() {
+  const skyGeo = new THREE.SphereGeometry(100, 32, 16);
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {
+      topColor: { value: new THREE.Color(0x4eb8d0) },
+      midColor: { value: new THREE.Color(0x87ceeb) },
+      botColor: { value: new THREE.Color(0xc8eef5) },
+    },
+    vertexShader: `
+      varying vec3 vWorldPos;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorldPos = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 topColor;
+      uniform vec3 midColor;
+      uniform vec3 botColor;
+      varying vec3 vWorldPos;
+      void main() {
+        float h = normalize(vWorldPos).y;
+        vec3 col = mix(botColor, midColor, smoothstep(-0.2, 0.25, h));
+        col = mix(col, topColor, smoothstep(0.2, 0.85, h));
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+  });
+  scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  // Clouds
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 1, transparent: true, opacity: 0.9,
+  });
+  for (let i = 0; i < 10; i++) {
+    const g = new THREE.Group();
+    const sizes = [2.5, 1.8, 2.0, 1.4];
+    sizes.forEach((s, j) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(s, 12, 10), cloudMat);
+      m.position.set((j - 1.5) * 1.4, Math.sin(j) * 0.4, (j % 2) * 0.6);
+      m.scale.y = 0.55;
+      g.add(m);
+    });
+    g.position.set(-30 + i * 12 + Math.random() * 4, 14 + Math.random() * 8, -25 - Math.random() * 20);
+    g.scale.setScalar(1.2 + Math.random());
+    scene.add(g);
+  }
+
+  // Distant hills
+  const hillMat = new THREE.MeshStandardMaterial({ color: 0x4a9e32, roughness: 1 });
+  for (let i = 0; i < 8; i++) {
+    const hill = new THREE.Mesh(
+      new THREE.SphereGeometry(8 + Math.random() * 6, 16, 12),
+      hillMat
+    );
+    hill.scale.y = 0.35;
+    hill.position.set(-20 + i * 14, -2, -30 - Math.random() * 10);
+    scene.add(hill);
+  }
+}
+
+function buildGround() {
+  // Visual ground strips
+  const groundGroup = new THREE.Group();
+
+  const grass = new THREE.Mesh(new THREE.BoxGeometry(120, 0.6, 40), matGrass);
+  grass.position.set(10, -0.3, 0);
+  grass.receiveShadow = true;
+  groundGroup.add(grass);
+
+  // Dirt edge
+  const dirt = new THREE.Mesh(new THREE.BoxGeometry(120, 1.2, 40), matDirt);
+  dirt.position.set(10, -1.2, 0);
+  dirt.receiveShadow = true;
+  groundGroup.add(dirt);
+
+  // Grass tufts
+  const tuftMat = new THREE.MeshStandardMaterial({ color: 0x3d9a28, roughness: 0.9 });
+  for (let i = 0; i < 40; i++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 5), tuftMat);
+    t.position.set(-15 + Math.random() * 55, 0.15, -8 + Math.random() * 16);
+    t.rotation.y = Math.random() * Math.PI;
+    groundGroup.add(t);
+  }
+
+  // Wooden fence posts near slingshot
+  for (let i = 0; i < 5; i++) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 1.2, 8), matSling);
+    post.position.set(-14 + i * 0.8, 0.5, -6);
+    post.castShadow = true;
+    groundGroup.add(post);
+  }
+
+  scene.add(groundGroup);
+
+  // Physics ground
+  const groundBody = new CANNON.Body({
+    type: CANNON.Body.STATIC,
+    shape: new CANNON.Box(new CANNON.Vec3(60, 0.5, 20)),
+    material: materials.ground,
+  });
+  groundBody.position.set(10, -0.5, 0);
+  world.addBody(groundBody);
+
+  // Invisible side walls to keep things on stage
+  [[0, 0, 12], [0, 0, -12]].forEach(([x, y, z]) => {
+    const wall = new CANNON.Body({
+      type: CANNON.Body.STATIC,
+      shape: new CANNON.Box(new CANNON.Vec3(60, 20, 0.5)),
+    });
+    wall.position.set(10, 10, z);
+    world.addBody(wall);
+  });
+}
+
+function buildSlingshot() {
+  const group = new THREE.Group();
+
+  // Y-shaped wooden slingshot
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 2.4, 8), matSling);
+  base.position.set(0, 1.2, 0);
+  base.castShadow = true;
+  group.add(base);
+
+  const left = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.6, 8), matSling);
+  left.position.set(0, 2.5, -0.55);
+  left.rotation.x = 0.45;
+  left.castShadow = true;
+  group.add(left);
+
+  const right = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.6, 8), matSling);
+  right.position.set(0, 2.5, 0.55);
+  right.rotation.x = -0.45;
+  right.castShadow = true;
+  group.add(right);
+
+  // Cross brace
+  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.9), matWoodDark);
+  brace.position.set(0, 2.0, 0);
+  group.add(brace);
+
+  group.position.copy(SLING_ORIGIN);
+  group.position.y = 0;
+  group.position.x = SLING_ORIGIN.x;
+  scene.add(group);
+
+  // Rubber bands (lines updated each frame)
+  const bandMat = new THREE.LineBasicMaterial({ color: 0x2a1510, linewidth: 2 });
+  const bandGeoL = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+  const bandGeoR = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+  const bandL = new THREE.Line(bandGeoL, bandMat);
+  const bandR = new THREE.Line(bandGeoR, bandMat);
+  scene.add(bandL, bandR);
+
+  // Pouch
+  const pouch = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 8, 6),
+    new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 })
+  );
+  scene.add(pouch);
+
+  return {
+    leftFork: new THREE.Vector3(SLING_ORIGIN.x, 3.15, -0.7),
+    rightFork: new THREE.Vector3(SLING_ORIGIN.x, 3.15, 0.7),
+    bandL, bandR, pouch,
+  };
+}
+
+const sling = buildSlingshot();
+
+function updateBands(birdPos) {
+  const pos = birdPos || SLING_ORIGIN;
+  const ptsL = [sling.leftFork, pos];
+  const ptsR = [sling.rightFork, pos];
+  sling.bandL.geometry.setFromPoints(ptsL);
+  sling.bandR.geometry.setFromPoints(ptsR);
+  sling.pouch.position.copy(pos);
+  sling.pouch.visible = !launched || (currentBird && !currentBird.flying);
+}
+
+/* ---------- Bird Factory ---------- */
+function createBirdMesh() {
+  const g = new THREE.Group();
+
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0xe53935, roughness: 0.55, metalness: 0.05,
+  });
+  const bellyMat = new THREE.MeshStandardMaterial({
+    color: 0xf5e6c8, roughness: 0.7, metalness: 0,
+  });
+  const beakMat = new THREE.MeshStandardMaterial({
+    color: 0xffa000, roughness: 0.45, metalness: 0.1,
+  });
+  const browMat = new THREE.MeshStandardMaterial({
+    color: 0x1a0505, roughness: 0.8,
+  });
+  const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+  const pupilMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
+  const tailMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.6 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 16), bodyMat);
+  body.castShadow = true;
+  g.add(body);
+
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 12), bellyMat);
+  belly.position.set(0.12, -0.12, 0);
+  belly.scale.set(0.9, 0.85, 1.05);
+  g.add(belly);
+
+  // Eyes
+  [[0.28, 0.12, 0.22], [0.28, 0.12, -0.22]].forEach(([x, y, z]) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeWhite);
+    eye.position.set(x, y, z);
+    g.add(eye);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), pupilMat);
+    pupil.position.set(x + 0.08, y + 0.01, z * 0.85);
+    g.add(pupil);
+  });
+
+  // Angry brows
+  const browL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.08), browMat);
+  browL.position.set(0.32, 0.26, 0.22);
+  browL.rotation.z = -0.35;
+  browL.rotation.y = 0.2;
+  g.add(browL);
+  const browR = browL.clone();
+  browR.position.z = -0.22;
+  browR.rotation.y = -0.2;
+  g.add(browR);
+
+  // Beak
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 8), beakMat);
+  beak.rotation.z = -Math.PI / 2;
+  beak.position.set(0.52, -0.02, 0);
+  g.add(beak);
+  const beakBot = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.16, 8), beakMat);
+  beakBot.rotation.z = -Math.PI / 2;
+  beakBot.position.set(0.48, -0.1, 0);
+  g.add(beakTop => {});
+  g.add(beakBot);
+
+  // Crest feathers
+  for (let i = 0; i < 3; i++) {
+    const f = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.28, 5), tailMat);
+    f.position.set(-0.05 + i * 0.05, 0.48, (i - 1) * 0.08);
+    f.rotation.z = 0.3 - i * 0.15;
+    g.add(f);
+  }
+
+  // Tail
+  for (let i = 0; i < 3; i++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.35, 4), tailMat);
+    t.position.set(-0.45, 0.05, (i - 1) * 0.1);
+    t.rotation.z = Math.PI / 2 + 0.2;
+    t.rotation.y = (i - 1) * 0.25;
+    g.add(t);
+  }
+
+  g.scale.setScalar(1);
+  return g;
+}
+
+function spawnBirdOnSling() {
+  if (birdsLeft <= 0) return null;
+
+  const mesh = createBirdMesh();
+  mesh.position.copy(SLING_ORIGIN);
+  scene.add(mesh);
+
+  const body = new CANNON.Body({
+    mass: 1.4,
+    shape: new CANNON.Sphere(0.42),
+    material: materials.bird,
+    linearDamping: 0.05,
+    angularDamping: 0.1,
+  });
+  body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
+  body.type = CANNON.Body.KINEMATIC;
+  world.addBody(body);
+
+  const bird = {
+    mesh, body, type: 'bird', flying: false, settled: false, life: 8,
+  };
+  currentBird = bird;
+  entities.push(bird);
+  launched = false;
+  aiming = false;
+  pullOffset.set(0, 0, 0);
+  updateBirdIcons();
+  updateBands(SLING_ORIGIN);
+  return bird;
+}
+
+/* ---------- Pig Factory ---------- */
+function createPigMesh() {
+  const g = new THREE.Group();
+  const skin = new THREE.MeshStandardMaterial({
+    color: 0x7cb342, roughness: 0.55, metalness: 0.05,
+  });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.7 });
+  const snoutMat = new THREE.MeshStandardMaterial({ color: 0x9ccc65, roughness: 0.5 });
+  const eyeW = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+  const pupil = new THREE.MeshStandardMaterial({ color: 0x111111 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.48, 18, 14), skin);
+  body.castShadow = true;
+  body.scale.set(1, 0.92, 1.05);
+  g.add(body);
+
+  // Snout
+  const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.22, 12), snoutMat);
+  snout.rotation.z = Math.PI / 2;
+  snout.position.set(0.42, 0, 0);
+  g.add(snout);
+  // Nostrils
+  [[0.52, 0.04, 0.07], [0.52, 0.04, -0.07]].forEach(([x, y, z]) => {
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), dark);
+    n.position.set(x, y, z);
+    g.add(n);
+  });
+
+  // Eyes
+  [[0.25, 0.2, 0.2], [0.25, 0.2, -0.2]].forEach(([x, y, z]) => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), eyeW);
+    e.position.set(x, y, z);
+    g.add(e);
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), pupil);
+    p.position.set(x + 0.06, y, z * 0.9);
+    g.add(p);
+  });
+
+  // Ears
+  [[0.05, 0.42, 0.28], [0.05, 0.42, -0.28]].forEach(([x, y, z]) => {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), skin);
+    ear.scale.set(0.7, 1, 0.5);
+    ear.position.set(x, y, z);
+    g.add(ear);
+    const inner = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), snoutMat);
+    inner.position.set(x + 0.04, y, z * 0.85);
+    g.add(inner);
+  });
+
+  return g;
+}
+
+function addPig(x, y, z) {
+  const mesh = createPigMesh();
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+
+  const body = new CANNON.Body({
+    mass: 0.9,
+    shape: new CANNON.Sphere(0.45),
+    material: materials.pig,
+    linearDamping: 0.15,
+    angularDamping: 0.3,
+  });
+  body.position.set(x, y, z);
+  body.sleepSpeedLimit = 0.3;
+  world.addBody(body);
+
+  const ent = { mesh, body, type: 'pig', hp: 28, broken: false };
+  entities.push(ent);
+  pigsAlive++;
+  return ent;
+}
+
+/* ---------- Blocks ---------- */
+const BLOCK = {
+  wood: { mat: matWood, phys: materials.wood, density: 0.55, hp: 35, color: 0xc4843a },
+  glass: { mat: matGlass, phys: materials.glass, density: 0.3, hp: 12, color: 0x7ec8e8 },
+  stone: { mat: matStone, phys: materials.stone, density: 1.4, hp: 80, color: 0x8a8f98 },
+};
+
+function addBlock(type, x, y, z, w, h, d, rotY = 0) {
+  const def = BLOCK[type];
+  const geo = new THREE.BoxGeometry(w, h, d);
+  // Add wood grain strips for wood
+  let mesh;
+  if (type === 'wood') {
+    const g = new THREE.Group();
+    const main = new THREE.Mesh(geo, def.mat.clone());
+    main.castShadow = true;
+    main.receiveShadow = true;
+    g.add(main);
+    // grain lines
+    const grain = new THREE.Mesh(
+      new THREE.BoxGeometry(w * 0.98, 0.02, d * 0.98),
+      matWoodDark
+    );
+    grain.position.y = h * 0.15;
+    g.add(grain);
+    const grain2 = grain.clone();
+    grain2.position.y = -h * 0.15;
+    g.add(grain2);
+    mesh = g;
+  } else {
+    mesh = new THREE.Mesh(geo, def.mat.clone());
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+  }
+  mesh.position.set(x, y, z);
+  mesh.rotation.y = rotY;
+  scene.add(mesh);
+
+  const mass = Math.max(0.2, w * h * d * def.density);
+  const body = new CANNON.Body({
+    mass,
+    shape: new CANNON.Box(new CANNON.Vec3(w / 2, h / 2, d / 2)),
+    material: def.phys,
+    linearDamping: 0.12,
+    angularDamping: 0.25,
+  });
+  body.position.set(x, y, z);
+  body.quaternion.setFromEuler(0, rotY, 0);
+  body.sleepSpeedLimit = 0.25;
+  world.addBody(body);
+
+  const ent = {
+    mesh, body, type: 'block', blockType: type, hp: def.hp, maxHp: def.hp, broken: false,
+    size: { w, h, d },
+  };
+  entities.push(ent);
+  return ent;
+}
+
+/* ---------- Levels ---------- */
+const LEVELS = [
+  {
+    name: 'Poached Eggs — 1-1',
+    birds: 3,
+    build() {
+      // Simple tower with 1 pig
+      addBlock('wood', 8, 0.5, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 10, 0.5, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 9, 1.2, 0, 2.4, 0.35, 0.5);
+      addBlock('wood', 8.3, 1.9, 0, 0.35, 1.0, 0.35);
+      addBlock('wood', 9.7, 1.9, 0, 0.35, 1.0, 0.35);
+      addBlock('wood', 9, 2.6, 0, 2.0, 0.35, 0.5);
+      addPig(9, 3.2, 0);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-2',
+    birds: 3,
+    build() {
+      // Two pillars + glass + 2 pigs
+      addBlock('wood', 7, 0.6, 0, 0.45, 1.2, 0.45);
+      addBlock('wood', 11, 0.6, 0, 0.45, 1.2, 0.45);
+      addBlock('wood', 9, 1.4, 0, 4.4, 0.35, 0.55);
+      addBlock('glass', 8, 2.1, 0, 0.4, 1.0, 0.4);
+      addBlock('glass', 10, 2.1, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 9, 2.8, 0, 3.2, 0.35, 0.5);
+      addPig(8, 1.95, 0);
+      addPig(10, 3.4, 0);
+      addBlock('stone', 9, 0.35, 0, 1.2, 0.7, 0.7);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-3',
+    birds: 4,
+    build() {
+      // Castle-ish structure
+      const baseX = 10;
+      // Left tower
+      addBlock('stone', baseX - 3, 0.5, 0, 0.7, 1.0, 0.7);
+      addBlock('wood', baseX - 3, 1.4, 0, 0.45, 0.8, 0.45);
+      addBlock('wood', baseX - 3, 2.1, 0, 1.2, 0.3, 0.5);
+      addPig(baseX - 3, 2.7, 0);
+
+      // Center
+      addBlock('wood', baseX, 0.5, -0.6, 0.4, 1.0, 0.4);
+      addBlock('wood', baseX, 0.5, 0.6, 0.4, 1.0, 0.4);
+      addBlock('glass', baseX - 1.2, 0.5, 0, 0.35, 1.0, 0.35);
+      addBlock('glass', baseX + 1.2, 0.5, 0, 0.35, 1.0, 0.35);
+      addBlock('wood', baseX, 1.2, 0, 3.2, 0.35, 1.6);
+      addPig(baseX, 1.85, 0);
+      addBlock('wood', baseX - 1.2, 2.0, 0, 0.35, 1.2, 0.35);
+      addBlock('wood', baseX + 1.2, 2.0, 0, 0.35, 1.2, 0.35);
+      addBlock('stone', baseX, 2.8, 0, 2.8, 0.4, 0.7);
+      addPig(baseX, 3.45, 0);
+
+      // Right
+      addBlock('stone', baseX + 3.5, 0.5, 0, 0.7, 1.0, 0.7);
+      addBlock('wood', baseX + 3.5, 1.4, 0, 0.5, 0.8, 0.5);
+      addBlock('glass', baseX + 3.5, 2.2, 0, 1.0, 0.3, 0.5);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-4',
+    birds: 4,
+    build() {
+      const bx = 11;
+      // Stacked boxes like classic
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3 - row; col++) {
+          const x = bx + (col - (2 - row) / 2) * 1.3;
+          const y = 0.4 + row * 1.15;
+          const t = row === 2 ? 'glass' : (col === 1 && row === 0 ? 'stone' : 'wood');
+          addBlock(t, x, y, 0, 1.1, 1.0, 0.7);
+        }
+      }
+      addPig(bx, 0.55 + 3 * 1.15, 0);
+      addPig(bx - 1.3, 1.55, 0);
+      addPig(bx + 1.3, 1.55, 0);
+
+      // Side props
+      addBlock('wood', bx - 4, 0.7, 0, 0.4, 1.4, 0.4);
+      addBlock('wood', bx - 4, 1.6, 0, 1.5, 0.3, 0.4);
+      addPig(bx - 4, 2.2, 0);
+    },
+  },
+];
+
+/* ---------- Trajectory Preview ---------- */
+function createTrajectory() {
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(40 * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.18, transparent: true, opacity: 0.7, depthWrite: false,
+  });
+  trajectoryLine = new THREE.Points(geo, mat);
+  scene.add(trajectoryLine);
+}
+
+function updateTrajectory(origin, velocity) {
+  if (!trajectoryLine) return;
+  const pos = trajectoryLine.geometry.attributes.position;
+  const g = -22;
+  let x = origin.x, y = origin.y, z = origin.z;
+  let vx = velocity.x, vy = velocity.y, vz = velocity.z;
+  const dt = 0.08;
+  for (let i = 0; i < 40; i++) {
+    pos.setXYZ(i, x, y, z);
+    x += vx * dt;
+    y += vy * dt;
+    z += vz * dt;
+    vy += g * dt;
+    if (y < 0) y = 0;
+  }
+  pos.needsUpdate = true;
+  trajectoryLine.visible = true;
+}
+
+/* ---------- Particles ---------- */
+function spawnBurst(pos, color, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.12, 0.12),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.7 })
+    );
+    mesh.position.copy(pos);
+    scene.add(mesh);
+    particles.push({
+      mesh,
+      vel: new THREE.Vector3(
+        (Math.random() - 0.5) * 8,
+        Math.random() * 6 + 2,
+        (Math.random() - 0.5) * 8
+      ),
+      life: 0.6 + Math.random() * 0.5,
+      rot: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
+    });
+  }
+}
+
+function spawnSmoke(pos) {
+  for (let i = 0; i < 6; i++) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2 + Math.random() * 0.2, 6, 6),
+      new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.5 })
+    );
+    mesh.position.copy(pos);
+    scene.add(mesh);
+    particles.push({
+      mesh,
+      vel: new THREE.Vector3((Math.random() - 0.5) * 2, Math.random() * 3 + 1, (Math.random() - 0.5) * 2),
+      life: 0.8,
+      smoke: true,
+      rot: new THREE.Vector3(),
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life -= dt;
+    p.vel.y -= 12 * dt;
+    p.mesh.position.addScaledVector(p.vel, dt);
+    p.mesh.rotation.x += p.rot.x * dt * 5;
+    p.mesh.rotation.y += p.rot.y * dt * 5;
+    if (p.smoke) {
+      p.mesh.scale.multiplyScalar(1 + dt * 1.5);
+      p.mesh.material.opacity = Math.max(0, p.life);
+    }
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      particles.splice(i, 1);
+    }
+  }
+}
+
+/* ---------- Damage / Collision ---------- */
+const impactCooldown = new WeakMap();
+
+function setupCollisions() {
+  world.addEventListener('beginContact', (e) => {
+    const a = findEnt(e.bodyA);
+    const b = findEnt(e.bodyB);
+    if (!a && !b) return;
+
+    const rel = e.bodyA.velocity.vsub(e.bodyB.velocity);
+    const speed = rel.length();
+    if (speed < 2) return;
+
+    applyImpact(a, b, speed, e);
+    applyImpact(b, a, speed, e);
+  });
+}
+
+function findEnt(body) {
+  return entities.find(e => e.body === body && !e.broken);
+}
+
+function applyImpact(ent, other, speed, event) {
+  if (!ent || ent.broken) return;
+  if (ent.type === 'bird') return;
+
+  const now = performance.now();
+  const last = impactCooldown.get(ent) || 0;
+  if (now - last < 80) return;
+  impactCooldown.set(ent, now);
+
+  let mult = 1;
+  if (other && other.type === 'bird') mult = 1.8;
+  if (ent.type === 'block' && ent.blockType === 'glass') mult *= 1.6;
+  if (ent.type === 'block' && ent.blockType === 'stone') mult *= 0.55;
+
+  const dmg = speed * mult * 1.4;
+  ent.hp -= dmg;
+
+  if (ent.type === 'pig' && speed > 4) {
+    camShake = Math.min(0.4, speed * 0.02);
+  }
+
+  if (ent.hp <= 0) {
+    destroyEntity(ent);
+  } else if (ent.type === 'block' && ent.blockType === 'wood' && ent.hp < ent.maxHp * 0.45) {
+    // Darken damaged wood
+    ent.mesh.traverse?.(c => {
+      if (c.isMesh && c.material && c.material.color) {
+        c.material.color.offsetHSL(0, 0, -0.05);
+      }
+    });
+  }
+}
+
+function destroyEntity(ent) {
+  if (ent.broken) return;
+  ent.broken = true;
+  const pos = new THREE.Vector3().copy(ent.mesh.position);
+
+  if (ent.type === 'pig') {
+    pigsAlive = Math.max(0, pigsAlive - 1);
+    addScore(5000, pos);
+    spawnBurst(pos, 0x7cb342, 16);
+    spawnSmoke(pos);
+    camShake = 0.35;
+  } else if (ent.type === 'block') {
+    const pts = ent.blockType === 'glass' ? 500 : ent.blockType === 'wood' ? 500 : 200;
+    addScore(pts, pos);
+    const col = BLOCK[ent.blockType].color;
+    spawnBurst(pos, col, ent.blockType === 'glass' ? 18 : 10);
+  }
+
+  scene.remove(ent.mesh);
+  world.removeBody(ent.body);
+}
+
+function addScore(pts, worldPos) {
+  score += pts;
+  scoreEl.textContent = score.toLocaleString();
+  if (worldPos) showFloatingScore(pts, worldPos);
+}
+
+function showFloatingScore(pts, worldPos) {
+  const v = worldPos.clone().project(camera);
+  const x = (v.x * 0.5 + 0.5) * innerWidth;
+  const y = (-v.y * 0.5 + 0.5) * innerHeight;
+  floatingScore.textContent = `+${pts}`;
+  floatingScore.style.left = `${x}px`;
+  floatingScore.style.top = `${y}px`;
+  floatingScore.style.opacity = '1';
+  floatingScore.style.transition = 'none';
+  requestAnimationFrame(() => {
+    floatingScore.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    floatingScore.style.opacity = '0';
+    floatingScore.style.transform = 'translate(-50%, -80px)';
+  });
+  setTimeout(() => {
+    floatingScore.style.transform = 'translate(-50%, 0)';
+  }, 900);
+}
+
+/* ---------- UI ---------- */
+function updateBirdIcons() {
+  birdsPanel.innerHTML = '';
+  const total = LEVELS[levelIndex].birds;
+  const remaining = birdsLeft + (currentBird && !launched ? 0 : 0);
+  // birdsLeft includes the one on sling until launched... we decrement on launch
+  for (let i = 0; i < total; i++) {
+    const icon = document.createElement('div');
+    icon.className = 'bird-icon';
+    const usedCount = total - birdsLeft - (currentBird && !launched ? 1 : 0);
+    if (i < usedCount) icon.classList.add('used');
+    else if (i === usedCount && currentBird && !launched) icon.classList.add('ready');
+    else if (i >= usedCount) icon.classList.add('ready');
+    birdsPanel.appendChild(icon);
+  }
+}
+
+function hideHint() {
+  if (!hintShown) return;
+  hintShown = false;
+  hintEl.classList.add('hidden');
+}
+
+/* ---------- Level Management ---------- */
+function clearLevel() {
+  for (const e of entities) {
+    scene.remove(e.mesh);
+    if (e.body) world.removeBody(e.body);
+  }
+  entities = [];
+  currentBird = null;
+  pigsAlive = 0;
+  particles.forEach(p => {
+    scene.remove(p.mesh);
+  });
+  particles = [];
+  if (trajectoryLine) trajectoryLine.visible = false;
+  waitingSettle = false;
+  levelComplete = false;
+  overlay.classList.remove('visible');
+}
+
+function loadLevel(idx) {
+  clearLevel();
+  levelIndex = idx % LEVELS.length;
+  const lvl = LEVELS[levelIndex];
+  levelTitle.textContent = lvl.name;
+  score = 0;
+  scoreEl.textContent = '0';
+  birdsLeft = lvl.birds;
+  lvl.build();
+  spawnBirdOnSling();
+  camera.position.copy(cameraBase);
+  gameActive = true;
+  launched = false;
+  aiming = false;
+  updateBirdIcons();
+}
+
+function checkLevelEnd() {
+  if (levelComplete || !gameActive) return;
+
+  if (pigsAlive <= 0) {
+    levelComplete = true;
+    waitingSettle = false;
+    // Bonus for leftover birds
+    const leftover = birdsLeft + (currentBird && !launched ? 1 : 0);
+    const bonus = leftover * 10000;
+    if (bonus > 0) {
+      score += bonus;
+      scoreEl.textContent = score.toLocaleString();
+    }
+    setTimeout(() => showResult(true, leftover), 800);
+    return;
+  }
+
+  if (birdsLeft <= 0 && (!currentBird || launched)) {
+    // Wait for settle then fail if pigs remain
+    waitingSettle = true;
+    settledTimer = 0;
+  }
+}
+
+function showResult(won, leftoverBirds = 0) {
+  gameActive = false;
+  resultModal.classList.toggle('fail', !won);
+  resultTitle.textContent = won ? 'Level Cleared!' : 'Level Failed!';
+  resultSub.textContent = won
+    ? `Score: ${score.toLocaleString()}`
+    : 'The pigs are still standing...';
+
+  starEls.forEach(s => s.classList.remove('lit'));
+  if (won) {
+    let stars = 1;
+    if (leftoverBirds >= 1 || score > 15000) stars = 2;
+    if (leftoverBirds >= 2 || score > 30000) stars = 3;
+    setTimeout(() => {
+      for (let i = 0; i < stars; i++) {
+        setTimeout(() => starEls[i].classList.add('lit'), i * 250);
+      }
+    }, 200);
+    nextBtn.style.display = '';
+    nextBtn.textContent = levelIndex >= LEVELS.length - 1 ? 'Play Again' : 'Next Level';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+  overlay.classList.add('visible');
+}
+
+/* ---------- Input ---------- */
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+function getPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  return { clientX, clientY };
+}
+
+function pointerOnBird() {
+  if (!currentBird || launched) return false;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObject(currentBird.mesh, true);
+  // Also allow clicking near slingshot area
+  const dist = raycaster.ray.distanceToPoint(SLING_ORIGIN);
+  return hits.length > 0 || dist < 2.5;
+}
+
+function getPullPoint() {
+  raycaster.setFromCamera(pointer, camera);
+  const hit = new THREE.Vector3();
+  dragPlane.constant = 0; // z=0 plane
+  // Plane: z = 0 → normal (0,0,1), constant 0
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  raycaster.ray.intersectPlane(plane, hit);
+  if (!hit) return SLING_ORIGIN.clone();
+
+  const offset = hit.clone().sub(SLING_ORIGIN);
+  // Prefer pulling left/back
+  if (offset.x > 0.3) offset.x = 0.3;
+  offset.y = Math.max(-1.5, Math.min(1.8, offset.y));
+  offset.z = Math.max(-1.2, Math.min(1.2, offset.z));
+
+  if (offset.length() > MAX_PULL) offset.setLength(MAX_PULL);
+  return SLING_ORIGIN.clone().add(offset);
+}
+
+function onPointerDown(e) {
+  if (!gameActive || !currentBird || launched || levelComplete) return;
+  e.preventDefault();
+  getPointerPos(e);
+  if (!pointerOnBird()) return;
+  aiming = true;
+  canvas.classList.add('aiming');
+  hideHint();
+  powerWrap.classList.add('visible');
+}
+
+function onPointerMove(e) {
+  if (!aiming || !currentBird) return;
+  e.preventDefault();
+  getPointerPos(e);
+  const pos = getPullPoint();
+  pullOffset.copy(pos).sub(SLING_ORIGIN);
+  currentBird.mesh.position.copy(pos);
+  currentBird.body.position.set(pos.x, pos.y, pos.z);
+  updateBands(pos);
+
+  const power = pullOffset.length() / MAX_PULL;
+  powerBar.style.height = `${power * 100}%`;
+
+  // Trajectory
+  const vel = getLaunchVelocity();
+  updateTrajectory(pos, vel);
+
+  // Aim bird face along launch direction
+  const dir = vel.clone().normalize();
+  currentBird.mesh.lookAt(pos.clone().add(dir));
+  currentBird.mesh.rotateY(Math.PI / 2);
+}
+
+function getLaunchVelocity() {
+  const pull = pullOffset.length();
+  if (pull < 0.15) return new THREE.Vector3();
+  const dir = pullOffset.clone().multiplyScalar(-1).normalize();
+  // Bias upward a bit for classic feel
+  dir.y += 0.12;
+  dir.normalize();
+  const power = Math.min(pull / MAX_PULL, 1) * LAUNCH_POWER;
+  return dir.multiplyScalar(power * (0.55 + 0.45 * (pull / MAX_PULL)));
+}
+
+function onPointerUp(e) {
+  if (!aiming || !currentBird) return;
+  e.preventDefault();
+  aiming = false;
+  canvas.classList.remove('aiming');
+  powerWrap.classList.remove('visible');
+  if (trajectoryLine) trajectoryLine.visible = false;
+
+  const pull = pullOffset.length();
+  if (pull < 0.4) {
+    // Snap back
+    currentBird.mesh.position.copy(SLING_ORIGIN);
+    currentBird.body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
+    updateBands(SLING_ORIGIN);
+    pullOffset.set(0, 0, 0);
+    return;
+  }
+
+  launchBird();
+}
+
+function launchBird() {
+  const vel = getLaunchVelocity();
+  launched = true;
+  currentBird.flying = true;
+  currentBird.body.type = CANNON.Body.DYNAMIC;
+  currentBird.body.velocity.set(vel.x, vel.y, vel.z);
+  // Spin
+  currentBird.body.angularVelocity.set(0, 0, -8 - Math.random() * 4);
+  currentBird.body.wakeUp();
+
+  birdsLeft--;
+  updateBirdIcons();
+  updateBands(SLING_ORIGIN);
+  sling.pouch.position.copy(SLING_ORIGIN);
+
+  waitingSettle = true;
+  settledTimer = 0;
+
+  // Elastic band snap visual — briefly pull pouch
+  camShake = 0.12;
+}
+
+canvas.addEventListener('mousedown', onPointerDown);
+canvas.addEventListener('mousemove', onPointerMove);
+window.addEventListener('mouseup', onPointerUp);
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+window.addEventListener('touchend', onPointerUp);
+
+/* ---------- Buttons ---------- */
+playBtn.addEventListener('click', () => {
+  titleScreen.classList.add('hidden');
+  loadLevel(0);
+});
+
+retryBtn.addEventListener('click', () => {
+  overlay.classList.remove('visible');
+  loadLevel(levelIndex);
+});
+
+nextBtn.addEventListener('click', () => {
+  overlay.classList.remove('visible');
+  if (levelIndex >= LEVELS.length - 1) loadLevel(0);
+  else loadLevel(levelIndex + 1);
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ---------- Sync & Settle ---------- */
+function syncMeshes() {
+  for (const e of entities) {
+    if (e.broken) continue;
+    if (e.type === 'bird' && !e.flying) continue;
+    e.mesh.position.copy(e.body.position);
+    e.mesh.quaternion.copy(e.body.quaternion);
+
+    // Kill pigs that fall below ground hard / off map
+    if (e.type === 'pig' && e.body.position.y < -2) {
+      destroyEntity(e);
+    }
+    if (e.type === 'block' && e.body.position.y < -3) {
+      destroyEntity(e);
+    }
+    // Bird fell off
+    if (e.type === 'bird' && e.flying && (e.body.position.y < -5 || e.body.position.x > 55)) {
+      e.life = 0;
+    }
+  }
+}
+
+function isWorldSettled() {
+  let maxSpeed = 0;
+  for (const e of entities) {
+    if (e.broken) continue;
+    if (e.type === 'bird' && !e.flying) continue;
+    const sp = e.body.velocity.length();
+    maxSpeed = Math.max(maxSpeed, sp);
+  }
+  return maxSpeed < 0.55;
+}
+
+function afterBirdSettled() {
+  // Remove spent bird
+  if (currentBird && currentBird.flying) {
+    const b = currentBird;
+    setTimeout(() => {
+      if (!b.broken) {
+        scene.remove(b.mesh);
+        world.removeBody(b.body);
+        b.broken = true;
+      }
+    }, 400);
+    currentBird = null;
+  }
+
+  if (pigsAlive <= 0) {
+    checkLevelEnd();
+    return;
+  }
+
+  if (birdsLeft > 0) {
+    setTimeout(() => {
+      if (!levelComplete) spawnBirdOnSling();
+    }, 500);
+    waitingSettle = false;
+  } else {
+    checkLevelEnd();
+    if (pigsAlive > 0) {
+      setTimeout(() => {
+        if (pigsAlive > 0 && !levelComplete) showResult(false);
+      }, 1000);
+    }
+  }
+}
+
+/* ---------- Camera ---------- */
+function updateCamera(dt) {
+  let target = cameraBase.clone();
+  let look = cameraLook.clone();
+
+  if (currentBird && currentBird.flying) {
+    const bp = currentBird.mesh.position;
+    target.x = THREE.MathUtils.clamp(bp.x * 0.35 + cameraBase.x, -2, 12);
+    target.y = THREE.MathUtils.clamp(bp.y * 0.3 + cameraBase.y, 6, 14);
+    look.x = THREE.MathUtils.clamp(bp.x * 0.5 + 4, 4, 18);
+    look.y = Math.max(2, bp.y * 0.3 + 2);
+  }
+
+  if (camShake > 0) {
+    target.x += (Math.random() - 0.5) * camShake * 2;
+    target.y += (Math.random() - 0.5) * camShake * 2;
+    camShake *= 0.9;
+    if (camShake < 0.01) camShake = 0;
+  }
+
+  camera.position.lerp(target, 1 - Math.pow(0.001, dt));
+  const curLook = new THREE.Vector3();
+  camera.getWorldDirection(curLook);
+  const desired = look.clone().sub(camera.position).normalize();
+  // Simple lookAt
+  camera.lookAt(look);
+}
+
+/* ---------- Init & Loop ---------- */
+buildSky();
+buildGround();
+createTrajectory();
+setupCollisions();
+updateBands(SLING_ORIGIN);
+
+const clock = new THREE.Clock();
+let accumulator = 0;
+const FIXED_DT = 1 / 60;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (gameActive) {
+    accumulator += dt;
+    while (accumulator >= FIXED_DT) {
+      world.step(FIXED_DT);
+      accumulator -= FIXED_DT;
+    }
+
+    syncMeshes();
+    updateParticles(dt);
+    updateCamera(dt);
+
+    // Band when aiming / idle
+    if (currentBird && !launched) {
+      updateBands(currentBird.mesh.position);
+    }
+
+    // Damage pigs from high speed / crushing
+    for (const e of entities) {
+      if (e.broken || e.type !== 'pig') continue;
+      const speed = e.body.velocity.length();
+      if (speed > 10) {
+        e.hp -= (speed - 10) * 0.5;
+        if (e.hp <= 0) destroyEntity(e);
+      }
+      // Upside down / tumbled a lot
+      const up = new CANNON.Vec3(0, 1, 0);
+      e.body.quaternion.vmult(up, up);
+      if (up.y < -0.3 && speed > 1.5) {
+        e.hp -= 8 * dt;
+        if (e.hp <= 0) destroyEntity(e);
+      }
+    }
+
+    if (waitingSettle && launched) {
+      settledTimer += dt;
+      const birdSlow = !currentBird || !currentBird.flying ||
+        currentBird.body.velocity.length() < 0.8 ||
+        currentBird.body.position.y < 0.5 && currentBird.body.velocity.length() < 2;
+
+      if (settledTimer > 1.2 && birdSlow && isWorldSettled()) {
+        waitingSettle = false;
+        afterBirdSettled();
+      } else if (settledTimer > 5.5) {
+        waitingSettle = false;
+        afterBirdSettled();
+      }
+    }
+
+    checkLevelEnd();
+  } else {
+    updateParticles(dt);
+  }
+
+  // Idle camera sway on title
+  if (!gameActive && !titleScreen.classList.contains('hidden')) {
+    const t = clock.elapsedTime;
+    camera.position.set(-2 + Math.sin(t * 0.3) * 1.5, 8 + Math.sin(t * 0.4) * 0.5, 22);
+    camera.lookAt(8, 3, 0);
+  }
+
+  renderer.render(scene, camera);
+}
+
+animate();
+  </script>
+</body>
+</html>
