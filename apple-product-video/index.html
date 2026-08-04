@@ -2097,14 +2097,19 @@ const startPlayback = async (fromFrame = 0) => {
 const bindStart = (el) => {
   el.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     startPlayback(0);
   });
 };
 bindStart(document.getElementById('play-btn'));
 bindStart(document.getElementById('replay-btn'));
 // Whole overlay is also a hit target (thin letterspaced type is easy to miss)
-bindStart(playOverlay);
-bindStart(replayOverlay);
+playOverlay.addEventListener('click', (e) => {
+  if (e.target === playOverlay) startPlayback(0);
+});
+replayOverlay.addEventListener('click', (e) => {
+  if (e.target === replayOverlay) startPlayback(0);
+});
 
 muteBtn.addEventListener('click', () => {
   muted = !muted;
