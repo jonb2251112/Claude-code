@@ -890,7 +890,7 @@ kbd{
   overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   overscroll-behavior:contain;padding-right:2px;
 }
-#journey.sheet .body{
+#journey.sheet > .body{
   width:min(94vw,460px);flex:1 1 auto;min-height:140px;
   max-height:none !important;
 }
@@ -1716,12 +1716,14 @@ kbd{
   #metarow{font-size:10px;letter-spacing:.1em;flex-wrap:wrap;justify-content:center;}
   #xpbar{width:min(92vw,320px);height:8px;}
   #looprail{
-    display:flex;flex-direction:column;gap:6px;
-    width:min(100%,420px);flex:0 0 auto;margin:2px 0;
+    display:grid;grid-template-columns:1fr 1fr;gap:6px;
+    width:min(100%,420px);flex:0 0 auto;margin:2px 0;align-items:stretch;
   }
   #hourlycrate, #mysterydeal, #streakvaultchip, #echonest{
-    padding:8px 10px;border-radius:12px;gap:8px;
+    padding:8px 10px;border-radius:12px;gap:8px;min-width:0;
   }
+  #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{display:none;}
+  #sniperfeed, #chipbank{grid-column:1 / -1;}
   #hourlycrate .ico, #mysterydeal .ico, #streakvaultchip .ico, #echonest .ico{
     width:34px;height:34px;font-size:8px;border-radius:10px;flex-shrink:0;
   }
@@ -1824,26 +1826,51 @@ kbd{
     background:rgba(12,38,62,.62);
   }
   #journey.sheet .head{width:min(100%,100%);max-width:none;}
+  #journey.sheet{
+    display:flex;flex-direction:column;justify-content:flex-start;
+    height:100%;max-height:100dvh;overflow:hidden;
+  }
+  #journey.sheet .head{flex:0 0 auto;width:100%;max-width:none;padding:10px 12px 6px;}
   #j-hero{
     width:100%;max-width:none;
-    max-height:min(36dvh, 260px);
-    padding:0 12px;gap:5px;margin-bottom:4px;
-  }
-  #j-mascot{transform:scale(.9);transform-origin:center bottom;}
-  #j-drops, #j-social, #j-heat, #j-flash{display:none !important;}
-  #j-vault{padding:7px 8px;gap:8px;}
-  #j-vault .go{min-height:40px;padding:8px 12px;}
-  #j-actions{
-    position:sticky;bottom:0;z-index:4;
-    display:grid;grid-template-columns:1fr 1fr;gap:8px;
-    width:100%;padding:8px 0 4px;
-    background:linear-gradient(180deg, transparent, rgba(12,38,62,.35) 24%);
-  }
-  #j-actions .btn{min-height:var(--touch);width:100%;font-size:11px;padding:10px 8px;}
-  #journey.sheet .body{
-    width:100%;max-width:none;flex:1 1 auto;min-height:0;
+    flex:0 0 auto !important;
     max-height:none !important;
-    padding:6px 10px calc(72px + env(safe-area-inset-bottom, 0px));
+    overflow:visible !important;
+    padding:0 10px;gap:5px;margin-bottom:4px;
+  }
+  /* Keep the pass list dominant — collapse secondary FOMO chrome on phones */
+  #j-mascot, #j-value, #j-dangle, #j-feed, #j-claimpulse, #j-lanes,
+  #j-drops, #j-social, #j-heat, #j-flash, #j-vipbar{display:none !important;}
+  #j-fomo{padding:6px 10px;border-radius:12px;gap:1px;}
+  #j-fomo .scare{display:none;}
+  #j-fomo .clock{font-size:13px;}
+  #j-progress{gap:2px;margin:0;}
+  #j-progress .row{font-size:10px;}
+  #j-progress .bar{height:7px;}
+  #j-progress .fillhint, #j-progress .neartag{display:none;}
+  #j-vault{padding:6px 8px;gap:6px;}
+  #j-vault .ico{width:30px;height:30px;border-radius:10px;}
+  #j-vault .t{font-size:11px;}
+  #j-vault .s{font-size:8px;}
+  #j-vault .go{min-height:36px;padding:6px 10px;font-size:11px;}
+  #j-actions{
+    position:static;
+    display:flex;flex-wrap:nowrap;gap:6px;
+    width:100%;padding:2px 0 4px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x;
+    scrollbar-width:none;
+  }
+  #j-actions::-webkit-scrollbar{display:none;}
+  #j-actions .btn{
+    flex:0 0 auto;min-height:40px;width:auto;min-width:112px;
+    font-size:11px;padding:8px 12px;white-space:nowrap;
+  }
+  #journey.sheet > .body{
+    width:100%;max-width:none;
+    flex:1 1 auto !important;min-height:0;
+    max-height:none !important;
+    padding:4px 10px calc(16px + env(safe-area-inset-bottom, 0px));
+    overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   }
   .jtier{gap:5px;padding:5px;border-radius:12px;}
   .jtier .num{font-size:12px;}
@@ -1866,26 +1893,28 @@ kbd{
   #title{font-size:clamp(30px,10vw,44px);}
   #tagline,#tapcue{display:none;}
   #startstats,#metarow{font-size:9px;}
-  #looprail{
-    display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:stretch;
-  }
-  #hourlycrate .h, #mysterydeal .h, #streakvaultchip .h, #echonest .h{display:none;}
   #hourlycrate .k, #mysterydeal .k, #streakvaultchip .k, #echonest .k{font-size:8px;}
   #hourlycrate .n, #mysterydeal .n, #streakvaultchip .n, #echonest .n{font-size:12px;}
-  #sniperfeed,#chipbank{grid-column:1 / -1;}
-  #j-hero{max-height:min(28dvh,200px);}
-  #j-vipbar{padding:8px 10px;}
-  #j-vipbar .t{font-size:12px;}
+  #gift,#loginstreak,#restbonus{padding:3px 8px;font-size:10px;}
+  #sniperfeed{display:none !important;}
   .sheet .body{max-height:min(55dvh, calc(100dvh - 140px));}
+  #journey.sheet > .body{max-height:none !important;}
 }
 
 @media (max-width:380px){
   #title{font-size:32px;}
-  .menugrid .btn.ghost{flex:1 1 calc(50% - 6px);font-size:10px;padding:9px 4px;}
+  #startstats,#metarow{font-size:9px;letter-spacing:.08em;}
+  #gift,#loginstreak,#restbonus{font-size:9px;padding:3px 8px;}
+  .menugrid{gap:5px;}
+  .menugrid .btn.ghost{
+    flex:1 1 calc(33.33% - 5px);min-width:0;max-width:none;
+    font-size:10px;padding:8px 4px;min-height:40px;
+  }
   #dpad{width:min(54vw,168px);}
   #powers,#dopafuse{max-width:36vw;width:min(36vw,130px);}
   #wagerchip{width:min(42vw,150px);bottom:calc(var(--safe-b) + 188px);}
-  #j-actions{grid-template-columns:1fr;}
+  #j-actions .btn{min-width:100px;padding:8px 10px;}
+  #chipbank{font-size:9px;}
 }
 
 @media (orientation:landscape) and (max-height:480px){
