@@ -46,17 +46,22 @@ persist in `localStorage`.
   rarity, revealed with a sunburst and worn immediately. The character sheet
   shows portraits rendered off-screen from the real geometry, viewed from the
   front — the only place in the game you get to see a critter's face.
-- **Awards.** Twenty-six of them, tracking distance, coins, log rows, railways,
+- **Awards.** Twenty-nine of them, tracking distance, coins, log rows, railways,
   near misses, streaks, hops, runs, the size of your collection, the number of
-  distinct ways you have died, revives, fever peaks, daily challenges and login
-  streaks. Each announces itself as it lands, and the score card dangles
+  distinct ways you have died, revives, every fever tier, daily challenges and
+  login streaks. Each announces itself as it lands, and the score card dangles
   whichever one you are closest to.
 - **Streaks.** Hops that land within 1.15 s of the last one chain; every tenth
   link pays a coin. The chip under the score turns red at ten.
-- **Fever.** Chain ten hops and coins pay double — twenty and they pay triple.
-  The streak chip goes gold, a multiplier pip appears next to your purse, and a
-  nearby coin on the same grass row snaps into your beak. Break the chain and
-  the heat dies.
+- **Fever ladder.** Six heat levels climb with your streak:
+  - **Warm Up** (5) — the chip catches fire
+  - **Fever** (10) — ×2 coins, magnet pulls adjacent coins
+  - **Super Fever** (18) — ×3, traffic eases, snappier hops
+  - **Mega Fever** (28) — ×4, magnet range 2, coin rain
+  - **Ultra Fever** (40) — ×5, deeper slow-mo, lucky free coins
+  - **Overdrive** (55) — ×7, magnet 3, rainbow chaos
+  Each upgrade flashes, rains confetti, and pays a heat bonus. Break the chain
+  and the heat dies.
 - **Second chance.** Die with at least 25 coins and the score card offers one
   revive per run. You keep your score, blink back onto safe grass with a short
   free pass, and hop on.

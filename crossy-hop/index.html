@@ -134,8 +134,20 @@ html,body{
 }
 #streak .lbl{font-size:9px;letter-spacing:.16em;text-transform:uppercase;opacity:.9;}
 #streak.hot{background:linear-gradient(#ff6a3c,#e02b2b);}
+#streak.warm{background:linear-gradient(#ffb347,#ff8c42);color:#fff;
+  box-shadow:0 3px 0 rgba(150,60,10,.4);}
 #streak.fever{background:linear-gradient(#ffe07a,#ff9a1a);color:#3c2500;
   box-shadow:0 3px 0 #c07800, 0 0 18px rgba(255,201,60,.55);}
+#streak.super{background:linear-gradient(#ff9a3c,#e02b2b);color:#fff;
+  box-shadow:0 3px 0 #9a1818, 0 0 20px rgba(255,80,40,.5);}
+#streak.mega{background:linear-gradient(#c084fc,#7c3aed);color:#fff;
+  box-shadow:0 3px 0 #5b21b6, 0 0 22px rgba(168,85,247,.55);}
+#streak.ultra{background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;
+  box-shadow:0 3px 0 #0e7490, 0 0 24px rgba(34,211,238,.55);}
+#streak.overdrive{background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c084fc);
+  background-size:200% 100%;color:#1a1025;animation:streakpop .3s ease, rainbowslide 1.2s linear infinite;
+  box-shadow:0 3px 0 #3b0764, 0 0 26px rgba(255,201,60,.65);}
+@keyframes rainbowslide{0%{background-position:0% 50%;}100%{background-position:200% 50%;}}
 #streak.hidden{display:none;}
 #streak.pop{animation:streakpop .3s ease;}
 @keyframes streakpop{0%{transform:scale(1);}40%{transform:scale(1.22);}100%{transform:scale(1);}}
@@ -149,6 +161,30 @@ html,body{
 }
 #multchip.hidden{display:none;}
 #multchip.pop{animation:streakpop .35s ease;}
+#multchip.mega{background:linear-gradient(#e9d5ff,#a855f7);color:#fff;box-shadow:0 3px 0 #6b21a8;}
+#multchip.ultra{background:linear-gradient(#a5f3fc,#06b6d4);color:#083344;box-shadow:0 3px 0 #0e7490;}
+#multchip.overdrive{background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff);
+  background-size:200% 100%;animation:rainbowslide 1s linear infinite;color:#1a1025;}
+
+#combo.warm .n{color:#ffb347;}
+#combo.fever .n{color:var(--gold);text-shadow:0 4px 0 var(--gold-dk), 0 0 28px rgba(255,201,60,.65);}
+#combo.super .n{color:#ff6a3c;text-shadow:0 4px 0 #9a1818, 0 0 28px rgba(255,80,40,.55);}
+#combo.mega .n{color:#e9d5ff;text-shadow:0 4px 0 #5b21b6, 0 0 28px rgba(168,85,247,.55);}
+#combo.ultra .n{color:#67e8f9;text-shadow:0 4px 0 #0e7490, 0 0 28px rgba(34,211,238,.55);}
+#combo.overdrive .n{
+  background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c084fc);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(0 3px 0 rgba(18,52,80,.35));
+}
+.toast.warm{color:#ffb347;}
+.toast.mega{color:#e9d5ff;font-size:clamp(22px,7vw,32px);}
+.toast.ultra{color:#67e8f9;font-size:clamp(22px,7vw,32px);}
+.toast.overdrive{font-size:clamp(24px,8vw,36px);
+  background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+#flash.mega{background:radial-gradient(circle at 50% 55%, #c084fc, transparent 62%);}
+#flash.ultra{background:radial-gradient(circle at 50% 55%, #67e8f9, transparent 62%);}
+#flash.overdrive{background:radial-gradient(circle at 50% 50%, #ffe07a, #c084fc 40%, transparent 65%);}
 
 /* Award / new-best badge that slides down from the top. */
 #badges{
@@ -708,7 +744,7 @@ kbd{
   <div id="awards" class="screen sheet hidden">
     <div class="head">
       <h2>Awards</h2>
-      <span class="count" id="a-count">0 / 26</span>
+      <span class="count" id="a-count">0 / 29</span>
       <button class="close-btn" data-close="awards" aria-label="Close">✕</button>
     </div>
     <div class="body"><div class="awards" id="a-list"></div></div>
@@ -829,9 +865,10 @@ const CFG = {
   /* --- progression juice --- */
   REVIVE_COST:     25,     // coins for one second chance per run
   REVIVE_IFRAME:   1.8,    // seconds of invulnerability after a revive
-  FEVER_AT:        10,     // streak that doubles coin payouts
-  FEVER_SUPER:     20,     // streak that triples them
   STREAK_WINDOW:   1.15,   // seconds between hops that keep the chain alive
+  /* Fever tiers live in FEVERS[]; these are the first paid tier thresholds. */
+  FEVER_AT:        10,
+  FEVER_SUPER:     18,
 
   /* --- dopamine / juice --- */
   CAM_KICK:        0.55,   // orthographic zoom punch amplitude
@@ -2138,7 +2175,7 @@ function updateTraffic(dt, focus){
       const ry = row.dir > 0 ? 0 : Math.PI;
       let minX = Infinity, maxX = -Infinity;
       for(const v of row.vehicles){
-        v.x += row.dir * row.speed * dt;
+        v.x += row.dir * row.speed * dt * (run.feverSlow || 1);
         if(v.x < minX) minX = v.x;
         if(v.x > maxX) maxX = v.x;
       }
@@ -2168,7 +2205,7 @@ function updateTraffic(dt, focus){
       if(row.logs && row.logs.length){
         let minX = Infinity, maxX = -Infinity;
         for(const l of row.logs){
-          l.x += row.dir * row.speed * dt;
+          l.x += row.dir * row.speed * dt * (run.feverSlow || 1);
           if(l.x < minX) minX = l.x;
           if(l.x > maxX) maxX = l.x;
         }
@@ -2205,7 +2242,7 @@ function updateTraffic(dt, focus){
         if(r.t <= 0){ r.state = 'run'; r.x = -r.dir * (SPAN + TRAIN_HALF + 2); }
       } else {
         r.blink += dt;
-        r.x += r.dir * CFG.TRAIN_SPEED * dt;
+        r.x += r.dir * CFG.TRAIN_SPEED * dt * (run.feverSlow || 1);
         if(draw && Math.abs(r.x - cam.x) < xLim + TRAIN_HALF)
           trainBatch.push(r.x, row.top + 0.04, z, 1,1,1, r.dir > 0 ? 0 : Math.PI);
         if(Math.abs(r.x) > SPAN + TRAIN_HALF + 2){ r.state = 'idle'; r.t = randf(2.2, 6.4); }
@@ -2390,12 +2427,12 @@ function landed(){
     player.y = row.top + (worn().float || 0);
     player.ride = null;
     Sfx.land(); Sfx.thump();
-    landRing(player.x, player.y, player.z, perfect ? 'mint' : (run.fever ? 'gold' : ''));
+    landRing(player.x, player.y, player.z, perfect ? 'mint' : (run.feverId ? 'gold' : ''));
     if(row.type === 'rail' && !row.credited){ row.credited = true; stats.rails++; run.rails++; tickQuests(); }
     // Fever magnet: a coin one column away snaps into your beak.
     if(row.coin != null && !row.coinTaken){
       const dist = Math.abs(row.coin - player.col);
-      if(dist === 0 || (run.fever && dist <= 1)){
+      if(dist === 0 || (run.magnet > 0 && dist <= run.magnet)){
         row.coinTaken = true;
         const pay = run.coinMult;
         Sfx.coin();
@@ -2434,7 +2471,6 @@ function landed(){
     onProgress(perfect);
   } else {
     run.streak = 0;
-    _feverTier = 0;
     endFever();
     hudStreak();
     hideCombo();
@@ -2482,7 +2518,7 @@ function updatePlayer(dt){
       avatar.visible = true;
     }
     if(player.hopping){
-      player.hopT += dt / CFG.HOP_TIME;
+      player.hopT += dt / (CFG.HOP_TIME * (run.hopScale || 1));
       if(player.hopT >= 1){ player.hopT = 1; landed(); }
     }
     if(player.ride && !player.hopping){
@@ -2708,8 +2744,11 @@ const AWARDS = [
   { id:'allDeaths', name:'Every Which Way',hint:'Meet all 7 ends',              goal:7,    get:()=>Object.keys(stats.deaths).length },
   { id:'revive1',   name:'Comeback Kid',   hint:'Take a second chance',         goal:1,    get:()=>stats.revives },
   { id:'revive9',   name:'Nine Lives',     hint:'Revive 9 times',               goal:9,    get:()=>stats.revives },
-  { id:'fever1',    name:'Fever Dream',    hint:'Enter fever mode',             goal:10,   get:()=>stats.feverPeak },
-  { id:'fever20',   name:'Super Fever',    hint:'Chain 20 hops in fever',       goal:20,   get:()=>stats.feverPeak },
+  { id:'fever1',    name:'Fever Dream',    hint:'Enter Fever',                  goal:10,   get:()=>stats.feverPeak },
+  { id:'fever18',   name:'Super Heated',   hint:'Reach Super Fever',            goal:18,   get:()=>stats.feverPeak },
+  { id:'fever28',   name:'Mega Meltdown',  hint:'Reach Mega Fever',             goal:28,   get:()=>stats.feverPeak },
+  { id:'fever40',   name:'Ultra Instinct', hint:'Reach Ultra Fever',            goal:40,   get:()=>stats.feverPeak },
+  { id:'fever55',   name:'Overdrive',      hint:'Reach Overdrive',              goal:55,   get:()=>stats.feverPeak },
   { id:'quest10',   name:'Daily Driver',   hint:'Finish 10 daily challenges',   goal:10,   get:()=>stats.questDone },
   { id:'loyal7',    name:'Loyal Hopper',   hint:'Log in 7 days in a row',       goal:7,    get:()=>stats.loginStreak },
 ];
@@ -2735,7 +2774,8 @@ function checkAwards(silent){
 /* --- run-scoped feedback ---------------------------------------------------- */
 const run = {
   streak: 0, lastHopT: -9, nearT: -9, milestone: 0, beatBest: false, gateRow: 0,
-  revived: false, fever: false, coinMult: 1,
+  revived: false, fever: false, coinMult: 1, feverId: '',
+  magnet: 0, feverSlow: 1, hopScale: 1, feverLuck: 0, feverRain: 0,
   coins: 0, rails: 0, logs: 0, nears: 0, perfects: 0,
 };
 
@@ -2744,50 +2784,161 @@ function resetRun(){
   run.milestone = 0; run.beatBest = false;
   run.gateRow = stats.best;
   run.revived = false; run.fever = false; run.coinMult = 1;
+  run.feverId = ''; run.magnet = 0; run.feverSlow = 1; run.hopScale = 1;
+  run.feverLuck = 0; run.feverRain = 0;
   run.coins = 0; run.rails = 0; run.logs = 0; run.nears = 0;
   run.perfects = 0;
-  _feverTier = 0;
+  _feverId = '';
   hudMult();
   hideCombo();
 }
 
-function endFever(){
-  if(run.fever) run.fever = false;
-  run.coinMult = 1;
-  _feverTier = 0;
-  hudMult();
+/* --- fever ladder ---------------------------------------------------------
+ * Six named heat levels. Each one stacks a coin multiplier with a gameplay
+ * perk so climbing the streak feels like unlocking new powers, not just
+ * watching a number go up.
+ *   warm      — visual heat, tiny magnet tease
+ *   fever     — ×2 coins, magnet 1
+ *   super     — ×3, traffic eases, snappier hops
+ *   mega      — ×4, magnet 2, bonus coin rain
+ *   ultra     — ×5, stronger slow-mo, lucky landings
+ *   overdrive — ×7, magnet 3, rainbow chaos
+ * -------------------------------------------------------------------------- */
+const FEVERS = [
+  { id:'warm',      at:5,  mult:1, magnet:0, slow:1.00, hop:1.00, luck:0,    rain:0,
+    name:'Warm Up',     tag:'warming up',  flash:'gold', toastKind:'warm',
+    hint:'coins start to glow',
+    colors:['#ffb347','#ff8c42','#ffe07a'], chip:'warm' },
+  { id:'fever',     at:10, mult:2, magnet:1, slow:1.00, hop:0.96, luck:0,    rain:0,
+    name:'Fever',       tag:'fever',       flash:'gold', toastKind:'fever',
+    hint:'coins pay double',
+    colors:['#ffc93c','#ffe07a','#ff9a3c','#fff6cf'], chip:'fever' },
+  { id:'super',     at:18, mult:3, magnet:1, slow:0.88, hop:0.90, luck:0.06, rain:0,
+    name:'Super Fever', tag:'super fever', flash:'gold', toastKind:'fever',
+    hint:'×3 · traffic eases',
+    colors:['#ff9a3c','#ff6a3c','#ffe07a','#ffffff'], chip:'super' },
+  { id:'mega',      at:28, mult:4, magnet:2, slow:0.80, hop:0.86, luck:0.12, rain:4,
+    name:'Mega Fever',  tag:'mega fever',  flash:'mega', toastKind:'mega',
+    hint:'×4 · wide magnet · coin rain',
+    colors:['#c084fc','#e9d5ff','#ffc93c','#ffffff'], chip:'mega' },
+  { id:'ultra',     at:40, mult:5, magnet:2, slow:0.72, hop:0.82, luck:0.18, rain:3,
+    name:'Ultra Fever', tag:'ultra fever', flash:'ultra', toastKind:'ultra',
+    hint:'×5 · slow-mo · lucky landings',
+    colors:['#67e8f9','#a5f3fc','#ffffff','#ffc93c'], chip:'ultra' },
+  { id:'overdrive', at:55, mult:7, magnet:3, slow:0.65, hop:0.78, luck:0.28, rain:2,
+    name:'Overdrive',   tag:'overdrive',   flash:'overdrive', toastKind:'overdrive',
+    hint:'×7 · rainbow chaos',
+    colors:['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c084fc','#ffffff'], chip:'overdrive' },
+];
+
+function feverForStreak(n){
+  let best = null;
+  for(const f of FEVERS) if(n >= f.at) best = f;
+  return best;
+}
+function feverIndex(id){
+  if(!id) return -1;
+  return FEVERS.findIndex(f => f.id === id);
 }
 
-let _feverTier = 0;
-function updateFeverTier(){
-  const tier = run.streak >= CFG.FEVER_SUPER ? 3 : run.streak >= CFG.FEVER_AT ? 2 : 0;
-  if(tier === _feverTier){
-    if(tier === 0) return;
-    run.coinMult = tier;
+function applyFeverState(f){
+  if(!f){
+    run.fever = false;
+    run.feverId = '';
+    run.coinMult = 1;
+    run.magnet = 0;
+    run.feverSlow = 1;
+    run.hopScale = 1;
+    run.feverLuck = 0;
+    run.feverRain = 0;
     return;
   }
-  const prev = _feverTier;
-  _feverTier = tier;
-  if(tier === 0){ endFever(); return; }
-  run.fever = true;
-  run.coinMult = tier;
-  if(prev === 0){
-    badge(tier >= 3 ? 'Super fever!' : 'Fever!', tier >= 3 ? 'coins pay triple' : 'coins pay double');
-    Sfx.fever();
-    buzz([12, 40, 12, 40, 18]);
-    flashScreen('gold');
-    burstConfetti(28, ['#ffc93c','#ffe07a','#ff9a3c','#fff6cf']);
-    camKick(0.55);
-    toast(tier >= 3 ? 'SUPER FEVER' : 'FEVER', player.x, player.y + 1.2, player.z, 'fever');
-  } else if(tier > prev){
-    badge('Super fever!', 'coins pay triple');
-    Sfx.fever();
-    flashScreen('gold');
-    burstConfetti(36, ['#ffc93c','#ffe07a','#fff6cf','#ffffff']);
-    camKick(0.7);
-    toast('SUPER FEVER', player.x, player.y + 1.2, player.z, 'fever');
+  run.fever = f.mult > 1 || f.id === 'warm';
+  run.feverId = f.id;
+  run.coinMult = f.mult;
+  run.magnet = f.magnet;
+  run.feverSlow = f.slow;
+  run.hopScale = f.hop;
+  run.feverLuck = f.luck;
+  run.feverRain = f.rain;
+}
+
+function endFever(){
+  const was = run.feverId;
+  applyFeverState(null);
+  _feverId = '';
+  hudMult();
+  hudStreak();
+  if(was) hideCombo();
+}
+
+let _feverId = '';
+function enterFever(f, prevId){
+  applyFeverState(f);
+  const first = !prevId;
+  const upgrade = feverIndex(f.id) > feverIndex(prevId);
+  if(!first && !upgrade){ hudMult(); return; }
+
+  const sub = f.hint;
+  badge(f.name + '!', sub);
+  Sfx.fever();
+  // Higher tiers get a thicker buzz pattern.
+  const rank = feverIndex(f.id);
+  buzz(rank >= 4 ? [14, 35, 14, 35, 14, 50, 20] : rank >= 2 ? [12, 40, 12, 40, 18] : [10, 30, 10]);
+  flashScreen(f.flash);
+  burstConfetti(22 + rank * 8, f.colors);
+  camKick(0.4 + rank * 0.12);
+  toast(f.name.toUpperCase(), player.x, player.y + 1.2, player.z, f.toastKind);
+  // A free coin burst on every new tier so the upgrade always pays.
+  if(f.mult > 1){
+    const pay = f.mult;
+    addCoins(pay);
+    run.coins += pay;
+    flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 5));
+    toast(`+${pay} heat`, player.x, player.y + 1.45, player.z, 'big');
   }
   hudMult();
+  hudStreak();
+  showCombo(run.streak);
+}
+
+function updateFeverTier(){
+  const f = feverForStreak(run.streak);
+  const id = f ? f.id : '';
+  if(id === _feverId){
+    if(f) applyFeverState(f);
+    return;
+  }
+  const prev = _feverId;
+  _feverId = id;
+  if(!f){ endFever(); return; }
+  enterFever(f, prev);
+}
+
+/** Bonus coin rain while mega+ fever is live. */
+function feverRainTick(){
+  if(!run.feverRain || run.feverRain <= 0) return;
+  if(run.streak % run.feverRain !== 0) return;
+  const pay = Math.max(1, run.coinMult - 1);
+  addCoins(pay);
+  run.coins += pay;
+  toast(`rain +${pay}`, player.x, player.y + 1.1, player.z, 'big');
+  flyCoins(player.x, player.y + 0.55, player.z, Math.min(pay, 4));
+  spawnFeathers(player.x, player.y + 0.4, player.z, 6, COIN_C, 0.7);
+  Sfx.cascade(Math.min(pay, 4));
+  camKick(0.2);
+}
+
+/** Lucky landing: chance of a free coin on any progress hop during high fever. */
+function feverLuckTick(){
+  if(!(run.feverLuck > 0) || !chance(run.feverLuck)) return;
+  const pay = Math.max(1, run.coinMult);
+  addCoins(pay);
+  run.coins += pay;
+  toast(`lucky +${pay}`, player.x, player.y + 1.25, player.z, 'big');
+  flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 3));
+  landRing(player.x, player.y, player.z, 'gold');
+  Sfx.coin();
 }
 
 /** Called on every hop that lands on a new furthest row. */
@@ -2802,6 +2953,8 @@ function onProgress(perfect){
     hudStreak();
     showCombo(run.streak);
   }
+  feverRainTick();
+  feverLuckTick();
   if(run.streak > 0 && run.streak % 10 === 0){
     const pay = run.coinMult;
     addCoins(pay);
@@ -2886,7 +3039,10 @@ const QUEST_POOL = [
   { id:'rails2',   name:'Track Hopper',     hint:'Cross 2 railways in one run',   goal:2,  reward:12, get:()=>run.rails },
   { id:'nears3',   name:'Brush With Death', hint:'Survive 3 near misses in a run',goal:3,  reward:14, get:()=>run.nears },
   { id:'streak15', name:'Keep Hopping',     hint:'Chain a streak of 15',          goal:15, reward:16, get:()=>run.streak },
-  { id:'fever',    name:'Catch Fire',       hint:'Enter fever mode',              goal:10, reward:15, get:()=>run.streak },
+  { id:'fever',    name:'Catch Fire',       hint:'Enter Fever',                   goal:10, reward:15, get:()=>run.streak },
+  { id:'super',    name:'Heat Wave',        hint:'Reach Super Fever',             goal:18, reward:20, get:()=>run.streak },
+  { id:'mega',     name:'Meltdown',         hint:'Reach Mega Fever',              goal:28, reward:28, get:()=>run.streak },
+  { id:'ultra',    name:'Blue Hot',         hint:'Reach Ultra Fever',             goal:40, reward:36, get:()=>run.streak },
 ];
 
 function ensureQuests(){
@@ -3034,7 +3190,6 @@ function doRevive(){
   avatar.rotation.set(0,0,0);
   avatar.position.set(player.x, player.y, player.z);
 
-  _feverTier = 0;
   endFever();
   run.streak = 0;
   hudStreak();
@@ -3288,22 +3443,36 @@ const hudCoins = (punch)=>{
   }
   if(state.panel === 'chars') renderChars();
 };
+const FEVER_CHIPS = ['warm','fever','super','mega','ultra','overdrive','hot'];
 function hudStreak(){
   const n = run.streak;
   streakEl.classList.toggle('hidden', n < 3);
-  if(n < 3){ streakEl.classList.remove('fever', 'hot'); return; }
-  streakVal.textContent = run.fever ? ('fever x' + n) : ('x' + n);
-  streakEl.classList.toggle('hot', n >= 10 && !run.fever);
-  streakEl.classList.toggle('fever', !!run.fever);
+  for(const c of FEVER_CHIPS) streakEl.classList.remove(c);
+  if(n < 3) return;
+  const f = feverForStreak(n);
+  if(f){
+    streakVal.textContent = f.tag + ' x' + n;
+    streakEl.classList.add(f.chip);
+  } else {
+    streakVal.textContent = 'x' + n;
+    if(n >= 8) streakEl.classList.add('hot');
+  }
   streakEl.classList.remove('pop');
-  void streakEl.offsetWidth;              // restart the pop animation
+  void streakEl.offsetWidth;
   streakEl.classList.add('pop');
 }
 function hudMult(){
-  const on = run.fever && run.coinMult > 1 && state.mode === 'play';
+  const on = run.coinMult > 1 && state.mode === 'play';
   multEl.classList.toggle('hidden', !on);
+  for(const c of ['mega','ultra','overdrive']) multEl.classList.remove(c);
   if(!on) return;
-  multEl.textContent = `×${run.coinMult} coins`;
+  let label = `×${run.coinMult} coins`;
+  if(run.magnet > 1) label += ` · mag ${run.magnet}`;
+  if(run.feverSlow < 0.95) label += ' · slow';
+  multEl.textContent = label;
+  if(run.feverId === 'mega' || run.feverId === 'ultra' || run.feverId === 'overdrive'){
+    multEl.classList.add(run.feverId);
+  }
   multEl.classList.remove('pop');
   void multEl.offsetWidth;
   multEl.classList.add('pop');
@@ -3412,15 +3581,18 @@ function landRing(x, y, z, kind){
 
 function showCombo(n){
   if(n < 3 || state.mode !== 'play') return;
+  const f = feverForStreak(n);
   comboN.textContent = 'x' + n;
-  comboL.textContent = run.fever ? (run.coinMult >= 3 ? 'super fever' : 'fever') : (n >= 10 ? 'on fire' : 'streak');
-  comboEl.classList.toggle('fever', !!run.fever);
+  comboL.textContent = f ? f.tag : (n >= 8 ? 'on fire' : 'streak');
+  for(const c of FEVER_CHIPS) comboEl.classList.remove(c);
+  if(f) comboEl.classList.add(f.chip);
   comboEl.classList.remove('show');
   void comboEl.offsetWidth;
   comboEl.classList.add('show');
 }
 function hideCombo(){
-  comboEl.classList.remove('show', 'fever');
+  comboEl.classList.remove('show');
+  for(const c of FEVER_CHIPS) comboEl.classList.remove(c);
 }
 
 function show(name){
@@ -3775,7 +3947,7 @@ requestAnimationFrame(frame);
 /* A small handle for tweaking and driving the game from the console. */
 window.HOP = {
   CFG, state, stats, run, player, world, cam, camera, avatar, Sfx, THREE, scene, renderer,
-  CRITTERS, AWARDS, QUEST_POOL, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
+  CRITTERS, AWARDS, QUEST_POOL, FEVERS, critterMesh, awardsDone, checkAwards, equip, pullPrize, drawPrize,
   openPanel, closePanel, dailyGift, ensureQuests, tickQuests, doRevive, canRevive,
   save, load, onProgress, nearMiss, addCoins,
   flashScreen, burstConfetti, flyCoins, camKick, showCombo,
