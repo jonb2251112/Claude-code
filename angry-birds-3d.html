@@ -237,6 +237,8 @@
       background:
         linear-gradient(180deg, #5ec8d8 0%, #87ceeb 35%, #a8e6a0 70%, #6bbf4a 100%);
       overflow: hidden;
+      pointer-events: auto;
+      cursor: pointer;
     }
     #title-screen::before {
       content: '';
@@ -424,11 +426,12 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x87ceeb, 55, 120);
+scene.fog = new THREE.Fog(0x87ceeb, 40, 95);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 200);
-camera.position.set(-2, 8, 22);
-camera.lookAt(8, 3, 0);
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 200);
+// Classic side-view: slingshot left, fortress right — both in frame
+camera.position.set(1, 5.2, 14.5);
+camera.lookAt(1.5, 2.2, 0);
 
 /* ---------- Lighting ---------- */
 const hemi = new THREE.HemisphereLight(0xb1e1ff, 0x6bbf4a, 0.7);
@@ -485,9 +488,9 @@ addCM(materials.stone, materials.pig, 0.4, 0.1);
 addCM(materials.glass, materials.pig, 0.25, 0.2);
 
 /* ---------- Game State ---------- */
-const SLING_ORIGIN = new THREE.Vector3(-10, 2.15, 0);
-const MAX_PULL = 3.2;
-const LAUNCH_POWER = 14.5;
+const SLING_ORIGIN = new THREE.Vector3(-6.5, 2.05, 0);
+const MAX_PULL = 3.0;
+const LAUNCH_POWER = 13.5;
 
 let score = 0;
 let levelIndex = 0;
@@ -505,8 +508,8 @@ let particles = [];
 let entities = []; // { mesh, body, type, hp, broken }
 let pigsAlive = 0;
 let hintShown = true;
-let cameraBase = new THREE.Vector3(-2, 8, 22);
-let cameraLook = new THREE.Vector3(8, 3, 0);
+let cameraBase = new THREE.Vector3(1, 5.2, 14.5);
+let cameraLook = new THREE.Vector3(1.5, 2.2, 0);
 let camShake = 0;
 
 /* ---------- Materials (visual) ---------- */
@@ -654,66 +657,90 @@ function buildGround() {
 function buildSlingshot() {
   const group = new THREE.Group();
 
-  // Y-shaped wooden slingshot
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 2.4, 8), matSling);
-  base.position.set(0, 1.2, 0);
+  // Classic Y-shaped wooden slingshot — larger & clearer in side view
+  const postMat = matSling;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 2.2, 10), postMat);
+  base.position.set(0, 1.1, 0);
   base.castShadow = true;
   group.add(base);
 
-  const left = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.6, 8), matSling);
-  left.position.set(0, 2.5, -0.55);
-  left.rotation.x = 0.45;
+  // Forks open in Z so the Y reads clearly from the side camera
+  const left = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 1.9, 10), postMat);
+  left.position.set(0.05, 2.55, -0.72);
+  left.rotation.x = 0.55;
   left.castShadow = true;
   group.add(left);
 
-  const right = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 1.6, 8), matSling);
-  right.position.set(0, 2.5, 0.55);
-  right.rotation.x = -0.45;
+  const right = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 1.9, 10), postMat);
+  right.position.set(0.05, 2.55, 0.72);
+  right.rotation.x = -0.55;
   right.castShadow = true;
   group.add(right);
 
-  // Cross brace
-  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.9), matWoodDark);
-  brace.position.set(0, 2.0, 0);
+  // Knobs on fork tips
+  [ -0.95, 0.95 ].forEach(z => {
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), matWoodDark);
+    knob.position.set(0.08, 3.35, z);
+    group.add(knob);
+  });
+
+  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 1.1), matWoodDark);
+  brace.position.set(0, 1.95, 0);
   group.add(brace);
 
-  group.position.copy(SLING_ORIGIN);
-  group.position.y = 0;
-  group.position.x = SLING_ORIGIN.x;
+  // Ground stake
+  const stake = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.25, 0.5), matWoodDark);
+  stake.position.set(0, 0.12, 0);
+  group.add(stake);
+
+  group.position.set(SLING_ORIGIN.x, 0, SLING_ORIGIN.z);
   scene.add(group);
 
-  // Rubber bands (lines updated each frame)
-  const bandMat = new THREE.LineBasicMaterial({ color: 0x2a1510, linewidth: 2 });
-  const bandGeoL = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-  const bandGeoR = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-  const bandL = new THREE.Line(bandGeoL, bandMat);
-  const bandR = new THREE.Line(bandGeoR, bandMat);
+  const bandMat = new THREE.MeshStandardMaterial({
+    color: 0x2b1810, roughness: 0.85, metalness: 0.05,
+  });
+  // Thick rubber-band tubes (Line linewidth is ignored by most GPUs)
+  const bandL = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1, 6), bandMat);
+  const bandR = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1, 6), bandMat);
   scene.add(bandL, bandR);
 
-  // Pouch
   const pouch = new THREE.Mesh(
-    new THREE.SphereGeometry(0.18, 8, 6),
+    new THREE.SphereGeometry(0.22, 10, 8),
     new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 })
   );
+  pouch.scale.set(1.1, 0.55, 1.3);
   scene.add(pouch);
 
   return {
-    leftFork: new THREE.Vector3(SLING_ORIGIN.x, 3.15, -0.7),
-    rightFork: new THREE.Vector3(SLING_ORIGIN.x, 3.15, 0.7),
-    bandL, bandR, pouch,
+    leftFork: new THREE.Vector3(SLING_ORIGIN.x + 0.08, 3.35, -0.95),
+    rightFork: new THREE.Vector3(SLING_ORIGIN.x + 0.08, 3.35, 0.95),
+    bandL, bandR, pouch, group,
   };
 }
 
 const sling = buildSlingshot();
 
+function placeBand(mesh, from, to) {
+  const mid = from.clone().add(to).multiplyScalar(0.5);
+  const dir = to.clone().sub(from);
+  const len = Math.max(dir.length(), 0.05);
+  mesh.position.copy(mid);
+  mesh.scale.set(1, len, 1);
+  mesh.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    dir.clone().normalize()
+  );
+}
+
 function updateBands(birdPos) {
   const pos = birdPos || SLING_ORIGIN;
-  const ptsL = [sling.leftFork, pos];
-  const ptsR = [sling.rightFork, pos];
-  sling.bandL.geometry.setFromPoints(ptsL);
-  sling.bandR.geometry.setFromPoints(ptsR);
+  placeBand(sling.bandL, sling.leftFork, pos);
+  placeBand(sling.bandR, sling.rightFork, pos);
   sling.pouch.position.copy(pos);
-  sling.pouch.visible = !launched || (currentBird && !currentBird.flying);
+  const showPouch = !launched || (currentBird && !currentBird.flying);
+  sling.pouch.visible = showPouch;
+  sling.bandL.visible = showPouch;
+  sling.bandR.visible = showPouch;
 }
 
 /* ---------- Bird Factory ---------- */
@@ -721,80 +748,84 @@ function createBirdMesh() {
   const g = new THREE.Group();
 
   const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0xe53935, roughness: 0.55, metalness: 0.05,
+    color: 0xe53935, roughness: 0.5, metalness: 0.05,
   });
   const bellyMat = new THREE.MeshStandardMaterial({
-    color: 0xf5e6c8, roughness: 0.7, metalness: 0,
+    color: 0xfff0d4, roughness: 0.65, metalness: 0,
   });
   const beakMat = new THREE.MeshStandardMaterial({
-    color: 0xffa000, roughness: 0.45, metalness: 0.1,
+    color: 0xffb300, roughness: 0.4, metalness: 0.1,
   });
   const browMat = new THREE.MeshStandardMaterial({
     color: 0x1a0505, roughness: 0.8,
   });
-  const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+  const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
   const pupilMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
-  const tailMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.6 });
+  const crestMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.55 });
 
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 16), bodyMat);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 18), bodyMat);
   body.castShadow = true;
+  body.scale.set(1.05, 1, 1.1);
   g.add(body);
 
-  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 12), bellyMat);
-  belly.position.set(0.12, -0.12, 0);
-  belly.scale.set(0.9, 0.85, 1.05);
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 12), bellyMat);
+  belly.position.set(0.14, -0.16, 0);
+  belly.scale.set(0.95, 0.9, 1.15);
   g.add(belly);
 
-  // Eyes
-  [[0.28, 0.12, 0.22], [0.28, 0.12, -0.22]].forEach(([x, y, z]) => {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeWhite);
+  // Big classic angry eyes (slightly toward +Z so side camera reads the face)
+  [[0.32, 0.16, 0.28], [0.32, 0.16, -0.18]].forEach(([x, y, z], i) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 12), eyeWhite);
     eye.position.set(x, y, z);
     g.add(eye);
-    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), pupilMat);
-    pupil.position.set(x + 0.08, y + 0.01, z * 0.85);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), pupilMat);
+    pupil.position.set(x + 0.09, y + 0.02, z + (i === 0 ? 0.02 : -0.02));
     g.add(pupil);
   });
 
-  // Angry brows
-  const browL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.06, 0.08), browMat);
-  browL.position.set(0.32, 0.26, 0.22);
-  browL.rotation.z = -0.35;
-  browL.rotation.y = 0.2;
+  // Thick angry brows
+  const browL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.1), browMat);
+  browL.position.set(0.36, 0.34, 0.28);
+  browL.rotation.z = -0.45;
+  browL.rotation.y = 0.15;
   g.add(browL);
-  const browR = browL.clone();
-  browR.position.z = -0.22;
-  browR.rotation.y = -0.2;
+  const browR = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.1), browMat);
+  browR.position.set(0.36, 0.34, -0.18);
+  browR.rotation.z = -0.45;
+  browR.rotation.y = -0.15;
   g.add(browR);
 
   // Beak
-  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 8), beakMat);
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.34, 8), beakMat);
   beak.rotation.z = -Math.PI / 2;
-  beak.position.set(0.52, -0.02, 0);
+  beak.position.set(0.62, 0.0, 0.05);
   g.add(beak);
-  const beakBot = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.16, 8), beakMat);
+  const beakBot = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 8), beakMat);
   beakBot.rotation.z = -Math.PI / 2;
-  beakBot.position.set(0.48, -0.1, 0);
-  g.add(beakTop => {});
+  beakBot.position.set(0.56, -0.12, 0.05);
   g.add(beakBot);
 
-  // Crest feathers
+  // Crest feathers (classic Red)
   for (let i = 0; i < 3; i++) {
-    const f = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.28, 5), tailMat);
-    f.position.set(-0.05 + i * 0.05, 0.48, (i - 1) * 0.08);
-    f.rotation.z = 0.3 - i * 0.15;
+    const f = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.36, 5), crestMat);
+    f.position.set(-0.02 + i * 0.06, 0.58, 0.05 + (i - 1) * 0.1);
+    f.rotation.z = 0.35 - i * 0.18;
+    f.castShadow = true;
     g.add(f);
   }
 
-  // Tail
+  // Tail feathers
   for (let i = 0; i < 3; i++) {
-    const t = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.35, 4), tailMat);
-    t.position.set(-0.45, 0.05, (i - 1) * 0.1);
-    t.rotation.z = Math.PI / 2 + 0.2;
-    t.rotation.y = (i - 1) * 0.25;
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.4, 4), crestMat);
+    t.position.set(-0.55, 0.05, (i - 1) * 0.12);
+    t.rotation.z = Math.PI / 2 + 0.25;
+    t.rotation.y = (i - 1) * 0.3;
     g.add(t);
   }
 
-  g.scale.setScalar(1);
+  // Face the flight direction (+X), slight tilt toward camera
+  g.rotation.y = -0.15;
+  g.scale.setScalar(1.15);
   return g;
 }
 
@@ -803,11 +834,12 @@ function spawnBirdOnSling() {
 
   const mesh = createBirdMesh();
   mesh.position.copy(SLING_ORIGIN);
+  mesh.rotation.set(0, -0.15, 0);
   scene.add(mesh);
 
   const body = new CANNON.Body({
-    mass: 1.4,
-    shape: new CANNON.Sphere(0.42),
+    mass: 1.5,
+    shape: new CANNON.Sphere(0.5),
     material: materials.bird,
     linearDamping: 0.05,
     angularDamping: 0.1,
@@ -833,51 +865,61 @@ function spawnBirdOnSling() {
 function createPigMesh() {
   const g = new THREE.Group();
   const skin = new THREE.MeshStandardMaterial({
-    color: 0x7cb342, roughness: 0.55, metalness: 0.05,
+    color: 0x8bc34a, roughness: 0.5, metalness: 0.05,
   });
   const dark = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.7 });
-  const snoutMat = new THREE.MeshStandardMaterial({ color: 0x9ccc65, roughness: 0.5 });
-  const eyeW = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+  const snoutMat = new THREE.MeshStandardMaterial({ color: 0xaed581, roughness: 0.45 });
+  const eyeW = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
   const pupil = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.48, 18, 14), skin);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.52, 20, 16), skin);
   body.castShadow = true;
-  body.scale.set(1, 0.92, 1.05);
+  body.scale.set(1, 0.92, 1.08);
   g.add(body);
 
-  // Snout
-  const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.22, 12), snoutMat);
+  // Snout faces slightly toward camera (+Z) and toward bird (-ish +X for incoming)
+  const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.26, 14), snoutMat);
   snout.rotation.z = Math.PI / 2;
-  snout.position.set(0.42, 0, 0);
+  snout.position.set(0.4, 0.02, 0.22);
   g.add(snout);
-  // Nostrils
-  [[0.52, 0.04, 0.07], [0.52, 0.04, -0.07]].forEach(([x, y, z]) => {
-    const n = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), dark);
+  [[0.52, 0.06, 0.28], [0.52, 0.06, 0.14]].forEach(([x, y, z]) => {
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), dark);
     n.position.set(x, y, z);
     g.add(n);
   });
 
-  // Eyes
-  [[0.25, 0.2, 0.2], [0.25, 0.2, -0.2]].forEach(([x, y, z]) => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), eyeW);
+  // Eyes toward camera
+  [[0.22, 0.22, 0.38], [0.08, 0.22, 0.42]].forEach(([x, y, z]) => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeW);
     e.position.set(x, y, z);
     g.add(e);
-    const p = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), pupil);
-    p.position.set(x + 0.06, y, z * 0.9);
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), pupil);
+    p.position.set(x + 0.04, y, z + 0.06);
     g.add(p);
   });
 
   // Ears
-  [[0.05, 0.42, 0.28], [0.05, 0.42, -0.28]].forEach(([x, y, z]) => {
-    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), skin);
-    ear.scale.set(0.7, 1, 0.5);
+  [[0.0, 0.48, 0.3], [-0.1, 0.48, 0.05]].forEach(([x, y, z]) => {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), skin);
+    ear.scale.set(0.7, 1.1, 0.45);
     ear.position.set(x, y, z);
     g.add(ear);
-    const inner = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), snoutMat);
-    inner.position.set(x + 0.04, y, z * 0.85);
+    const inner = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 6), snoutMat);
+    inner.position.set(x + 0.03, y, z + 0.04);
     g.add(inner);
   });
 
+  // Little smile wrinkle
+  const smile = new THREE.Mesh(
+    new THREE.TorusGeometry(0.12, 0.025, 6, 10, Math.PI),
+    dark
+  );
+  smile.position.set(0.35, -0.12, 0.35);
+  smile.rotation.x = Math.PI / 2;
+  smile.rotation.z = -0.4;
+  g.add(smile);
+
+  g.scale.setScalar(1.05);
   return g;
 }
 
@@ -968,84 +1010,77 @@ const LEVELS = [
     name: 'Poached Eggs — 1-1',
     birds: 3,
     build() {
-      // Simple tower with 1 pig
-      addBlock('wood', 8, 0.5, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 10, 0.5, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 9, 1.2, 0, 2.4, 0.35, 0.5);
-      addBlock('wood', 8.3, 1.9, 0, 0.35, 1.0, 0.35);
-      addBlock('wood', 9.7, 1.9, 0, 0.35, 1.0, 0.35);
-      addBlock('wood', 9, 2.6, 0, 2.0, 0.35, 0.5);
-      addPig(9, 3.2, 0);
+      // Classic small tower — close enough to read with slingshot
+      addBlock('wood', 5.2, 0.55, 0, 0.45, 1.1, 0.45);
+      addBlock('wood', 7.0, 0.55, 0, 0.45, 1.1, 0.45);
+      addBlock('wood', 6.1, 1.3, 0, 2.3, 0.35, 0.55);
+      addBlock('wood', 5.4, 2.0, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 6.8, 2.0, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 6.1, 2.7, 0, 2.0, 0.35, 0.5);
+      addPig(6.1, 3.35, 0);
     },
   },
   {
     name: 'Poached Eggs — 1-2',
     birds: 3,
     build() {
-      // Two pillars + glass + 2 pigs
-      addBlock('wood', 7, 0.6, 0, 0.45, 1.2, 0.45);
-      addBlock('wood', 11, 0.6, 0, 0.45, 1.2, 0.45);
-      addBlock('wood', 9, 1.4, 0, 4.4, 0.35, 0.55);
-      addBlock('glass', 8, 2.1, 0, 0.4, 1.0, 0.4);
-      addBlock('glass', 10, 2.1, 0, 0.4, 1.0, 0.4);
-      addBlock('wood', 9, 2.8, 0, 3.2, 0.35, 0.5);
-      addPig(8, 1.95, 0);
-      addPig(10, 3.4, 0);
-      addBlock('stone', 9, 0.35, 0, 1.2, 0.7, 0.7);
+      addBlock('wood', 4.5, 0.6, 0, 0.45, 1.2, 0.45);
+      addBlock('wood', 8.0, 0.6, 0, 0.45, 1.2, 0.45);
+      addBlock('wood', 6.25, 1.4, 0, 4.0, 0.35, 0.55);
+      addBlock('glass', 5.3, 2.1, 0, 0.4, 1.0, 0.4);
+      addBlock('glass', 7.2, 2.1, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 6.25, 2.8, 0, 2.8, 0.35, 0.5);
+      addPig(5.3, 1.95, 0);
+      addPig(7.2, 3.4, 0);
+      addBlock('stone', 6.25, 0.35, 0, 1.1, 0.7, 0.7);
     },
   },
   {
     name: 'Poached Eggs — 1-3',
     birds: 4,
     build() {
-      // Castle-ish structure
-      const baseX = 10;
-      // Left tower
-      addBlock('stone', baseX - 3, 0.5, 0, 0.7, 1.0, 0.7);
-      addBlock('wood', baseX - 3, 1.4, 0, 0.45, 0.8, 0.45);
-      addBlock('wood', baseX - 3, 2.1, 0, 1.2, 0.3, 0.5);
-      addPig(baseX - 3, 2.7, 0);
+      const baseX = 7;
+      addBlock('stone', baseX - 2.8, 0.5, 0, 0.7, 1.0, 0.7);
+      addBlock('wood', baseX - 2.8, 1.4, 0, 0.45, 0.8, 0.45);
+      addBlock('wood', baseX - 2.8, 2.1, 0, 1.2, 0.3, 0.5);
+      addPig(baseX - 2.8, 2.7, 0);
 
-      // Center
-      addBlock('wood', baseX, 0.5, -0.6, 0.4, 1.0, 0.4);
-      addBlock('wood', baseX, 0.5, 0.6, 0.4, 1.0, 0.4);
-      addBlock('glass', baseX - 1.2, 0.5, 0, 0.35, 1.0, 0.35);
-      addBlock('glass', baseX + 1.2, 0.5, 0, 0.35, 1.0, 0.35);
-      addBlock('wood', baseX, 1.2, 0, 3.2, 0.35, 1.6);
+      addBlock('wood', baseX, 0.5, -0.55, 0.4, 1.0, 0.4);
+      addBlock('wood', baseX, 0.5, 0.55, 0.4, 1.0, 0.4);
+      addBlock('glass', baseX - 1.1, 0.5, 0, 0.35, 1.0, 0.35);
+      addBlock('glass', baseX + 1.1, 0.5, 0, 0.35, 1.0, 0.35);
+      addBlock('wood', baseX, 1.2, 0, 3.0, 0.35, 1.5);
       addPig(baseX, 1.85, 0);
-      addBlock('wood', baseX - 1.2, 2.0, 0, 0.35, 1.2, 0.35);
-      addBlock('wood', baseX + 1.2, 2.0, 0, 0.35, 1.2, 0.35);
-      addBlock('stone', baseX, 2.8, 0, 2.8, 0.4, 0.7);
+      addBlock('wood', baseX - 1.1, 2.0, 0, 0.35, 1.2, 0.35);
+      addBlock('wood', baseX + 1.1, 2.0, 0, 0.35, 1.2, 0.35);
+      addBlock('stone', baseX, 2.8, 0, 2.6, 0.4, 0.7);
       addPig(baseX, 3.45, 0);
 
-      // Right
-      addBlock('stone', baseX + 3.5, 0.5, 0, 0.7, 1.0, 0.7);
-      addBlock('wood', baseX + 3.5, 1.4, 0, 0.5, 0.8, 0.5);
-      addBlock('glass', baseX + 3.5, 2.2, 0, 1.0, 0.3, 0.5);
+      addBlock('stone', baseX + 3.2, 0.5, 0, 0.7, 1.0, 0.7);
+      addBlock('wood', baseX + 3.2, 1.4, 0, 0.5, 0.8, 0.5);
+      addBlock('glass', baseX + 3.2, 2.2, 0, 1.0, 0.3, 0.5);
     },
   },
   {
     name: 'Poached Eggs — 1-4',
     birds: 4,
     build() {
-      const bx = 11;
-      // Stacked boxes like classic
+      const bx = 7.5;
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 3 - row; col++) {
-          const x = bx + (col - (2 - row) / 2) * 1.3;
-          const y = 0.4 + row * 1.15;
+          const x = bx + (col - (2 - row) / 2) * 1.25;
+          const y = 0.4 + row * 1.1;
           const t = row === 2 ? 'glass' : (col === 1 && row === 0 ? 'stone' : 'wood');
-          addBlock(t, x, y, 0, 1.1, 1.0, 0.7);
+          addBlock(t, x, y, 0, 1.05, 0.95, 0.65);
         }
       }
-      addPig(bx, 0.55 + 3 * 1.15, 0);
-      addPig(bx - 1.3, 1.55, 0);
-      addPig(bx + 1.3, 1.55, 0);
+      addPig(bx, 0.5 + 3 * 1.1, 0);
+      addPig(bx - 1.25, 1.5, 0);
+      addPig(bx + 1.25, 1.5, 0);
 
-      // Side props
-      addBlock('wood', bx - 4, 0.7, 0, 0.4, 1.4, 0.4);
-      addBlock('wood', bx - 4, 1.6, 0, 1.5, 0.3, 0.4);
-      addPig(bx - 4, 2.2, 0);
+      addBlock('wood', bx - 3.6, 0.7, 0, 0.4, 1.4, 0.4);
+      addBlock('wood', bx - 3.6, 1.6, 0, 1.4, 0.3, 0.4);
+      addPig(bx - 3.6, 2.2, 0);
     },
   },
 ];
@@ -1491,10 +1526,21 @@ canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 window.addEventListener('touchend', onPointerUp);
 
 /* ---------- Buttons ---------- */
-playBtn.addEventListener('click', () => {
+playBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  startGame();
+});
+titleScreen.addEventListener('click', (e) => {
+  if (e.target === playBtn || playBtn.contains(e.target) || e.target === titleScreen || e.target.classList.contains('logo') || e.target.classList.contains('logo-sub') || e.target.closest('.logo')) {
+    startGame();
+  }
+});
+
+function startGame() {
+  if (titleScreen.classList.contains('hidden')) return;
   titleScreen.classList.add('hidden');
   loadLevel(0);
-});
+}
 
 retryBtn.addEventListener('click', () => {
   overlay.classList.remove('visible');
@@ -1587,10 +1633,10 @@ function updateCamera(dt) {
 
   if (currentBird && currentBird.flying) {
     const bp = currentBird.mesh.position;
-    target.x = THREE.MathUtils.clamp(bp.x * 0.35 + cameraBase.x, -2, 12);
-    target.y = THREE.MathUtils.clamp(bp.y * 0.3 + cameraBase.y, 6, 14);
-    look.x = THREE.MathUtils.clamp(bp.x * 0.5 + 4, 4, 18);
-    look.y = Math.max(2, bp.y * 0.3 + 2);
+    target.x = THREE.MathUtils.clamp(bp.x * 0.25 + cameraBase.x, -1, 8);
+    target.y = THREE.MathUtils.clamp(bp.y * 0.25 + cameraBase.y, 4.5, 10);
+    look.x = THREE.MathUtils.clamp(bp.x * 0.55 + 1, 0, 12);
+    look.y = Math.max(1.5, bp.y * 0.25 + 1.8);
   }
 
   if (camShake > 0) {
@@ -1601,10 +1647,6 @@ function updateCamera(dt) {
   }
 
   camera.position.lerp(target, 1 - Math.pow(0.001, dt));
-  const curLook = new THREE.Vector3();
-  camera.getWorldDirection(curLook);
-  const desired = look.clone().sub(camera.position).normalize();
-  // Simple lookAt
   camera.lookAt(look);
 }
 
@@ -1679,8 +1721,8 @@ function animate() {
   // Idle camera sway on title
   if (!gameActive && !titleScreen.classList.contains('hidden')) {
     const t = clock.elapsedTime;
-    camera.position.set(-2 + Math.sin(t * 0.3) * 1.5, 8 + Math.sin(t * 0.4) * 0.5, 22);
-    camera.lookAt(8, 3, 0);
+    camera.position.set(1 + Math.sin(t * 0.35) * 1.2, 5.2 + Math.sin(t * 0.45) * 0.35, 14.5);
+    camera.lookAt(1.5, 2.2, 0);
   }
 
   renderer.render(scene, camera);
