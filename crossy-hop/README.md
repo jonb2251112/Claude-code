@@ -1,7 +1,8 @@
 # CROSSY HOP
 
-A voxel road-crossing game in 3D, built mobile-first. Twelve critters, endless
-traffic, and an eagle with no patience.
+A voxel road-crossing game in 3D, built mobile-first. Twenty critters, a
+fever ladder, journey track, lucky spins, pets, power-ups — and an eagle with
+no patience.
 
 Everything lives in a single [`index.html`](index.html). There are no images,
 models, fonts or audio files: the cars, critters, trees, logs and trains are
@@ -38,10 +39,9 @@ persist in `localStorage`.
 
 ## Things to chase
 
-- **Characters.** Twelve critters — chicken, duck, pigeon, cat, bunny, penguin,
-  parrot, frog, panda, dino, robot, ghost — built by one parameterised voxel
-  function from a table of spec objects. Each retunes the hop blip, and a few
-  change how a run feels: the frog hops higher, the ghost has no legs and floats.
+- **Characters.** Twenty critters (fox, owl, pig, sheep, raccoon, wolf, unicorn,
+  alien joined the roster) built by one parameterised voxel function. Each
+  retunes the hop blip; frog hops higher, ghost floats, robot beeps.
 - **Prize machine.** 40 coins for a random critter you do not own, weighted by
   rarity, revealed with a sunburst and worn immediately. The character sheet
   shows portraits rendered off-screen from the real geometry, viewed from the
@@ -77,6 +77,30 @@ persist in `localStorage`.
   fever), and your previous best is drawn across the world as a gold stripe with
   flags either side. Cross it and the run announces itself.
 - **Daily gift.** A handful of coins the first time you play on a given day.
+
+
+## Retention systems (the "one more hop" engine)
+
+Soft-currency only — no real-money purchases. Everything spends coins you earn.
+
+- **XP & levels.** Every hop, coin, perfect and run feeds a level curve. Level
+  rewards pay coins, chests and titles up to 100.
+- **Ranks & titles.** Best-score ranks from Hatchling to Immortal. Twenty-five
+  titles to unlock and wear on the menu.
+- **Journey track.** Forty nodes paid in journey stars from your runs — coins,
+  XP, chests and free spins.
+- **Lucky Spin.** One free ticket a day (or 30 coins). Jackpots, chests, banked
+  shields/magnets, XP.
+- **Power-ups.** Shield, Magnet, Turbo, Midas, Chill and Fury spawn on grass.
+  Bank shields/magnets from the spin and arm them before a run.
+- **Run events.** Golden Road, Coin Storm, Stampede, Quiet Town, Fever Spark,
+  Treasure Row and more — they interrupt the grind with a new rule for a stretch.
+- **Chests.** Bronze / silver / gold loot tables from levels, journey and spins.
+- **Pets.** Hatch companions that occasionally find spare coins.
+- **Weekly goals.** Three seeded goals that reset each week.
+- **Shop trails.** Cosmetic hop trails bought with coins.
+- **Rest bonus.** Come back after four hours for a welcome-back pouch.
+- **Combo callouts, rhythm bonuses, near-miss style pay, milestone board.**
 
 ## Feel
 
