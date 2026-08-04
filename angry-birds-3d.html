@@ -514,6 +514,7 @@ let cameraLook = new THREE.Vector3(0.8, 2.0, 0);
 let camShake = 0;
 let levelReady = false;
 let levelAge = 0;
+let shotsFired = 0;
 
 /* ---------- Materials (visual) ---------- */
 const matWood = new THREE.MeshStandardMaterial({
@@ -942,8 +943,8 @@ function addPig(x, y, z) {
   body.allowSleep = true;
   body.sleepSpeedLimit = 0.15;
   body.sleepTimeLimit = 0.5;
+  body.type = CANNON.Body.KINEMATIC; // frozen until first launch
   world.addBody(body);
-  body.sleep();
 
   const ent = { mesh, body, type: 'pig', hp: 28, broken: false };
   entities.push(ent);
@@ -1002,8 +1003,8 @@ function addBlock(type, x, y, z, w, h, d, rotY = 0) {
   body.allowSleep = true;
   body.sleepSpeedLimit = 0.12;
   body.sleepTimeLimit = 0.4;
+  body.type = CANNON.Body.KINEMATIC; // frozen until first launch
   world.addBody(body);
-  body.sleep();
 
   const ent = {
     mesh, body, type: 'block', blockType: type, hp: def.hp, maxHp: def.hp, broken: false,
@@ -1346,6 +1347,7 @@ function loadLevel(idx) {
   birdsLeft = lvl.birds;
   levelReady = false;
   levelAge = 0;
+  shotsFired = 0;
   lvl.build();
   spawnBirdOnSling();
   camera.position.copy(cameraBase);
@@ -1360,8 +1362,8 @@ function loadLevel(idx) {
 
 function checkLevelEnd() {
   if (levelComplete || !gameActive || !levelReady) return;
-  // Don't auto-win from spawn jitter
-  if (!launched && levelAge < 1.0) return;
+  // Structures must only clear after the player has taken a shot
+  if (shotsFired === 0) return;
 
   if (pigsAlive <= 0) {
     levelComplete = true;
@@ -1428,14 +1430,13 @@ function pointerOnBird() {
   if (!currentBird || launched) return false;
   raycaster.setFromCamera(pointer, camera);
   const hits = raycaster.intersectObject(currentBird.mesh, true);
-  // Also allow clicking near slingshot area
   const dist = raycaster.ray.distanceToPoint(SLING_ORIGIN);
-  return hits.length > 0 || dist < 2.5;
+  // Generous hit target for mouse + touch
+  return hits.length > 0 || dist < 4.0;
 }
 
 function getPullPoint() {
   raycaster.setFromCamera(pointer, camera);
-  // Plane through slingshot, facing the camera (approx z-constant)
   const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   const hit = new THREE.Vector3();
   if (!raycaster.ray.intersectPlane(plane, hit)) {
@@ -1443,7 +1444,6 @@ function getPullPoint() {
   }
 
   const offset = hit.clone().sub(SLING_ORIGIN);
-  // Prefer pulling left / back (classic slingshot)
   offset.x = Math.min(0.15, offset.x);
   offset.y = Math.max(-1.4, Math.min(1.6, offset.y));
   offset.z = Math.max(-1.0, Math.min(1.0, offset.z));
@@ -1481,7 +1481,6 @@ function onPointerDown(e) {
   canvas.classList.add('aiming');
   hideHint();
   powerWrap.classList.add('visible');
-  // Don't yank the bird on the initial click — wait for real drag
 }
 
 function onPointerMove(e) {
@@ -1490,18 +1489,18 @@ function onPointerMove(e) {
   getPointerPos(e);
   const pos = getPullPoint();
   const pull = pos.distanceTo(SLING_ORIGIN);
-  if (pull > 0.25) dragMoved = true;
+  if (pull > 0.12) dragMoved = true;
   if (dragMoved) applyAimPose(pos);
 }
 
 function getLaunchVelocity() {
   const pull = pullOffset.length();
-  if (pull < 0.15) return new THREE.Vector3();
+  if (pull < 0.1) return new THREE.Vector3();
   const dir = pullOffset.clone().multiplyScalar(-1).normalize();
-  dir.y += 0.12;
+  dir.y += 0.15;
   dir.normalize();
   const power = Math.min(pull / MAX_PULL, 1) * LAUNCH_POWER;
-  return dir.multiplyScalar(power * (0.55 + 0.45 * (pull / MAX_PULL)));
+  return dir.multiplyScalar(power * (0.6 + 0.4 * (pull / MAX_PULL)));
 }
 
 function onPointerUp(e) {
@@ -1513,8 +1512,7 @@ function onPointerUp(e) {
   if (trajectoryLine) trajectoryLine.visible = false;
 
   const pull = pullOffset.length();
-  // Require a real drag + enough pull — taps must not launch
-  if (!dragMoved || pull < 0.55) {
+  if (!dragMoved || pull < 0.35) {
     currentBird.mesh.position.copy(SLING_ORIGIN);
     currentBird.mesh.rotation.set(0, -0.15, 0);
     currentBird.body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
@@ -1537,9 +1535,12 @@ function launchBird() {
   currentBird.body.angularVelocity.set(0, 0, -8 - Math.random() * 4);
   currentBird.body.wakeUp();
 
-  // Wake the fortress so impacts can topple it
+  // Activate fortress physics for the shot
   for (const e of entities) {
     if (e.broken || e.type === 'bird') continue;
+    e.body.type = CANNON.Body.DYNAMIC;
+    e.body.velocity.set(0, 0, 0);
+    e.body.angularVelocity.set(0, 0, 0);
     e.body.wakeUp();
   }
 
@@ -1551,6 +1552,7 @@ function launchBird() {
   waitingSettle = true;
   settledTimer = 0;
   camShake = 0.12;
+  shotsFired++;
 }
 
 canvas.addEventListener('mousedown', onPointerDown);
