@@ -91,8 +91,10 @@ Soft-currency only — no real-money purchases. Everything spends coins you earn
   claim": 4-day FOMO clock, jackpot dangles, near-miss star bar, claim-heat
   streaks, fake live loot feed, pulsing unclaimed counters, VIP chicken ticket,
   tier skips / star packs / 2× boosters. Soft currency only — no real money.
-- **Lucky Spin.** One free ticket a day (or 30 coins). Jackpots, chests, banked
-  shields/magnets, XP.
+- **Lucky Spin.** Real animated prize wheel with peg-tick SFX and a hard stop.
+  One free ticket a day (or 30 coins). Jackpots, chests, banked shields/magnets, XP.
+- **Prize Machine & pet eggs.** Characters and pets crack out of animated eggs
+  with shake → crack → reveal juice.
 - **Power-ups.** Shield, Magnet, Turbo, Midas, Chill and Fury spawn on grass.
   Bank shields/magnets from the spin and arm them before a run.
 - **Run events.** Golden Road, Coin Storm, Stampede, Quiet Town, Fever Spark,
@@ -117,6 +119,8 @@ Every hop is tuned to land with a little dopamine hit:
   punch, not a shake.
 - **Confetti and colour flashes** when fever ignites, awards unlock, challenges
   clear, or you take a second chance.
+- **Buttons shimmer**, sheets slide in, the title bobs, and every menu tap has
+  weight.
 
 ## Rules of the road
 
