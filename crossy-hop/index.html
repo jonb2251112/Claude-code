@@ -116144,6 +116144,9 @@ function nextSeasonId(id){
 function syncJourneyTable(){
   const id = currentSeasonId();
   JOURNEY = JOURNEY_BY_ID[id] || JOURNEY_CLASSIC;
+  try{
+    if(typeof window !== 'undefined' && window.HOP_ADDICT) window.HOP_ADDICT.JOURNEY = JOURNEY;
+  }catch(e){}
   return id;
 }
 function applySeasonTheme(id){
