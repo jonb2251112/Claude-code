@@ -4597,14 +4597,17 @@ function journeySeasonEnd(){
     save();
   }
   // Soft reset prompt when season rolls — keep progress, refresh sale.
-  const elapsed = now - (stats.seasonStartedAt|0);
+  // NOTE: never use `|0` on timestamps — ToInt32 truncates epoch ms.
+  const started = Number(stats.seasonStartedAt) || now;
+  const elapsed = now - started;
   if(elapsed > JOURNEY_SEASON_MS){
     stats.seasonStartedAt = now;
     stats.vipSaleSeen = 0;
     stats.journeyUpsells = 0;
     save();
+    return now + JOURNEY_SEASON_MS;
   }
-  return (stats.seasonStartedAt|0) + JOURNEY_SEASON_MS;
+  return started + JOURNEY_SEASON_MS;
 }
 function journeyMsLeft(){
   return Math.max(0, journeySeasonEnd() - Date.now());
@@ -4629,7 +4632,7 @@ function formatSeasonClock(ms){
 }
 function vipPrice(){
   // Fake scarcity: sale for the first 48h of a season, or after any upsell tease.
-  const age = Date.now() - (stats.seasonStartedAt|0);
+  const age = Date.now() - (Number(stats.seasonStartedAt) || Date.now());
   const sale = age < 48 * 3600e3 || (stats.journeyUpsells|0) >= 1;
   return sale ? VIP_PRICE_SALE : VIP_PRICE_FULL;
 }
@@ -4653,10 +4656,10 @@ function journeyStarsFromRun(){
   return n;
 }
 function starBoostActive(){
-  return (stats.boostUntil|0) > Date.now();
+  return (Number(stats.boostUntil) || 0) > Date.now();
 }
 function starBoostLeft(){
-  return Math.max(0, (stats.boostUntil|0) - Date.now());
+  return Math.max(0, (Number(stats.boostUntil) || 0) - Date.now());
 }
 
 /** Fake "missed value" in coins so VIP feels like a steal. */
@@ -6407,7 +6410,7 @@ function addictionLoad(raw){
   stats.shieldSaves = raw.shieldSaves|0;
   stats.turboUses = raw.turboUses|0;
   stats.eventsSeen = raw.eventsSeen|0;
-  stats.lastPlayAt = raw.lastPlayAt|0;
+  stats.lastPlayAt = Number(raw.lastPlayAt) || 0;
   stats.weekId = raw.weekId || "";
   stats.weeklies = Array.isArray(raw.weeklies) ? raw.weeklies : [];
   stats.weekCoins = raw.weekCoins|0;
@@ -6416,11 +6419,11 @@ function addictionLoad(raw){
   stats.weekPerfect = raw.weekPerfect|0;
   stats.weekSpins = raw.weekSpins|0;
   stats.vipPass = raw.vipPass|0;
-  stats.vipBoughtAt = raw.vipBoughtAt|0;
-  stats.seasonStartedAt = raw.seasonStartedAt|0;
+  stats.vipBoughtAt = Number(raw.vipBoughtAt) || 0;
+  stats.seasonStartedAt = Number(raw.seasonStartedAt) || 0;
   stats.freeClaimed = Array.isArray(raw.freeClaimed) ? raw.freeClaimed : [];
   stats.vipClaimed = Array.isArray(raw.vipClaimed) ? raw.vipClaimed : [];
-  stats.boostUntil = raw.boostUntil|0;
+  stats.boostUntil = Number(raw.boostUntil) || 0;
   stats.journeyUpsells = raw.journeyUpsells|0;
   stats.vipSaleSeen = raw.vipSaleSeen|0;
 }
@@ -6436,15 +6439,15 @@ function addictionSaveFields(){
     bankShield: stats.bankShield|0, bankMagnet: stats.bankMagnet|0,
     chestsOpened: stats.chestsOpened|0, feverEnters: stats.feverEnters|0,
     shieldSaves: stats.shieldSaves|0, turboUses: stats.turboUses|0,
-    eventsSeen: stats.eventsSeen|0, lastPlayAt: stats.lastPlayAt|0,
+    eventsSeen: stats.eventsSeen|0, lastPlayAt: Number(stats.lastPlayAt) || 0,
     weekId: stats.weekId||"", weeklies: stats.weeklies||[],
     weekCoins: stats.weekCoins|0, weekRuns: stats.weekRuns|0,
     weekFever: stats.weekFever|0, weekPerfect: stats.weekPerfect|0,
     weekSpins: stats.weekSpins|0,
-    vipPass: stats.vipPass|0, vipBoughtAt: stats.vipBoughtAt|0,
-    seasonStartedAt: stats.seasonStartedAt|0,
+    vipPass: stats.vipPass|0, vipBoughtAt: Number(stats.vipBoughtAt) || 0,
+    seasonStartedAt: Number(stats.seasonStartedAt) || 0,
     freeClaimed: stats.freeClaimed||[], vipClaimed: stats.vipClaimed||[],
-    boostUntil: stats.boostUntil|0, journeyUpsells: stats.journeyUpsells|0,
+    boostUntil: Number(stats.boostUntil) || 0, journeyUpsells: stats.journeyUpsells|0,
     vipSaleSeen: stats.vipSaleSeen|0,
   };
 }
