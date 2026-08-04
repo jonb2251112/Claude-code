@@ -118631,6 +118631,10 @@ function addictionOnDeath(){
 
 function addictionOnGameOver(){
   failWager();
+  // Clear mid-run itch chrome so over-screen owns the eyeballs.
+  const fuseEl = $('dopafuse'); if(fuseEl) fuseEl.classList.remove('on','hot');
+  const wagerEl = $('wagerchip'); if(wagerEl) wagerEl.classList.remove('show','active');
+  hideRivalBan();
   const stars = journeyStarsFromRun();
   addJourneyStars(stars);
   // Streak vault — bank soft coins from the heat you just lost, cash later.
