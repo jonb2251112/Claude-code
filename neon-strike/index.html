@@ -864,31 +864,45 @@ const backLight = addPoint(0xff2fb4, 0, 2.6, -2.4, 12, 12);
 /* ============================================================================
  * 6. ENVIRONMENT MAP — a tiny synthetic room rendered through PMREM gives the
  *    ball believable streaky reflections without downloading an HDRI.
+ *    On software WebGL / flaky GPUs, PMREM's readPixels can stall and leave
+ *    the canvas black — we catch that and fall back to a plain color env.
  * ========================================================================== */
 function buildEnvMap(){
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  pmrem.compileEquirectangularShader();
-  const s = new THREE.Scene();
-  s.background = new THREE.Color(0x070912);
-  const bright = (hex, w, h, pos, rot)=>{
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:hex}));
-    m.position.set(...pos); if(rot) m.rotation.set(...rot); s.add(m);
-  };
-  // ceiling light strips (the long highlights you see rolling across the ball)
-  for(let i=-2;i<=2;i++) bright(0xffffff, 1.1, 16, [i*3.0, 5.2, 0], [Math.PI/2,0,0]);
-  // neon walls
-  bright(0x1ce0ff, 0.9, 20, [-7.5, 1.8, 0], [0, Math.PI/2, 0]);
-  bright(0xff2fb4, 0.9, 20, [ 7.5, 1.8, 0], [0,-Math.PI/2, 0]);
-  bright(0x2a3050, 15, 20, [0,-2.4,0], [-Math.PI/2,0,0]);
-  // a warm blob for the pin deck end
-  bright(0xffd9a0, 4.0, 3.0, [0, 2.0, 10], [0, Math.PI, 0]);
-  const rt = pmrem.fromScene(s, 0.035, 0.1, 60);
-  pmrem.dispose();
-  s.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); });
-  return rt.texture;
+  try{
+    const gl = renderer.getContext();
+    const soft = /SwiftShader|llvmpipe|Software/i.test(gl.getParameter(gl.RENDERER)||'');
+    if(soft || LOW_END){
+      // Cheap solid-ish env: skip PMREM entirely on weak GPUs.
+      return null;
+    }
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+    const s = new THREE.Scene();
+    s.background = new THREE.Color(0x070912);
+    const bright = (hex, w, h, pos, rot)=>{
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:hex}));
+      m.position.set(...pos); if(rot) m.rotation.set(...rot); s.add(m);
+    };
+    // ceiling light strips (the long highlights you see rolling across the ball)
+    for(let i=-2;i<=2;i++) bright(0xffffff, 1.1, 16, [i*3.0, 5.2, 0], [Math.PI/2,0,0]);
+    // neon walls
+    bright(0x1ce0ff, 0.9, 20, [-7.5, 1.8, 0], [0, Math.PI/2, 0]);
+    bright(0xff2fb4, 0.9, 20, [ 7.5, 1.8, 0], [0,-Math.PI/2, 0]);
+    bright(0x2a3050, 15, 20, [0,-2.4,0], [-Math.PI/2,0,0]);
+    // a warm blob for the pin deck end
+    bright(0xffd9a0, 4.0, 3.0, [0, 2.0, 10], [0, Math.PI, 0]);
+    const rt = pmrem.fromScene(s, 0.035, 0.1, soft ? 32 : 60);
+    pmrem.dispose();
+    s.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); });
+    return rt.texture;
+  }catch(err){
+    console.warn('Env map unavailable:', err);
+    return null;
+  }
 }
 const envMap = buildEnvMap();
-scene.environment = envMap;
+if(envMap) scene.environment = envMap;
+else scene.environment = null;
 
 /* ============================================================================
  * 7. PHYSICS WORLD
@@ -1997,17 +2011,35 @@ UI.btnSnd.addEventListener('click', e=>{
   UI.btnSnd.textContent = on ? '🔊' : '🔇';
   if(on) Audio.blip(880, 0.08);
 });
-$('btn-play').addEventListener('click', e=>{
-  e.stopPropagation();
+function startFromTitle(){
+  if(UI.ovStart.classList.contains('hidden')) return;
   Audio.resume(); Audio.blip(1040, 0.1);
   UI.ovStart.classList.add('hidden');
   startGame();
-});
-$('btn-again').addEventListener('click', e=>{
+  haptic(12);
+}
+$('btn-play').addEventListener('pointerup', e=>{
+  e.stopPropagation(); e.preventDefault();
+  startFromTitle();
+}, { passive:false });
+$('btn-play').addEventListener('click', e=>{
   e.stopPropagation();
+  startFromTitle();
+});
+function restartFromEnd(){
+  if(UI.ovEnd.classList.contains('hidden')) return;
   Audio.resume(); Audio.blip(1040, 0.1);
   UI.ovEnd.classList.add('hidden');
   startGame();
+  haptic(12);
+}
+$('btn-again').addEventListener('pointerup', e=>{
+  e.stopPropagation(); e.preventDefault();
+  restartFromEnd();
+}, { passive:false });
+$('btn-again').addEventListener('click', e=>{
+  e.stopPropagation();
+  restartFromEnd();
 });
 
 /* ============================================================================
