@@ -490,7 +490,8 @@ addCM(materials.glass, materials.pig, 0.25, 0.2);
 /* ---------- Game State ---------- */
 const SLING_ORIGIN = new THREE.Vector3(-6.5, 2.05, 0);
 const MAX_PULL = 3.0;
-const LAUNCH_POWER = 13.5;
+const LAUNCH_POWER = 15.5;
+const DRAG_PIXELS_FOR_MAX = 110; // pixels of drag ≈ full power
 
 let score = 0;
 let levelIndex = 0;
@@ -499,6 +500,8 @@ let currentBird = null;
 let aiming = false;
 let launched = false;
 let dragMoved = false;
+let aimStartX = 0;
+let aimStartY = 0;
 let settledTimer = 0;
 let waitingSettle = false;
 let gameActive = false;
@@ -1474,33 +1477,51 @@ function applyAimPose(pos) {
 function onPointerDown(e) {
   if (!gameActive || !currentBird || launched || levelComplete) return;
   e.preventDefault();
-  getPointerPos(e);
+  const p = getPointerPos(e);
   if (!pointerOnBird()) return;
   aiming = true;
   dragMoved = false;
+  aimStartX = p.clientX;
+  aimStartY = p.clientY;
   canvas.classList.add('aiming');
   hideHint();
   powerWrap.classList.add('visible');
+  try { canvas.setPointerCapture?.(e.pointerId); } catch (_) {}
 }
 
 function onPointerMove(e) {
   if (!aiming || !currentBird) return;
   e.preventDefault();
-  getPointerPos(e);
-  const pos = getPullPoint();
-  const pull = pos.distanceTo(SLING_ORIGIN);
-  if (pull > 0.12) dragMoved = true;
-  if (dragMoved) applyAimPose(pos);
+  const p = getPointerPos(e);
+  const dx = p.clientX - aimStartX;
+  const dy = p.clientY - aimStartY;
+  const screenDist = Math.hypot(dx, dy);
+
+  const pullScale = MAX_PULL / DRAG_PIXELS_FOR_MAX;
+  // Left drag → pull back (−X); up drag → lift (+Y)
+  const offset = new THREE.Vector3(
+    Math.min(0.1, -dx * pullScale),
+    Math.max(-1.5, Math.min(1.6, -dy * pullScale * 0.7)),
+    Math.max(-0.7, Math.min(0.7, dx * pullScale * 0.08))
+  );
+  if (offset.x > 0) offset.x *= 0.1;
+  if (offset.length() > MAX_PULL) offset.setLength(MAX_PULL);
+
+  if (screenDist > 8) dragMoved = true;
+  if (dragMoved) {
+    const pos = SLING_ORIGIN.clone().add(offset);
+    applyAimPose(pos);
+  }
 }
 
 function getLaunchVelocity() {
   const pull = pullOffset.length();
   if (pull < 0.1) return new THREE.Vector3();
   const dir = pullOffset.clone().multiplyScalar(-1).normalize();
-  dir.y += 0.15;
+  dir.y += 0.18;
   dir.normalize();
   const power = Math.min(pull / MAX_PULL, 1) * LAUNCH_POWER;
-  return dir.multiplyScalar(power * (0.6 + 0.4 * (pull / MAX_PULL)));
+  return dir.multiplyScalar(power * (0.65 + 0.35 * (pull / MAX_PULL)));
 }
 
 function onPointerUp(e) {
@@ -1510,9 +1531,10 @@ function onPointerUp(e) {
   canvas.classList.remove('aiming');
   powerWrap.classList.remove('visible');
   if (trajectoryLine) trajectoryLine.visible = false;
+  try { canvas.releasePointerCapture?.(e.pointerId); } catch (_) {}
 
   const pull = pullOffset.length();
-  if (!dragMoved || pull < 0.35) {
+  if (!dragMoved || pull < 0.28) {
     currentBird.mesh.position.copy(SLING_ORIGIN);
     currentBird.mesh.rotation.set(0, -0.15, 0);
     currentBird.body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
@@ -1555,6 +1577,10 @@ function launchBird() {
   shotsFired++;
 }
 
+canvas.addEventListener('pointerdown', onPointerDown);
+canvas.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+canvas.addEventListener('pointercancel', onPointerUp);
 canvas.addEventListener('mousedown', onPointerDown);
 canvas.addEventListener('mousemove', onPointerMove);
 window.addEventListener('mouseup', onPointerUp);
