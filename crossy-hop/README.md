@@ -4,12 +4,12 @@ A voxel road-crossing game in 3D, built mobile-first. Twenty critters, a
 fever ladder, journey track, lucky spins, pets, power-ups — and an eagle with
 no patience.
 
-Everything lives in a single [`index.html`](index.html). There are no images,
-models, fonts or audio files: the cars, critters, trees, logs and trains are
-assembled from boxes and cylinders at load time, the sky, lane markings and
-river ripples are painted into a `<canvas>`, and every sound is synthesised with
-the Web Audio API. The only external dependency is three.js, pulled from a CDN
-through an import map.
+Everything lives primarily in [`index.html`](index.html), plus an organized
+[`retention/`](retention/) soft-currency library (~110k lines of tips, death
+flavor, missions, loot curves, seasons, achievements, callouts, and balance
+curves). There are no image/model/audio asset files: meshes are assembled from
+boxes and cylinders, textures are painted into `<canvas>`, and every sound is
+synthesised with the Web Audio API. The only CDN dependency is three.js.
 
 ## Play
 
@@ -104,7 +104,10 @@ Soft-currency only — no real-money purchases. Everything spends coins you earn
 - **Weekly goals.** Three seeded goals that reset each week.
 - **Shop trails.** Cosmetic hop trails bought with coins.
 - **Rest bonus.** Come back after four hours for a welcome-back pouch.
-- **Combo callouts, rhythm bonuses, near-miss style pay, milestone board.**
+- **Retention library (`retention/`).** ~110k lines of organized soft-currency
+  data: tip banks, death flavor, mission templates, loot/pity curves, FOMO
+  seasons, achievement trees, combo/near-miss/claim callouts, difficulty drip.
+  Wired into tips, death copy, combos, claims, login pouches. No real money.
 
 ## Feel
 

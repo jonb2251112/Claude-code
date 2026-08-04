@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#8fd9ff" />
-<meta name="description" content="CROSSY HOP — a voxel road-crossing game in 3D. Touch-first, no assets, one file." />
+<meta name="description" content="CROSSY HOP — addictive voxel road-crossing. Soft-currency retention library, animated spin wheel, egg hatches. No real-money IAP." />
 <title>CROSSY HOP — 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
-<!-- Inline so the page makes exactly one request: itself (plus three.js). -->
+<!-- Core game + three.js + organized ./retention/ library. Soft currency only. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%237ec850'/%3E%3Crect x='4' y='6' width='8' height='6' fill='%23fcfcf6'/%3E%3Crect x='6' y='3' width='5' height='4' fill='%23fcfcf6'/%3E%3Crect x='11' y='4' width='2' height='2' fill='%23f2a12b'/%3E%3Crect x='7' y='1' width='2' height='2' fill='%23e0453f'/%3E%3C/svg%3E" />
 <style>
 /* ============================================================================
@@ -1722,9 +1722,9 @@ kbd{
 /* ============================================================================
  * CROSSY HOP — a voxel road-crossing game.
  *
- * One file, no downloaded assets: every mesh is assembled from boxes and
- * cylinders at load time, the three textures (sky, lane dashes, water ripple)
- * are painted into <canvas>, and all audio is synthesised with Web Audio.
+ * Core game lives in this file. Soft-currency retention data & pickers live in
+ * ./retention/ (organized ~100k-line library — tips, death flavor, missions,
+ * loot curves, seasons, achievements, callouts, balance). No real-money IAP.
  *
  * Contents
  *   1. Config & device tiering        7. World generation
@@ -1735,6 +1735,11 @@ kbd{
  *   6. Instanced batches             12. Game state, HUD, main loop
  * ========================================================================== */
 import * as THREE from 'three';
+import {
+  HOP_RETENTION, pickTip, pickDeathFlavor, pickNearMissLine, pickClaimLine,
+  pickComboCallout, rollDailyMissions, currentSeason, difficultyAt, lootRoll,
+  RETENTION_META,
+} from './retention/hooks.js';
 
 /* ============================================================================
  * 1. CONFIG
@@ -4001,7 +4006,12 @@ function nearMiss(){
   run.nearT = state.clock;
   stats.nearMisses++;
   run.nears++;
-  toast('close!', player.x, player.y + 0.95, player.z, 'big');
+  let line = 'close!';
+  try{
+    const hit = pickNearMissLine((stats.nearMisses|0) + (state.score|0));
+    if(hit && hit.text) line = hit.text;
+  }catch(e){}
+  toast(line, player.x, player.y + 0.95, player.z, 'big');
   landRing(player.x, player.y, player.z, 'mint');
   Sfx.whoosh();
   buzz(10);
@@ -4596,7 +4606,14 @@ function showCombo(n){
   if(n < 3 || state.mode !== 'play') return;
   const f = feverForStreak(n);
   comboN.textContent = 'x' + n;
-  comboL.textContent = f ? f.tag : (n >= 8 ? 'on fire' : 'streak');
+  let label = f ? f.tag : (n >= 8 ? 'on fire' : 'streak');
+  if(!f){
+    try{
+      const hit = pickComboCallout(n);
+      if(hit && hit.text) label = hit.text;
+    }catch(e){}
+  }
+  comboL.textContent = label;
   for(const c of FEVER_CHIPS) comboEl.classList.remove(c);
   if(f) comboEl.classList.add(f.chip);
   comboEl.classList.remove('show');
@@ -4831,8 +4848,13 @@ function dailyGift(){
   else stats.loginStreak = 1;
   // Day 1: 15 (20 on first ever), then +5 per consecutive day, capped at 50.
   const amount = first ? 20 : Math.min(15 + (stats.loginStreak - 1) * 5, 50);
+  let pouchBonus = 0;
+  try{
+    const pouch = (HOP_RETENTION.LOGIN_POUCH || [])[Math.min((stats.loginStreak|0), (HOP_RETENTION.LOGIN_POUCH||[]).length - 1)];
+    if(pouch && pouch.coins) pouchBonus = Math.min(15, pouch.coins % 16);
+  }catch(e){}
   stats.gift = today;
-  addCoins(amount);
+  addCoins(amount + pouchBonus);
   checkAwards();
   save();
   // Shown as a chip on the title screen rather than a toast, so it cannot be
@@ -5466,7 +5488,12 @@ function claimJourneyCell(idx, lane, opts = {}){
   const big = !!(rew && (rew.jackpot || rew.exclusive || lane === 'vip'));
   if(!opts.silent){
     showJourneyReveal(lane, rew);
-    badge(lane === 'vip' ? (rew.jackpot ? 'JACKPOT!' : 'VIP reward!') : 'Journey reward', rew.label);
+    let claimTitle = lane === 'vip' ? (rew.jackpot ? 'JACKPOT!' : 'VIP reward!') : 'Journey reward';
+    try{
+      const hit = pickClaimLine((stats.claimsTotal|0));
+      if(hit && hit.text) claimTitle = hit.text;
+    }catch(e){}
+    badge(claimTitle, rew.label);
     Sfx.quest();
     flashScreen(rew.jackpot ? 'overdrive' : lane === 'vip' ? 'mega' : 'gold');
     burstConfetti(big ? 36 : 16, lane === 'vip'
@@ -9263,7 +9290,13 @@ const DEATH_FLAVOR = {
   eagle: ['dinner is served', 'from above', 'patience expired'],
 };
 function deathFlavor(cause){
-  const arr = DEATH_FLAVOR[cause] || DEATH_FLAVOR.car;
+  // Map sub-causes into the retention bank keys.
+  const key = ({ truck:'car', bus:'car', lorry:'car' }[cause]) || cause || 'car';
+  try{
+    const hit = pickDeathFlavor(key, (state.score|0) ^ (stats.runs|0));
+    if(hit && hit.text) return hit.text;
+  }catch(e){}
+  const arr = DEATH_FLAVOR[cause] || DEATH_FLAVOR[key] || DEATH_FLAVOR.car;
   return arr[(Math.random()*arr.length)|0];
 }
 
@@ -9989,7 +10022,15 @@ const TIP_VAULT = [
   "Vault tip 250: the next fever is always one streak away.",
 ];
 function vaultTip(){ return TIP_VAULT[(Math.random()*TIP_VAULT.length)|0]; }
-function showTip(){ const el=$("gametip"); if(el) el.textContent = chance(0.5)?randomTip():vaultTip(); }
+function showTip(){
+  const el = $("gametip");
+  if(!el) return;
+  try{
+    const tip = pickTip(((Date.now()/6e4)|0) ^ (stats.coins|0));
+    if(tip && tip.text){ el.textContent = tip.text; return; }
+  }catch(e){}
+  el.textContent = chance(0.5) ? randomTip() : vaultTip();
+}
 
 
 function canPrestige(){ return (stats.level|0) >= 50 && (stats.best|0) >= 200; }
@@ -10642,8 +10683,9 @@ window.HOP = {
   openPanel, closePanel, dailyGift, ensureQuests, tickQuests, doRevive, canRevive,
   save, load, onProgress, nearMiss, addCoins,
   flashScreen, burstConfetti, flyCoins, camKick, showCombo,
-  addXp, doSpin, grantChest, hatchPet, grantPower, FEVERS,
+  addXp, doSpin, grantChest, hatchPet, grantPower,
   buyVipPass, skipJourneyTier, buyStarPack, buyStarBoost, claimAllJourney,
+  HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
 };
 
