@@ -2351,8 +2351,10 @@ kbd{
 }
 #news-hero h3{
   margin:0 0 6px;font-size:clamp(22px,6vw,28px);letter-spacing:.04em;
-  text-shadow:0 3px 0 rgba(0,0,0,.25);line-height:1.1;
+  text-shadow:0 3px 0 rgba(0,0,0,.25);line-height:1.1;color:#fff;
+  position:relative;z-index:1;
 }
+#news-hero .tag, #news-hero p{position:relative;z-index:1;}
 #news-hero p{
   margin:0;font-size:13px;line-height:1.4;opacity:.92;font-weight:700;
   max-width:34ch;
@@ -124811,10 +124813,17 @@ function renderNews(){
 }
 function refreshNewsUi(){
   const unread = newsUnread();
-  for(const id of ['btn-news','btn-news2','btn-news-more']){
+  for(const id of ['btn-news','btn-news2']){
     const el = $(id);
     if(!el) continue;
     el.classList.toggle('hot', unread);
+    el.textContent = unread ? 'News · new' : 'News';
+  }
+  const moreNews = $('btn-news-more');
+  if(moreNews){
+    moreNews.classList.toggle('hot', unread);
+    const label = moreNews.querySelector('span') || moreNews;
+    if(moreNews.querySelector('span')) moreNews.querySelector('span').textContent = unread ? 'Season News · new' : 'Season News';
   }
   for(const id of ['btn-more','btn-more2']){
     const el = $(id);
@@ -128478,6 +128487,7 @@ window.HOP = {
   JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
   STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
   refreshFeaturedDrop, parkLooprailInMore,
+  renderNews, refreshNewsUi, newsUnread, markSeasonNewsSeen,
   adminCompleteStoryChapter, adminResetStory, endStoryCutscene,
   HOP_RETENTION, RETENTION_META, pickTip, pickDeathFlavor, currentSeason, difficultyAt, lootRoll,
   move: tryMove, start: startGame,
