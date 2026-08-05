@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#2a8cff" />
+  <title>SONIC — Green Hill Zone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee&display=swap" rel="stylesheet" />
+  <style>
+:root {
+  --sky: #2a8cff;
+  --grass: #38d020;
+  --dirt-a: #c06028;
+  --dirt-b: #e09040;
+  --hud-gold: #ffe040;
+  --panel: rgba(8, 20, 48, 0.88);
+  --accent: #ff3040;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #061018;
+  font-family: "Press Start 2P", monospace;
+  color: #fff;
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse at 50% 0%, #1a4060 0%, #061018 70%);
+}
+
+#game {
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  max-height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: var(--sky);
+  border-radius: 0;
+  box-shadow: 0 0 0 2px #0a2030, 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(20, 80, 180, 0.55), rgba(6, 16, 24, 0.82));
+  z-index: 20;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.title-card-inner {
+  text-align: center;
+  animation: titleIn 0.7s cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+
+.zone-name {
+  font-family: "Bungee", sans-serif;
+  font-size: clamp(2.2rem, 9vw, 4.5rem);
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow:
+    4px 4px 0 #1a2060,
+    -1px -1px 0 #88c8ff;
+  line-height: 1;
+}
+
+.zone-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.zone-word {
+  font-family: "Bungee", sans-serif;
+  font-size: clamp(1.6rem, 6vw, 3rem);
+  color: #fff;
+  text-shadow: 3px 3px 0 #1a2060;
+}
+
+.act-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #7a28c8;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem 0.35rem 0.7rem;
+  box-shadow: 4px 4px 0 #2a1048;
+  transform: rotate(-4deg);
+}
+
+.act-label {
+  font-size: 0.65rem;
+  color: #fff;
+}
+
+.act-num {
+  font-family: "Bungee", sans-serif;
+  font-size: 2rem;
+  color: #ffe040;
+  line-height: 1;
+  text-shadow: 2px 2px 0 #402080;
+}
+
+#btn-start,
+#btn-resume,
+#btn-restart,
+#btn-again {
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(0.7rem, 2.5vw, 0.95rem);
+  padding: 0.9rem 1.4rem;
+  border: 3px solid #fff;
+  background: linear-gradient(180deg, #ff5060, #c01828);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #701018;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+#btn-start:active,
+#btn-resume:active,
+#btn-restart:active,
+#btn-again:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #701018;
+}
+
+.hint {
+  font-size: 0.45rem;
+  opacity: 0.75;
+  text-align: center;
+  max-width: 28rem;
+  line-height: 1.7;
+}
+
+.pause-panel,
+.result-panel {
+  background: var(--panel);
+  border: 3px solid #fff;
+  padding: 1.5rem 1.75rem;
+  text-align: center;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+  min-width: min(90vw, 320px);
+}
+
+.pause-panel h2,
+.result-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: var(--hud-gold);
+}
+
+.pause-panel button,
+.result-panel button {
+  display: block;
+  width: 100%;
+  margin: 0.55rem 0 0;
+  animation: none;
+}
+
+.result-stats {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.result-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.55rem;
+}
+
+.result-stats span {
+  color: #88c8ff;
+}
+
+.result-stats strong {
+  color: var(--hud-gold);
+}
+
+#btn-pause {
+  position: absolute;
+  top: max(0.6rem, env(safe-area-inset-top));
+  right: max(0.6rem, env(safe-area-inset-right));
+  z-index: 15;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  border-radius: 6px;
+  display: none;
+}
+
+#btn-pause.visible {
+  display: grid;
+  place-items: center;
+}
+
+#sega-mark {
+  position: absolute;
+  bottom: max(0.4rem, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Bungee", sans-serif;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  z-index: 12;
+  text-shadow: none;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+  display: none;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 1rem;
+  z-index: 14;
+  pointer-events: none;
+}
+
+.controls.visible {
+  display: flex;
+}
+
+.dpad {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  pointer-events: auto;
+}
+
+.dpad-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.action-btns {
+  display: flex;
+  gap: 0.55rem;
+  pointer-events: auto;
+}
+
+.ctrl {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.65);
+  background: rgba(10, 30, 60, 0.55);
+  color: #fff;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.ctrl.action {
+  width: 4rem;
+  height: 4rem;
+  background: rgba(200, 40, 50, 0.65);
+  font-size: 0.9rem;
+}
+
+.ctrl.spin {
+  background: rgba(40, 100, 220, 0.65);
+  width: 3.5rem;
+  height: 3.5rem;
+  align-self: flex-end;
+  margin-bottom: 0.35rem;
+}
+
+.ctrl:active,
+.ctrl.pressed {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@keyframes titleIn {
+  from { opacity: 0; transform: scale(0.7) translateY(-20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+
+@media (hover: none), (max-width: 900px) {
+  .controls.visible {
+    display: flex;
+  }
+  .hint {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .ctrl {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+  .ctrl.action {
+    width: 3.3rem;
+    height: 3.3rem;
+  }
+  .ctrl.spin {
+    width: 2.9rem;
+    height: 2.9rem;
+  }
+  #sega-mark {
+    font-size: 1.1rem;
+    bottom: 0.2rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+<div id="app">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div id="title-card" class="overlay">
+      <div class="title-card-inner">
+        <div class="zone-name">GREEN HILL</div>
+        <div class="zone-row">
+          <span class="zone-word">ZONE</span>
+          <div class="act-badge">
+            <span class="act-label">ACT</span>
+            <span class="act-num">1</span>
+          </div>
+        </div>
+      </div>
+      <button id="btn-start" type="button">TAP TO START</button>
+      <p class="hint">← → move · ↑ / Z jump · ↓ / X roll · Space spindash</p>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="pause-panel">
+        <h2>PAUSED</h2>
+        <button id="btn-resume" type="button">RESUME</button>
+        <button id="btn-restart" type="button">RESTART</button>
+      </div>
+    </div>
+
+    <div id="result-overlay" class="overlay hidden">
+      <div class="result-panel">
+        <h2 id="result-title">ACT CLEAR!</h2>
+        <div class="result-stats">
+          <div><span>TIME</span><strong id="result-time">0:00</strong></div>
+          <div><span>RINGS</span><strong id="result-rings">0</strong></div>
+          <div><span>SCORE</span><strong id="result-score">0</strong></div>
+        </div>
+        <button id="btn-again" type="button">PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <div id="controls" class="controls">
+      <div class="dpad">
+        <button class="ctrl" data-key="left" aria-label="Left">◀</button>
+        <div class="dpad-mid">
+          <button class="ctrl" data-key="up" aria-label="Up">▲</button>
+          <button class="ctrl" data-key="down" aria-label="Down">▼</button>
+        </div>
+        <button class="ctrl" data-key="right" aria-label="Right">▶</button>
+      </div>
+      <div class="action-btns">
+        <button class="ctrl action" data-key="jump" aria-label="Jump">A</button>
+        <button class="ctrl action spin" data-key="spin" aria-label="Spin">B</button>
+      </div>
+    </div>
+
+    <button id="btn-pause" type="button" aria-label="Pause">❚❚</button>
+    <div id="sega-mark">SEGA</div>
+  </div>
+
+<script>
+// --- js/input.js ---
+/** Keyboard + on-screen touch controls */
+class Input {
+  constructor() {
+    this.keys = Object.create(null);
+    this._bind();
+  }
+
+  _bind() {
+    const set = (code, down) => {
+      const map = {
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        ArrowUp: "up",
+        ArrowDown: "down",
+        KeyA: "left",
+        KeyD: "right",
+        KeyW: "up",
+        KeyS: "down",
+        KeyZ: "jump",
+        KeyX: "spin",
+        Space: "spin",
+        KeyJ: "jump",
+        KeyK: "spin",
+        Escape: "pause",
+        KeyP: "pause",
+      };
+      const k = map[code];
+      if (k) this.keys[k] = down;
+    };
+
+    window.addEventListener("keydown", (e) => {
+      set(e.code, true);
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"].includes(e.code)) {
+        e.preventDefault();
+      }
+    });
+    window.addEventListener("keyup", (e) => set(e.code, false));
+
+    const bindBtn = (el) => {
+      const key = el.dataset.key;
+      const on = (e) => {
+        e.preventDefault();
+        this.keys[key] = true;
+        el.classList.add("pressed");
+      };
+      const off = (e) => {
+        e.preventDefault();
+        this.keys[key] = false;
+        el.classList.remove("pressed");
+      };
+      el.addEventListener("pointerdown", on);
+      el.addEventListener("pointerup", off);
+      el.addEventListener("pointerleave", off);
+      el.addEventListener("pointercancel", off);
+    };
+
+    document.querySelectorAll(".ctrl").forEach(bindBtn);
+  }
+
+  down(k) {
+    return !!this.keys[k];
+  }
+
+  consume(k) {
+    if (!this.keys[k]) return false;
+    this.keys[k] = false;
+    return true;
+  }
+}
+
+// --- js/audio.js ---
+/** Lightweight procedural SFX via Web Audio API */
+class AudioBus {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+
+  ensure() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx?.state === "suspended") this.ctx.resume();
+  }
+
+  tone(freq, dur = 0.08, type = "square", gain = 0.06, slide = 0) {
+    if (!this.enabled) return;
+    this.ensure();
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t0);
+    if (slide) o.frequency.linearRampToValueAtTime(freq + slide, t0 + dur);
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    o.connect(g);
+    g.connect(this.ctx.destination);
+    o.start(t0);
+    o.stop(t0 + dur + 0.02);
+  }
+
+  ring() {
+    this.tone(880, 0.07, "square", 0.05);
+    this.tone(1320, 0.09, "square", 0.035, 200);
+  }
+
+  jump() {
+    this.tone(320, 0.1, "square", 0.05, 280);
+  }
+
+  spindash() {
+    this.tone(180, 0.15, "sawtooth", 0.04, 420);
+  }
+
+  hurt() {
+    this.tone(220, 0.18, "sawtooth", 0.06, -120);
+  }
+
+  spring() {
+    this.tone(400, 0.12, "square", 0.05, 500);
+  }
+
+  checkpoint() {
+    this.tone(520, 0.08, "square", 0.045);
+    setTimeout(() => this.tone(780, 0.12, "square", 0.04), 80);
+  }
+
+  clear() {
+    [523, 659, 784, 1046].forEach((f, i) => {
+      setTimeout(() => this.tone(f, 0.15, "square", 0.05), i * 90);
+    });
+  }
+
+  stomp() {
+    this.tone(140, 0.08, "triangle", 0.05, -40);
+  }
+}
+
+// --- js/level.js ---
+/**
+ * Green Hill Zone tilemap + collision.
+ * Tile ids: 0 empty, 1 solid, 2 slope /, 3 slope \, 4 platform (one-way), 5 spring
+ */
+const TILE = 32;
+
+const T = {
+  EMPTY: 0,
+  SOLID: 1,
+  SLOPE_L: 2, // rises to the right  /
+  SLOPE_R: 3, // rises to the left   \
+  PLATFORM: 4,
+  SPRING: 5,
+};
+
+/** Build Act 1 layout — wide scrolling Green Hill style course */
+function buildLevel() {
+  const W = 220;
+  const H = 20;
+  const map = Array.from({ length: H }, () => Array(W).fill(T.EMPTY));
+
+  const fillGround = (x0, x1, y) => {
+    for (let x = x0; x <= x1; x++) {
+      for (let yy = y; yy < H; yy++) map[yy][x] = T.SOLID;
+    }
+  };
+
+  const plateau = (x0, x1, y) => {
+    for (let x = x0; x <= x1; x++) map[y][x] = T.SOLID;
+    for (let x = x0; x <= x1; x++) {
+      for (let yy = y + 1; yy < H; yy++) {
+        if (map[yy][x] === T.EMPTY) map[yy][x] = T.SOLID;
+      }
+    }
+  };
+
+  // Starting flats
+  fillGround(0, 28, 14);
+
+  // Gentle rise
+  map[13][29] = T.SLOPE_L;
+  for (let yy = 14; yy < H; yy++) map[yy][29] = T.SOLID;
+  map[13][30] = T.SOLID;
+  for (let yy = 14; yy < H; yy++) map[yy][30] = T.SOLID;
+  map[12][31] = T.SLOPE_L;
+  for (let yy = 13; yy < H; yy++) map[yy][31] = T.SOLID;
+  plateau(32, 40, 12);
+
+  // Drop to valley
+  map[12][41] = T.SLOPE_R;
+  for (let yy = 13; yy < H; yy++) map[yy][41] = T.SOLID;
+  map[13][42] = T.SLOPE_R;
+  for (let yy = 14; yy < H; yy++) map[yy][42] = T.SOLID;
+  fillGround(43, 55, 14);
+
+  // Floating platforms
+  for (let x = 48; x <= 52; x++) map[10][x] = T.PLATFORM;
+  for (let x = 56; x <= 60; x++) map[8][x] = T.PLATFORM;
+  for (let x = 62; x <= 66; x++) map[6][x] = T.PLATFORM;
+
+  // Mid hill
+  fillGround(56, 58, 14);
+  map[13][59] = T.SLOPE_L;
+  for (let yy = 14; yy < H; yy++) map[yy][59] = T.SOLID;
+  plateau(60, 72, 12);
+
+  // Tunnel / low ceiling feel with platforms above
+  fillGround(73, 88, 14);
+  for (let x = 76; x <= 84; x++) map[11][x] = T.PLATFORM;
+
+  // Big ramp up
+  map[13][89] = T.SLOPE_L;
+  for (let yy = 14; yy < H; yy++) map[yy][89] = T.SOLID;
+  map[12][90] = T.SLOPE_L;
+  for (let yy = 13; yy < H; yy++) map[yy][90] = T.SOLID;
+  map[11][91] = T.SLOPE_L;
+  for (let yy = 12; yy < H; yy++) map[yy][91] = T.SOLID;
+  plateau(92, 105, 10);
+
+  // Drop
+  map[10][106] = T.SLOPE_R;
+  for (let yy = 11; yy < H; yy++) map[yy][106] = T.SOLID;
+  map[11][107] = T.SLOPE_R;
+  for (let yy = 12; yy < H; yy++) map[yy][107] = T.SOLID;
+  map[12][108] = T.SLOPE_R;
+  for (let yy = 13; yy < H; yy++) map[yy][108] = T.SOLID;
+  map[13][109] = T.SLOPE_R;
+  for (let yy = 14; yy < H; yy++) map[yy][109] = T.SOLID;
+  fillGround(110, 130, 14);
+
+  // Stepping platforms to high ledge
+  for (let x = 118; x <= 121; x++) map[11][x] = T.PLATFORM;
+  for (let x = 124; x <= 127; x++) map[9][x] = T.PLATFORM;
+  for (let x = 130; x <= 134; x++) map[7][x] = T.PLATFORM;
+  plateau(136, 148, 8);
+
+  // Final stretch
+  map[8][149] = T.SLOPE_R;
+  for (let yy = 9; yy < H; yy++) map[yy][149] = T.SOLID;
+  map[9][150] = T.SLOPE_R;
+  for (let yy = 10; yy < H; yy++) map[yy][150] = T.SOLID;
+  map[10][151] = T.SLOPE_R;
+  for (let yy = 11; yy < H; yy++) map[yy][151] = T.SOLID;
+  map[11][152] = T.SLOPE_R;
+  for (let yy = 12; yy < H; yy++) map[yy][152] = T.SOLID;
+  map[12][153] = T.SLOPE_R;
+  for (let yy = 13; yy < H; yy++) map[yy][153] = T.SOLID;
+  map[13][154] = T.SLOPE_R;
+  for (let yy = 14; yy < H; yy++) map[yy][154] = T.SOLID;
+  fillGround(155, 219, 14);
+
+  // Springs
+  map[13][50] = T.SPRING;
+  map[13][115] = T.SPRING;
+  map[9][140] = T.SPRING;
+
+  // Decor flowers / palms are drawn procedurally from coords
+  const decorations = [
+    { type: "flower", x: 6 * TILE, y: 14 * TILE },
+    { type: "flower", x: 10 * TILE, y: 14 * TILE },
+    { type: "palm", x: 18 * TILE, y: 14 * TILE },
+    { type: "palm", x: 24 * TILE, y: 14 * TILE },
+    { type: "flower", x: 36 * TILE, y: 12 * TILE },
+    { type: "palm", x: 46 * TILE, y: 14 * TILE },
+    { type: "palm", x: 64 * TILE, y: 12 * TILE },
+    { type: "flower", x: 70 * TILE, y: 12 * TILE },
+    { type: "palm", x: 80 * TILE, y: 14 * TILE },
+    { type: "palm", x: 98 * TILE, y: 10 * TILE },
+    { type: "flower", x: 112 * TILE, y: 14 * TILE },
+    { type: "palm", x: 120 * TILE, y: 14 * TILE },
+    { type: "palm", x: 160 * TILE, y: 14 * TILE },
+    { type: "flower", x: 168 * TILE, y: 14 * TILE },
+    { type: "palm", x: 180 * TILE, y: 14 * TILE },
+    { type: "waterfall", x: 14 * TILE, y: 6 * TILE },
+    { type: "waterfall", x: 100 * TILE, y: 4 * TILE },
+  ];
+
+  return { map, W, H, decorations, spawn: { x: 3 * TILE, y: 12 * TILE }, goalX: 210 * TILE };
+}
+
+function tileAt(level, tx, ty) {
+  if (ty < 0 || ty >= level.H || tx < 0 || tx >= level.W) return T.SOLID;
+  return level.map[ty][tx];
+}
+
+/** Ground height at world X within a tile (for slopes) */
+function groundYInTile(tile, localX) {
+  const t = Math.max(0, Math.min(TILE, localX));
+  if (tile === T.SLOPE_L) return TILE - t; // high on right
+  if (tile === T.SLOPE_R) return t; // high on left
+  if (tile === T.SOLID || tile === T.SPRING) return 0;
+  if (tile === T.PLATFORM) return 0;
+  return TILE;
+}
+
+function isSolidTile(t) {
+  return t === T.SOLID || t === T.SLOPE_L || t === T.SLOPE_R || t === T.SPRING;
+}
+
+function isOneWay(t) {
+  return t === T.PLATFORM;
+}
+
+// --- js/entities.js ---
+
+function createRings(level) {
+  const rings = [];
+  const addArc = (cx, cy, n, r = 40) => {
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * i) / (n - 1 || 1);
+      rings.push({
+        x: cx + Math.cos(a) * r,
+        y: cy - Math.sin(a) * r * 0.55,
+        got: false,
+        anim: Math.random() * Math.PI * 2,
+      });
+    }
+  };
+  const line = (x0, y, n, gap = 28) => {
+    for (let i = 0; i < n; i++) {
+      rings.push({ x: x0 + i * gap, y, got: false, anim: i * 0.4 });
+    }
+  };
+
+  line(5 * TILE, 12.5 * TILE, 5);
+  line(32 * TILE, 10.5 * TILE, 6);
+  addArc(50 * TILE, 8 * TILE, 5, 48);
+  line(57 * TILE, 6.5 * TILE, 4);
+  line(63 * TILE, 4.5 * TILE, 4);
+  line(74 * TILE, 12.5 * TILE, 8);
+  line(93 * TILE, 8.5 * TILE, 7);
+  line(112 * TILE, 12.5 * TILE, 6);
+  line(119 * TILE, 9.5 * TILE, 3);
+  line(125 * TILE, 7.5 * TILE, 3);
+  line(131 * TILE, 5.5 * TILE, 4);
+  line(138 * TILE, 6.5 * TILE, 6);
+  line(158 * TILE, 12.5 * TILE, 10);
+  line(175 * TILE, 12.5 * TILE, 8);
+  line(195 * TILE, 12.5 * TILE, 6);
+
+  return rings;
+}
+
+function createEnemies() {
+  return [
+    { x: 22 * TILE, y: 14 * TILE, vx: -0.8, minX: 16 * TILE, maxX: 27 * TILE, alive: true, anim: 0 },
+    { x: 45 * TILE, y: 14 * TILE, vx: 0.9, minX: 43 * TILE, maxX: 54 * TILE, alive: true, anim: 0 },
+    { x: 68 * TILE, y: 12 * TILE, vx: -0.85, minX: 61 * TILE, maxX: 71 * TILE, alive: true, anim: 0 },
+    { x: 82 * TILE, y: 14 * TILE, vx: 0.75, minX: 74 * TILE, maxX: 87 * TILE, alive: true, anim: 0 },
+    { x: 100 * TILE, y: 10 * TILE, vx: -0.9, minX: 93 * TILE, maxX: 104 * TILE, alive: true, anim: 0 },
+    { x: 125 * TILE, y: 14 * TILE, vx: 0.85, minX: 112 * TILE, maxX: 129 * TILE, alive: true, anim: 0 },
+    { x: 145 * TILE, y: 8 * TILE, vx: -0.8, minX: 137 * TILE, maxX: 147 * TILE, alive: true, anim: 0 },
+    { x: 170 * TILE, y: 14 * TILE, vx: 1.0, minX: 156 * TILE, maxX: 190 * TILE, alive: true, anim: 0 },
+    { x: 200 * TILE, y: 14 * TILE, vx: -0.9, minX: 192 * TILE, maxX: 208 * TILE, alive: true, anim: 0 },
+  ];
+}
+
+function createCheckpoint() {
+  return { x: 110 * TILE, y: 14 * TILE, active: false };
+}
+
+function createGoal(level) {
+  return { x: level.goalX, y: 14 * TILE, spun: false, angle: 0 };
+}
+
+function updateEnemies(enemies, dt) {
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    e.anim += dt * 10;
+    e.x += e.vx * dt * 60;
+    if (e.x < e.minX) {
+      e.x = e.minX;
+      e.vx = Math.abs(e.vx);
+    }
+    if (e.x > e.maxX) {
+      e.x = e.maxX;
+      e.vx = -Math.abs(e.vx);
+    }
+  }
+}
+
+function updateRings(rings, dt) {
+  for (const r of rings) {
+    if (!r.got) r.anim += dt * 8;
+  }
+}
+
+// --- js/sonic.js ---
+
+/** Classic-inspired Sonic physics */
+const ACCEL = 0.046875;
+const DECEL = 0.5;
+const FRICTION = 0.046875;
+const TOP = 6;
+const JUMP = 6.5;
+const GRAVITY = 0.21875;
+const AIR_ACCEL = 0.09375;
+const ROLL_FRICTION = 0.0234375;
+const ROLL_DECEL = 0.125;
+const SPINDASH_MAX = 8;
+const HURT_KNOCK = 2.5;
+
+class Sonic {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.w = 20;
+    this.h = 28;
+    this.vx = 0;
+    this.vy = 0;
+    this.grounded = false;
+    this.facing = 1;
+    this.rolling = false;
+    this.spindash = 0;
+    this.charging = false;
+    this.jumpHeld = false;
+    this.anim = 0;
+    this.state = "idle"; // idle, walk, run, jump, roll, spindash, hurt, dead
+    this.invuln = 0;
+    this.rings = 0;
+    this.lives = 3;
+    this.score = 0;
+    this.dead = false;
+    this.springing = false;
+  }
+
+  bounds() {
+    const h = this.rolling || this.state === "roll" || this.state === "jump" ? 20 : this.h;
+    const w = this.rolling ? 20 : this.w;
+    return {
+      l: this.x - w / 2,
+      r: this.x + w / 2,
+      t: this.y - h,
+      b: this.y,
+      w,
+      h,
+    };
+  }
+
+  reset(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.grounded = false;
+    this.rolling = false;
+    this.spindash = 0;
+    this.charging = false;
+    this.state = "idle";
+    this.invuln = 120;
+    this.dead = false;
+    this.springing = false;
+  }
+
+  hurt(audio) {
+    if (this.invuln > 0 || this.dead) return false;
+    if (this.rings > 0) {
+      const lost = this.rings;
+      this.rings = 0;
+      this.vx = -this.facing * HURT_KNOCK;
+      this.vy = -4;
+      this.grounded = false;
+      this.rolling = false;
+      this.state = "hurt";
+      this.invuln = 120;
+      audio?.hurt();
+      return { scatter: lost };
+    }
+    this.die(audio);
+    return { scatter: 0 };
+  }
+
+  die(audio) {
+    this.dead = true;
+    this.state = "dead";
+    this.vy = -7;
+    this.vx = 0;
+    this.lives = Math.max(0, this.lives - 1);
+    audio?.hurt();
+  }
+
+  update(input, level, dt) {
+    if (this.dead) {
+      this.vy += GRAVITY * 1.2 * dt * 60;
+      this.y += this.vy * dt * 60;
+      this.anim += dt * 12;
+      return;
+    }
+
+    if (this.invuln > 0) this.invuln--;
+
+    const left = input.down("left");
+    const right = input.down("right");
+    const down = input.down("down");
+    const jump = input.down("jump") || input.down("up");
+    const spin = input.down("spin");
+
+    // Spindash charge
+    if (this.grounded && down && spin && Math.abs(this.vx) < 0.5) {
+      this.charging = true;
+      this.spindash = Math.min(SPINDASH_MAX, this.spindash + 0.35 * dt * 60);
+      this.state = "spindash";
+      this.vx = 0;
+    } else if (this.charging && !down) {
+      this.vx = this.facing * (8 + this.spindash);
+      this.rolling = true;
+      this.charging = false;
+      this.spindash = 0;
+      this.state = "roll";
+    } else if (!down) {
+      this.charging = false;
+      this.spindash = Math.max(0, this.spindash - 0.2);
+    }
+
+    if (!this.charging) {
+      if (this.grounded) {
+        if (this.rolling) {
+          if (left) {
+            if (this.vx > 0) this.vx -= ROLL_DECEL * dt * 60;
+            this.facing = -1;
+          }
+          if (right) {
+            if (this.vx < 0) this.vx += ROLL_DECEL * dt * 60;
+            this.facing = 1;
+          }
+          if (this.vx > 0) this.vx = Math.max(0, this.vx - ROLL_FRICTION * dt * 60);
+          if (this.vx < 0) this.vx = Math.min(0, this.vx + ROLL_FRICTION * dt * 60);
+          if (Math.abs(this.vx) < 0.5 && !down) this.rolling = false;
+          if (!down && Math.abs(this.vx) < 1.5) this.rolling = false;
+        } else {
+          if (left) {
+            if (this.vx > 0) this.vx -= DECEL * dt * 60;
+            else this.vx -= ACCEL * dt * 60;
+            this.facing = -1;
+          } else if (right) {
+            if (this.vx < 0) this.vx += DECEL * dt * 60;
+            else this.vx += ACCEL * dt * 60;
+            this.facing = 1;
+          } else {
+            if (this.vx > 0) this.vx = Math.max(0, this.vx - FRICTION * dt * 60);
+            if (this.vx < 0) this.vx = Math.min(0, this.vx + FRICTION * dt * 60);
+          }
+          this.vx = Math.max(-TOP, Math.min(TOP, this.vx));
+
+          // Duck into roll at speed
+          if (down && Math.abs(this.vx) > 1.2) {
+            this.rolling = true;
+            this.state = "roll";
+          }
+        }
+
+        // Jump
+        if (jump && !this.jumpHeld) {
+          this.vy = -JUMP;
+          this.grounded = false;
+          this.rolling = true;
+          this.state = "jump";
+          this.jumpHeld = true;
+          this.springing = false;
+        }
+      } else {
+        // Air control
+        if (left) {
+          this.vx -= AIR_ACCEL * dt * 60;
+          this.facing = -1;
+        }
+        if (right) {
+          this.vx += AIR_ACCEL * dt * 60;
+          this.facing = 1;
+        }
+        this.vx = Math.max(-TOP * 1.15, Math.min(TOP * 1.15, this.vx));
+
+        // Variable jump
+        if (!jump && this.vy < -2 && !this.springing) {
+          this.vy = -2;
+        }
+
+        this.vy += GRAVITY * dt * 60;
+        this.vy = Math.min(16, this.vy);
+      }
+    }
+
+    if (!jump) this.jumpHeld = false;
+
+    // Integrate + collide
+    this._moveX(level, this.vx * dt * 60);
+    this._moveY(level, this.vy * dt * 60);
+
+    // Animation state
+    this.anim += dt * (Math.abs(this.vx) * 1.5 + 8);
+    if (this.charging) this.state = "spindash";
+    else if (!this.grounded) this.state = "jump";
+    else if (this.rolling) this.state = "roll";
+    else if (Math.abs(this.vx) > 4.5) this.state = "run";
+    else if (Math.abs(this.vx) > 0.3) this.state = "walk";
+    else this.state = "idle";
+  }
+
+  _moveX(level, dx) {
+    this.x += dx;
+    const b = this.bounds();
+    const top = Math.floor(b.t / TILE);
+    const bot = Math.floor((b.b - 1) / TILE);
+    if (dx > 0) {
+      const tx = Math.floor(b.r / TILE);
+      for (let ty = top; ty <= bot; ty++) {
+        const t = tileAt(level, tx, ty);
+        if (isSolidTile(t) && t !== T.SLOPE_L && t !== T.SLOPE_R) {
+          this.x = tx * TILE - (b.r - this.x);
+          this.vx = 0;
+          this.rolling = false;
+          break;
+        }
+      }
+    } else if (dx < 0) {
+      const tx = Math.floor(b.l / TILE);
+      for (let ty = top; ty <= bot; ty++) {
+        const t = tileAt(level, tx, ty);
+        if (isSolidTile(t) && t !== T.SLOPE_L && t !== T.SLOPE_R) {
+          this.x = (tx + 1) * TILE + (this.x - b.l);
+          this.vx = 0;
+          this.rolling = false;
+          break;
+        }
+      }
+    }
+  }
+
+  _moveY(level, dy) {
+    this.y += dy;
+    const b = this.bounds();
+    const left = Math.floor(b.l / TILE);
+    const right = Math.floor((b.r - 1) / TILE);
+
+    if (dy >= 0) {
+      let landed = false;
+      let bestY = Infinity;
+      let spring = false;
+
+      for (let tx = left; tx <= right; tx++) {
+        const ty = Math.floor(b.b / TILE);
+        const t = tileAt(level, tx, ty);
+        if (isSolidTile(t) || (isOneWay(t) && this.vy >= 0 && b.b - dy <= ty * TILE + 2)) {
+          const localX = this.x - tx * TILE;
+          let gy = ty * TILE + groundYInTile(t, localX);
+          if (t === T.SOLID || t === T.SPRING || t === T.PLATFORM) gy = ty * TILE;
+          if (t === T.SLOPE_L || t === T.SLOPE_R) {
+            gy = ty * TILE + groundYInTile(t, localX);
+          }
+          if (b.b >= gy && b.b - dy <= gy + 10 && gy < bestY) {
+            bestY = gy;
+            landed = true;
+            spring = t === T.SPRING;
+          }
+        }
+        // also check tile above for slopes that stick up
+        const t2 = tileAt(level, tx, ty - 1);
+        if (t2 === T.SLOPE_L || t2 === T.SLOPE_R) {
+          const localX = this.x - tx * TILE;
+          const gy = (ty - 1) * TILE + groundYInTile(t2, localX);
+          if (b.b >= gy && b.b - dy <= gy + 12 && gy < bestY) {
+            bestY = gy;
+            landed = true;
+          }
+        }
+      }
+
+      if (landed) {
+        this.y = bestY;
+        this.vy = 0;
+        this.grounded = true;
+        if (spring) {
+          this.vy = -10;
+          this.grounded = false;
+          this.rolling = true;
+          this.springing = true;
+          this.state = "jump";
+        }
+      } else {
+        this.grounded = false;
+      }
+    } else {
+      this.grounded = false;
+      const ty = Math.floor(b.t / TILE);
+      for (let tx = left; tx <= right; tx++) {
+        const t = tileAt(level, tx, ty);
+        if (isSolidTile(t) && t !== T.SLOPE_L && t !== T.SLOPE_R && t !== T.SPRING) {
+          this.y = (ty + 1) * TILE + (this.y - b.t);
+          this.vy = 0;
+          break;
+        }
+      }
+    }
+  }
+
+  bounceEnemy() {
+    this.vy = -JUMP * 0.85;
+    this.grounded = false;
+    this.rolling = true;
+    this.state = "jump";
+  }
+}
+
+// --- js/renderer.js ---
+
+const COLORS = {
+  skyTop: "#5eb0ff",
+  skyBot: "#2a8cff",
+  water: "#2080e0",
+  waterHi: "#a8e8ff",
+  treeDark: "#186018",
+  treeMid: "#28a028",
+  grass: "#38d020",
+  grassDark: "#28a018",
+  dirtA: "#c06028",
+  dirtB: "#e09040",
+  dirtDeep: "#904018",
+  cliff: "#a05028",
+  cloud: "#ffffff",
+  palmTrunk: "#a06830",
+  palmLeaf: "#30c028",
+  flowerPetal: "#c040d0",
+  flowerCenter: "#ffe040",
+};
+
+class Renderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.w = canvas.width;
+    this.h = canvas.height;
+    this.time = 0;
+  }
+
+  clear() {
+    const { ctx, w, h } = this;
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, COLORS.skyTop);
+    g.addColorStop(1, COLORS.skyBot);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  drawBackground(camX, time) {
+    const { ctx, w, h } = this;
+    this.time = time;
+
+    // Distant clouds (parallax)
+    const cloudOff = (camX * 0.15) % 400;
+    ctx.fillStyle = COLORS.cloud;
+    for (let i = -1; i < 5; i++) {
+      const cx = i * 280 - cloudOff + 40;
+      this._cloud(cx, 28 + (i % 3) * 10, 1);
+      this._cloud(cx + 140, 55, 0.7);
+    }
+
+    // Water band
+    const waterY = h * 0.52;
+    const waterPar = camX * 0.25;
+    ctx.fillStyle = COLORS.water;
+    ctx.fillRect(0, waterY, w, h * 0.22);
+
+    // Water sparkles
+    ctx.fillStyle = COLORS.waterHi;
+    for (let i = 0; i < 24; i++) {
+      const sx = ((i * 73 - waterPar * 0.5 + time * 20) % (w + 40)) - 20;
+      const sy = waterY + 8 + (i % 5) * 12;
+      const pulse = 0.5 + 0.5 * Math.sin(time * 6 + i);
+      if (pulse > 0.55) {
+        ctx.fillRect(sx, sy, 6, 2);
+        ctx.fillRect(sx + 2, sy - 2, 2, 6);
+      }
+    }
+
+    // Tree line
+    const treePar = camX * 0.35;
+    for (let i = -1; i < 12; i++) {
+      const tx = i * 90 - (treePar % 90);
+      this._bush(tx, waterY - 8, COLORS.treeDark);
+      this._bush(tx + 40, waterY - 18, COLORS.treeMid);
+    }
+
+    // Cliff / waterfall mid-layer
+    const cliffPar = camX * 0.4;
+    this._cliff(120 - cliffPar * 0.3, waterY - 110, time);
+  }
+
+  _cloud(x, y, s) {
+    const { ctx } = this;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 28 * s, 10 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 18 * s, y - 4 * s, 20 * s, 12 * s, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - 16 * s, y + 2 * s, 16 * s, 8 * s, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _bush(x, y, color) {
+    const { ctx } = this;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 36, 22, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 28, y + 4, 30, 18, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - 24, y + 6, 26, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _cliff(x, y, time) {
+    const { ctx } = this;
+    ctx.fillStyle = COLORS.cliff;
+    ctx.fillRect(x, y, 70, 140);
+    // waterfall
+    const flow = (time * 80) % 16;
+    ctx.fillStyle = "#60c8ff";
+    ctx.fillRect(x + 22, y, 26, 140);
+    ctx.fillStyle = "#e8ffff";
+    for (let i = 0; i < 10; i++) {
+      ctx.fillRect(x + 26, y + ((i * 16 + flow) % 140), 6, 8);
+      ctx.fillRect(x + 36, y + ((i * 16 + flow + 8) % 140), 6, 8);
+    }
+  }
+
+  drawDecorations(level, camX, camY, time) {
+    for (const d of level.decorations) {
+      const sx = d.x - camX;
+      const sy = d.y - camY;
+      if (sx < -80 || sx > this.w + 80) continue;
+      if (d.type === "palm") this._palm(sx, sy);
+      else if (d.type === "flower") this._flower(sx, sy, time);
+      else if (d.type === "waterfall") this._cliff(sx - 20, sy - 40, time);
+    }
+  }
+
+  _palm(x, groundY) {
+    const { ctx } = this;
+    // segmented trunk
+    ctx.fillStyle = COLORS.palmTrunk;
+    for (let i = 0; i < 7; i++) {
+      const tw = 10 - i * 0.3;
+      ctx.fillRect(x - tw / 2, groundY - 14 - i * 16, tw, 16);
+      ctx.fillStyle = "#804820";
+      ctx.fillRect(x - tw / 2, groundY - 14 - i * 16 + 12, tw, 3);
+      ctx.fillStyle = COLORS.palmTrunk;
+    }
+    const top = groundY - 14 - 7 * 16;
+    ctx.fillStyle = COLORS.palmLeaf;
+    for (let a = -2; a <= 2; a++) {
+      ctx.beginPath();
+      ctx.ellipse(x + a * 18, top + Math.abs(a) * 4, 22, 8, a * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  _flower(x, groundY, time) {
+    const { ctx } = this;
+    const bob = Math.sin(time * 3 + x * 0.01) * 2;
+    ctx.strokeStyle = "#28a018";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x, groundY);
+    ctx.quadraticCurveTo(x + 4, groundY - 20, x, groundY - 36 + bob);
+    ctx.stroke();
+    // leaves
+    ctx.fillStyle = "#38d020";
+    ctx.beginPath();
+    ctx.ellipse(x - 10, groundY - 18, 10, 5, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(x + 12, groundY - 22, 10, 5, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    // petals
+    ctx.fillStyle = COLORS.flowerPetal;
+    const cy = groundY - 36 + bob;
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + time;
+      ctx.beginPath();
+      ctx.ellipse(x + Math.cos(a) * 10, cy + Math.sin(a) * 10, 8, 6, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = COLORS.flowerCenter;
+    ctx.beginPath();
+    ctx.arc(x, cy, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  drawTiles(level, camX, camY) {
+    const { ctx, w, h } = this;
+    const x0 = Math.max(0, Math.floor(camX / TILE) - 1);
+    const x1 = Math.min(level.W - 1, Math.ceil((camX + w) / TILE) + 1);
+    const y0 = Math.max(0, Math.floor(camY / TILE) - 1);
+    const y1 = Math.min(level.H - 1, Math.ceil((camY + h) / TILE) + 1);
+
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const t = tileAt(level, tx, ty);
+        if (t === T.EMPTY) continue;
+        const sx = tx * TILE - camX;
+        const sy = ty * TILE - camY;
+        this._drawTile(sx, sy, t, tx, ty);
+      }
+    }
+  }
+
+  _drawTile(sx, sy, t, tx, ty) {
+    const { ctx } = this;
+    if (t === T.PLATFORM) {
+      ctx.fillStyle = COLORS.grass;
+      ctx.fillRect(sx, sy, TILE, 8);
+      ctx.fillStyle = COLORS.dirtA;
+      ctx.fillRect(sx, sy + 8, TILE, 6);
+      return;
+    }
+
+    if (t === T.SLOPE_L) {
+      // / slope
+      ctx.fillStyle = COLORS.grass;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + TILE);
+      ctx.lineTo(sx + TILE, sy);
+      ctx.lineTo(sx + TILE, sy + 8);
+      ctx.lineTo(sx, sy + TILE + 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = (tx + ty) % 2 ? COLORS.dirtA : COLORS.dirtB;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + TILE + 8);
+      ctx.lineTo(sx + TILE, sy + 8);
+      ctx.lineTo(sx + TILE, sy + TILE);
+      ctx.lineTo(sx, sy + TILE);
+      ctx.closePath();
+      ctx.fill();
+      // fill below dirt for continuity handled by solid tiles
+      return;
+    }
+
+    if (t === T.SLOPE_R) {
+      ctx.fillStyle = COLORS.grass;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx + TILE, sy + TILE);
+      ctx.lineTo(sx + TILE, sy + TILE + 8);
+      ctx.lineTo(sx, sy + 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = (tx + ty) % 2 ? COLORS.dirtA : COLORS.dirtB;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + 8);
+      ctx.lineTo(sx + TILE, sy + TILE + 8);
+      ctx.lineTo(sx + TILE, sy + TILE);
+      ctx.lineTo(sx, sy + TILE);
+      ctx.closePath();
+      ctx.fill();
+      return;
+    }
+
+    if (t === T.SPRING) {
+      this._spring(sx, sy);
+      return;
+    }
+
+    const checker = (tx + ty) % 2 === 0;
+    ctx.fillStyle = checker ? COLORS.dirtA : COLORS.dirtB;
+    ctx.fillRect(sx, sy, TILE, TILE);
+    ctx.strokeStyle = COLORS.dirtDeep;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sx + 0.5, sy + 0.5, TILE - 1, TILE - 1);
+  }
+
+  drawTilesWithGrass(level, camX, camY) {
+    const { ctx, w, h } = this;
+    const x0 = Math.max(0, Math.floor(camX / TILE) - 1);
+    const x1 = Math.min(level.W - 1, Math.ceil((camX + w) / TILE) + 1);
+    const y0 = Math.max(0, Math.floor(camY / TILE) - 1);
+    const y1 = Math.min(level.H - 1, Math.ceil((camY + h) / TILE) + 1);
+
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const t = tileAt(level, tx, ty);
+        if (t === T.EMPTY) continue;
+        const sx = tx * TILE - camX;
+        const sy = ty * TILE - camY;
+
+        if (t === T.PLATFORM) {
+          ctx.fillStyle = COLORS.grass;
+          ctx.fillRect(sx, sy, TILE, 8);
+          // grass blades
+          ctx.fillStyle = COLORS.grassDark;
+          for (let i = 0; i < 6; i++) {
+            ctx.fillRect(sx + 4 + i * 5, sy - 3, 2, 5);
+          }
+          ctx.fillStyle = COLORS.dirtA;
+          ctx.fillRect(sx, sy + 8, TILE, 6);
+          continue;
+        }
+
+        if (t === T.SLOPE_L || t === T.SLOPE_R) {
+          this._drawTile(sx, sy, t, tx, ty);
+          continue;
+        }
+
+        if (t === T.SPRING) {
+          // draw solid under spring first
+          const checker = (tx + ty) % 2 === 0;
+          ctx.fillStyle = checker ? COLORS.dirtA : COLORS.dirtB;
+          ctx.fillRect(sx, sy, TILE, TILE);
+          this._spring(sx + 4, sy);
+          continue;
+        }
+
+        const checker = (tx + ty) % 2 === 0;
+        ctx.fillStyle = checker ? COLORS.dirtA : COLORS.dirtB;
+        ctx.fillRect(sx, sy, TILE, TILE);
+
+        const above = tileAt(level, tx, ty - 1);
+        if (above === T.EMPTY || above === T.PLATFORM) {
+          // grass top
+          ctx.fillStyle = COLORS.grass;
+          ctx.fillRect(sx, sy, TILE, 8);
+          ctx.fillStyle = COLORS.grassDark;
+          for (let i = 0; i < 8; i++) {
+            const bx = sx + i * 4 + 1;
+            ctx.fillRect(bx, sy - 4, 2, 6);
+            if (i % 2 === 0) ctx.fillRect(bx + 1, sy - 6, 1, 3);
+          }
+        }
+      }
+    }
+  }
+
+  _spring(sx, sy) {
+    const { ctx } = this;
+    ctx.fillStyle = "#e02020";
+    ctx.fillRect(sx + 6, sy + 18, 20, 10);
+    ctx.fillStyle = "#f0f0f0";
+    ctx.fillRect(sx + 8, sy + 8, 16, 12);
+    ctx.fillStyle = "#e02020";
+    ctx.fillRect(sx + 8, sy + 10, 16, 3);
+    ctx.fillRect(sx + 8, sy + 16, 16, 3);
+    ctx.fillStyle = "#ffe040";
+    ctx.fillRect(sx + 4, sy + 4, 24, 6);
+  }
+
+  drawRing(x, y, anim) {
+    const { ctx } = this;
+    const spin = 0.55 + 0.45 * Math.abs(Math.cos(anim));
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(spin, 1);
+    ctx.strokeStyle = "#ffe040";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = "#fff8a0";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawEnemy(e, camX, camY) {
+    if (!e.alive) return;
+    const { ctx } = this;
+    const x = e.x - camX;
+    const y = e.y - camY;
+    const dir = e.vx >= 0 ? 1 : -1;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(dir, 1);
+    // Motobug body
+    ctx.fillStyle = "#e02030";
+    ctx.beginPath();
+    ctx.ellipse(0, -10, 16, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#202020";
+    ctx.beginPath();
+    ctx.arc(-8, -4, 7, 0, Math.PI * 2);
+    ctx.arc(8, -4, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffe040";
+    ctx.fillRect(6, -16, 8, 4);
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(8, -12, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#202020";
+    ctx.beginPath();
+    ctx.arc(9, -12, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  drawCheckpoint(cp, camX, camY, time) {
+    const { ctx } = this;
+    const x = cp.x - camX;
+    const y = cp.y - camY;
+    ctx.fillStyle = "#ffe040";
+    ctx.fillRect(x - 2, y - 64, 4, 64);
+    ctx.fillStyle = cp.active ? "#40e080" : "#e02030";
+    ctx.beginPath();
+    ctx.arc(x, y - 72, 12, 0, Math.PI * 2);
+    ctx.fill();
+    if (cp.active) {
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      const a = time * 4;
+      ctx.beginPath();
+      ctx.arc(x, y - 72, 16 + Math.sin(a) * 2, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  drawGoal(goal, camX, camY) {
+    const { ctx } = this;
+    const x = goal.x - camX;
+    const y = goal.y - camY;
+    ctx.fillStyle = "#404040";
+    ctx.fillRect(x - 3, y - 80, 6, 80);
+    ctx.save();
+    ctx.translate(x, y - 56);
+    ctx.rotate(goal.angle);
+    ctx.fillStyle = "#2080e0";
+    ctx.fillRect(-22, -22, 44, 44);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 10px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("GOAL", 0, 0);
+    ctx.restore();
+  }
+
+  drawSonic(sonic, camX, camY) {
+    if (sonic.invuln > 0 && Math.floor(sonic.invuln / 3) % 2 === 0 && !sonic.dead) return;
+    const { ctx } = this;
+    const x = sonic.x - camX;
+    const y = sonic.y - camY;
+    const rolling = sonic.state === "roll" || sonic.state === "jump" || sonic.state === "spindash" || sonic.dead;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(sonic.facing, 1);
+
+    if (rolling) {
+      const rot = sonic.anim * (sonic.state === "spindash" ? 1.5 : 1);
+      ctx.rotate(rot);
+      // Spin ball
+      ctx.fillStyle = "#1860d0";
+      ctx.beginPath();
+      ctx.arc(0, -10, 14, 0, Math.PI * 2);
+      ctx.fill();
+      // spikes
+      ctx.fillStyle = "#1048a8";
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * 8, -10 + Math.sin(a) * 8);
+        ctx.lineTo(Math.cos(a) * 18, -10 + Math.sin(a) * 18);
+        ctx.lineTo(Math.cos(a + 0.3) * 8, -10 + Math.sin(a + 0.3) * 8);
+        ctx.fill();
+      }
+      ctx.fillStyle = "#f0b090";
+      ctx.beginPath();
+      ctx.arc(2, -8, 4, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      const runLeg = Math.sin(sonic.anim) * (sonic.state === "run" ? 8 : sonic.state === "walk" ? 5 : 0);
+      // shoes
+      ctx.fillStyle = "#e02030";
+      ctx.fillRect(-10, -6 + runLeg * 0.3, 10, 6);
+      ctx.fillRect(2, -6 - runLeg * 0.3, 10, 6);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(-8, -4 + runLeg * 0.3, 6, 2);
+      ctx.fillRect(4, -4 - runLeg * 0.3, 6, 2);
+      // body
+      ctx.fillStyle = "#1860d0";
+      ctx.beginPath();
+      ctx.ellipse(0, -18, 12, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // belly
+      ctx.fillStyle = "#f0b090";
+      ctx.beginPath();
+      ctx.ellipse(2, -14, 6, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // head quills
+      ctx.fillStyle = "#1860d0";
+      ctx.beginPath();
+      ctx.moveTo(-4, -28);
+      ctx.lineTo(-18, -40);
+      ctx.lineTo(-2, -32);
+      ctx.lineTo(-8, -48);
+      ctx.lineTo(4, -34);
+      ctx.lineTo(2, -50);
+      ctx.lineTo(10, -30);
+      ctx.closePath();
+      ctx.fill();
+      // muzzle
+      ctx.fillStyle = "#f0b090";
+      ctx.beginPath();
+      ctx.ellipse(8, -20, 6, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // eye
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.ellipse(6, -24, 5, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#202020";
+      ctx.beginPath();
+      ctx.arc(8, -23, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      // gloves
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(-10, -12, 4, 0, Math.PI * 2);
+      ctx.arc(12, -14 - runLeg * 0.2, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Spindash dust
+    if (sonic.state === "spindash") {
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(-20 - i * 6, -4 - Math.random() * 8, 4, 4);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  drawHUD(sonic, timeMs) {
+    const { ctx } = this;
+    const sec = Math.floor(timeMs / 1000);
+    const mm = Math.floor(sec / 60);
+    const ss = String(sec % 60).padStart(2, "0");
+
+    ctx.font = '14px "Press Start 2P", monospace';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    const label = (text, x, y, color = "#ffe040") => {
+      ctx.fillStyle = color;
+      ctx.fillText(text, x, y);
+    };
+    const value = (text, x, y) => {
+      ctx.fillStyle = "#fff";
+      ctx.fillText(text, x, y);
+    };
+
+    label("SCORE", 16, 14);
+    value(String(sonic.score).padStart(6, "0"), 16, 34);
+    label("TIME", 16, 58);
+    value(`${mm}:${ss}`, 16, 78);
+    label("RINGS", 16, 102);
+    value(String(sonic.rings).padStart(3, "0"), 16, 122);
+    if (sonic.rings === 0 && Math.floor(timeMs / 200) % 2 === 0) {
+      label("RINGS", 16, 102, "#ff3040");
+    }
+
+    // Lives
+    ctx.fillStyle = "#1860d0";
+    ctx.beginPath();
+    ctx.arc(this.w - 70, 28, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#f0b090";
+    ctx.beginPath();
+    ctx.arc(this.w - 66, 28, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.font = '12px "Press Start 2P", monospace';
+    ctx.textAlign = "left";
+    ctx.fillText(`×${sonic.lives}`, this.w - 52, 22);
+  }
+
+  drawScatteredRings(scattered, camX, camY) {
+    for (const r of scattered) {
+      this.drawRing(r.x - camX, r.y - camY, r.anim);
+    }
+  }
+}
+
+// --- js/game.js ---
+class Game {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.input = new Input();
+    this.audio = new AudioBus();
+    this.renderer = new Renderer(canvas);
+    this.state = "title"; // title, playing, paused, clear, gameover
+    this.level = null;
+    this.sonic = null;
+    this.rings = [];
+    this.enemies = [];
+    this.checkpoint = null;
+    this.goal = null;
+    this.scattered = [];
+    this.camX = 0;
+    this.camY = 0;
+    this.timeMs = 0;
+    this.spawn = { x: 0, y: 0 };
+    this._last = 0;
+    this._raf = 0;
+    this._jumpLatched = false;
+    this._spinLatched = false;
+  }
+
+  start() {
+    this._resetAct();
+    this.state = "playing";
+    this.audio.ensure();
+    this._last = performance.now();
+    cancelAnimationFrame(this._raf);
+    this._loop(this._last);
+  }
+
+  _resetAct(keepStats = false) {
+    this.level = buildLevel();
+    const rings = keepStats && this.sonic ? this.sonic.rings : 0;
+    const score = keepStats && this.sonic ? this.sonic.score : 0;
+    const lives = keepStats && this.sonic ? this.sonic.lives : 3;
+    this.spawn = { ...this.level.spawn };
+    if (this.checkpoint?.active) {
+      this.spawn = { x: this.checkpoint.x, y: this.checkpoint.y - TILE * 2 };
+    } else {
+      this.checkpoint = createCheckpoint();
+    }
+    this.sonic = new Sonic(this.spawn.x, this.spawn.y);
+    this.sonic.rings = keepStats ? rings : 0;
+    this.sonic.score = keepStats ? score : 0;
+    this.sonic.lives = lives;
+    this.rings = createRings(this.level);
+    this.enemies = createEnemies();
+    this.goal = createGoal(this.level);
+    this.scattered = [];
+    this.timeMs = keepStats ? this.timeMs : 0;
+    this.camX = Math.max(0, this.sonic.x - this.canvas.width * 0.35);
+    this.camY = 0;
+  }
+
+  fullRestart() {
+    this.checkpoint = createCheckpoint();
+    this._resetAct(false);
+    this.state = "playing";
+    this.audio.ensure();
+  }
+
+  togglePause() {
+    if (this.state === "playing") this.state = "paused";
+    else if (this.state === "paused") this.state = "playing";
+  }
+
+  _loop = (now) => {
+    const dt = Math.min(0.033, (now - this._last) / 1000);
+    this._last = now;
+    this.update(dt);
+    this.draw();
+    this._raf = requestAnimationFrame(this._loop);
+  };
+
+  update(dt) {
+    if (this.input.consume("pause") && (this.state === "playing" || this.state === "paused")) {
+      this.togglePause();
+      this._syncUI();
+    }
+
+    if (this.state !== "playing") return;
+
+    this.timeMs += dt * 1000;
+
+    // Jump SFX latch
+    const jumpPressed = this.input.down("jump") || this.input.down("up");
+    if (jumpPressed && !this._jumpLatched && this.sonic.grounded && !this.sonic.charging) {
+      this.audio.jump();
+    }
+    this._jumpLatched = jumpPressed;
+
+    const spinPressed = this.input.down("spin");
+    if (spinPressed && !this._spinLatched && this.sonic.grounded && this.input.down("down")) {
+      this.audio.spindash();
+    }
+    this._spinLatched = spinPressed;
+
+    const wasSpring = this.sonic.springing;
+    this.sonic.update(this.input, this.level, dt);
+    if (this.sonic.springing && !wasSpring && this.sonic.vy < -8) {
+      this.audio.spring();
+    }
+
+    updateEnemies(this.enemies, dt);
+    updateRings(this.rings, dt);
+    this._updateScattered(dt);
+    this._collectRings();
+    this._enemyCollisions();
+    this._checkpoint();
+    this._goal();
+    this._camera(dt);
+    this._deathCheck();
+  }
+
+  _updateScattered(dt) {
+    for (const r of this.scattered) {
+      r.vy += 0.25 * dt * 60;
+      r.x += r.vx * dt * 60;
+      r.y += r.vy * dt * 60;
+      r.life -= dt;
+      r.anim += dt * 10;
+      // bounce on ground-ish
+      if (r.y > 14 * TILE - 8 && r.vy > 0) {
+        r.y = 14 * TILE - 8;
+        r.vy *= -0.55;
+        r.vx *= 0.85;
+      }
+    }
+    this.scattered = this.scattered.filter((r) => r.life > 0);
+
+    // recollect scattered
+    const b = this.sonic.bounds();
+    for (const r of this.scattered) {
+      if (Math.hypot(r.x - this.sonic.x, r.y - (this.sonic.y - 14)) < 18) {
+        r.life = 0;
+        this.sonic.rings++;
+        this.sonic.score += 10;
+        this.audio.ring();
+      }
+    }
+    this.scattered = this.scattered.filter((r) => r.life > 0);
+  }
+
+  _collectRings() {
+    const sx = this.sonic.x;
+    const sy = this.sonic.y - 14;
+    for (const r of this.rings) {
+      if (r.got) continue;
+      if (Math.hypot(r.x - sx, r.y - sy) < 20) {
+        r.got = true;
+        this.sonic.rings++;
+        this.sonic.score += 100;
+        this.audio.ring();
+      }
+    }
+  }
+
+  _enemyCollisions() {
+    if (this.sonic.dead) return;
+    const b = this.sonic.bounds();
+    for (const e of this.enemies) {
+      if (!e.alive) continue;
+      const ex = e.x;
+      const ey = e.y;
+      const hit =
+        b.r > ex - 14 && b.l < ex + 14 && b.b > ey - 22 && b.t < ey;
+
+      if (!hit) continue;
+
+      const stomping =
+        this.sonic.vy > 0 &&
+        b.b - this.sonic.vy * 0.5 <= ey - 10 &&
+        (this.sonic.state === "jump" || this.sonic.state === "roll" || this.sonic.rolling);
+
+      if (stomping || this.sonic.rolling || this.sonic.state === "roll") {
+        e.alive = false;
+        this.sonic.bounceEnemy();
+        this.sonic.score += 100;
+        this.audio.stomp();
+      } else {
+        const result = this.sonic.hurt(this.audio);
+        if (result?.scatter) {
+          this._scatterRings(Math.min(result.scatter, 20));
+        }
+      }
+    }
+  }
+
+  _scatterRings(n) {
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2;
+      this.scattered.push({
+        x: this.sonic.x,
+        y: this.sonic.y - 16,
+        vx: Math.cos(a) * (2 + Math.random() * 2.5),
+        vy: Math.sin(a) * (2 + Math.random() * 2) - 3,
+        life: 3.5,
+        anim: Math.random() * 5,
+      });
+    }
+  }
+
+  _checkpoint() {
+    const cp = this.checkpoint;
+    if (cp.active) return;
+    const b = this.sonic.bounds();
+    if (b.r > cp.x - 8 && b.l < cp.x + 8 && b.b > cp.y - 80 && b.t < cp.y) {
+      cp.active = true;
+      this.spawn = { x: cp.x, y: cp.y - TILE * 2 };
+      this.audio.checkpoint();
+      this.sonic.score += 500;
+    }
+  }
+
+  _goal() {
+    const g = this.goal;
+    const b = this.sonic.bounds();
+    if (!g.spun && b.r > g.x - 10 && b.l < g.x + 10 && b.b > g.y - 80) {
+      g.spun = true;
+      this.audio.clear();
+      // bonus
+      const ringBonus = this.sonic.rings * 100;
+      const timeBonus = Math.max(0, 100000 - Math.floor(this.timeMs / 10));
+      this.sonic.score += ringBonus + Math.floor(timeBonus / 50);
+      this.state = "clear";
+      this._syncUI();
+    }
+    if (g.spun) g.angle += 0.35;
+  }
+
+  _camera(dt) {
+    const targetX = this.sonic.x - this.canvas.width * 0.38;
+    const maxX = this.level.W * TILE - this.canvas.width;
+    this.camX += (Math.max(0, Math.min(maxX, targetX)) - this.camX) * Math.min(1, 8 * dt);
+
+    const targetY = this.sonic.y - this.canvas.height * 0.62;
+    const maxY = this.level.H * TILE - this.canvas.height;
+    this.camY += (Math.max(0, Math.min(maxY, targetY)) - this.camY) * Math.min(1, 6 * dt);
+  }
+
+  _deathCheck() {
+    if (this.sonic.dead) {
+      if (this.sonic.y > this.camY + this.canvas.height + 80) {
+        if (this.sonic.lives <= 0) {
+          this.state = "gameover";
+          this._syncUI();
+        } else {
+          this._resetAct(true);
+        }
+      }
+      return;
+    }
+    if (this.sonic.y > this.level.H * TILE + 40) {
+      this.sonic.die(this.audio);
+    }
+  }
+
+  draw() {
+    const r = this.renderer;
+    const t = performance.now() / 1000;
+    r.clear();
+    r.drawBackground(this.camX, t);
+
+    if (!this.level) return;
+
+    r.drawDecorations(this.level, this.camX, this.camY, t);
+    r.drawTilesWithGrass(this.level, this.camX, this.camY);
+
+    for (const ring of this.rings) {
+      if (!ring.got) r.drawRing(ring.x - this.camX, ring.y - this.camY, ring.anim);
+    }
+    r.drawScatteredRings(this.scattered, this.camX, this.camY);
+
+    r.drawCheckpoint(this.checkpoint, this.camX, this.camY, t);
+    r.drawGoal(this.goal, this.camX, this.camY);
+
+    for (const e of this.enemies) r.drawEnemy(e, this.camX, this.camY);
+
+    if (this.sonic) r.drawSonic(this.sonic, this.camX, this.camY);
+
+    if (this.state === "playing" || this.state === "paused" || this.state === "clear") {
+      r.drawHUD(this.sonic, this.timeMs);
+    }
+  }
+
+  _syncUI() {
+    const title = document.getElementById("title-card");
+    const pause = document.getElementById("pause-overlay");
+    const result = document.getElementById("result-overlay");
+    const controls = document.getElementById("controls");
+    const btnPause = document.getElementById("btn-pause");
+
+    title?.classList.toggle("hidden", this.state !== "title");
+    pause?.classList.toggle("hidden", this.state !== "paused");
+    result?.classList.toggle("hidden", this.state !== "clear" && this.state !== "gameover");
+    controls?.classList.toggle("visible", this.state === "playing");
+    btnPause?.classList.toggle("visible", this.state === "playing" || this.state === "paused");
+
+    if (this.state === "clear" || this.state === "gameover") {
+      const sec = Math.floor(this.timeMs / 1000);
+      document.getElementById("result-title").textContent =
+        this.state === "gameover" ? "GAME OVER" : "ACT CLEAR!";
+      document.getElementById("result-time").textContent =
+        `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+      document.getElementById("result-rings").textContent = String(this.sonic?.rings ?? 0);
+      document.getElementById("result-score").textContent = String(this.sonic?.score ?? 0);
+    }
+  }
+
+  showTitle() {
+    this.state = "title";
+    this.level = buildLevel();
+    this.checkpoint = createCheckpoint();
+    this.sonic = new Sonic(this.level.spawn.x, this.level.spawn.y);
+    this.rings = createRings(this.level);
+    this.enemies = createEnemies();
+    this.goal = createGoal(this.level);
+    this.scattered = [];
+    this.camX = 0;
+    this.camY = 40;
+    this.timeMs = 0;
+    this._syncUI();
+    this._last = performance.now();
+    cancelAnimationFrame(this._raf);
+    const idle = (now) => {
+      const dt = Math.min(0.033, (now - this._last) / 1000);
+      this._last = now;
+      if (this.state === "title") {
+        this.camX = (Math.sin(now / 3000) * 0.5 + 0.5) * 200;
+        updateRings(this.rings, dt);
+        updateEnemies(this.enemies, dt);
+        this.draw();
+        this._raf = requestAnimationFrame(idle);
+      }
+    };
+    this._raf = requestAnimationFrame(idle);
+  }
+}
+
+// --- js/main.js ---
+
+const canvas = document.getElementById("game");
+const game = new Game(canvas);
+
+function fitCanvas() {
+  // Keep internal resolution fixed for crisp pixels; CSS scales it.
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  // Stay at design resolution — CSS handles display size
+  void dpr;
+}
+
+fitCanvas();
+window.addEventListener("resize", fitCanvas);
+
+document.getElementById("btn-start")?.addEventListener("click", () => {
+  game.start();
+  game._syncUI();
+});
+
+document.getElementById("btn-resume")?.addEventListener("click", () => {
+  game.state = "playing";
+  game._syncUI();
+});
+
+document.getElementById("btn-restart")?.addEventListener("click", () => {
+  game.fullRestart();
+  game._syncUI();
+});
+
+document.getElementById("btn-again")?.addEventListener("click", () => {
+  game.checkpoint = null;
+  game.fullRestart();
+  game._syncUI();
+});
+
+document.getElementById("btn-pause")?.addEventListener("click", () => {
+  game.togglePause();
+  game._syncUI();
+});
+
+// Prevent page scroll while playing on mobile
+document.body.addEventListener(
+  "touchmove",
+  (e) => {
+    if (game.state === "playing") e.preventDefault();
+  },
+  { passive: false }
+);
+
+game.showTitle();
+</script>
+</body>
+</html>
