@@ -662,6 +662,9 @@ kbd{
   -webkit-mask-image:radial-gradient(circle, #000 22%, transparent 66%);
   animation:spinburst 9s linear infinite;
 }
+/* Keep hatch sunburst off until the bloom beat so the egg stays the hero */
+#hatch::before{opacity:0;transition:opacity .25s ease;}
+#hatch.bloom::before, #hatch.revealed::before{opacity:1;}
 @keyframes spinburst{
   from{transform:translate(-50%,-50%) rotate(0deg);}
   to{transform:translate(-50%,-50%) rotate(360deg);}
@@ -669,70 +672,297 @@ kbd{
 #reveal .swatch, #hatch .swatch{
   width:112px;height:112px;border-radius:26px;
   background-size:contain;background-position:center;background-repeat:no-repeat;
+  background-color:#ffe07a;
   box-shadow:0 8px 0 rgba(18,52,80,.25);
 }
+#hatch .swatch{background-color:#ff9a3c;}
 #reveal .k, #hatch .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;}
 #reveal .n, #hatch .n{font-size:clamp(24px,8vmin,36px);color:#fff;text-shadow:0 3px 0 rgba(18,52,80,.45);}
 #reveal .r, #hatch .r{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
 @keyframes pop{0%{opacity:0;transform:scale(.5) rotate(-8deg);}100%{opacity:1;transform:scale(1) rotate(-2deg);}}
 
-/* Egg hatch stage */
+/* Egg hatch stage — satisfying multi-beat reveal */
+#hatch{
+  z-index:40;
+  background:radial-gradient(120% 70% at 50% 46%, rgba(255,224,122,.22), rgba(8,24,42,.78) 48%, rgba(6,16,30,.92));
+}
+/* Stack egg + card dead-center so reveal never drifts sideways */
+#hatch .egg-stage, #hatch .hatch-card{
+  position:absolute;left:50%;top:46%;
+  transform:translate(-50%,-50%);
+}
 #hatch .egg-stage{
-  position:relative;z-index:2;width:160px;height:180px;
+  z-index:2;width:min(72vw,260px);height:min(72vw,260px);
   display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 14px 0 rgba(18,52,80,.16));
+  transition:opacity .22s ease, filter .22s ease;
 }
+#hatch .egg-shadow{
+  position:absolute;left:50%;bottom:22%;width:96px;height:18px;margin-left:-48px;
+  border-radius:50%;background:rgba(12,38,62,.38);
+  transform:scaleX(1);opacity:.7;
+  transition:transform .35s ease, opacity .35s ease;
+}
+#hatch.drop .egg-shadow{animation:eggshadowin .55s cubic-bezier(.2,1.2,.3,1) both;}
+#hatch.shake .egg-shadow{animation:eggshadowpulse .18s ease-in-out infinite;}
+#hatch.crack .egg-shadow,#hatch.bloom .egg-shadow{transform:scaleX(1.35);opacity:.25;}
+#hatch.revealed .egg-shadow{opacity:0;}
 #hatch .egg{
-  position:relative;width:100px;height:124px;
-  transform-origin:50% 80%;
-  animation:eggidle 1.1s ease-in-out infinite;
+  position:relative;width:124px;height:154px;margin:0;
+  transform-origin:50% 88%;
+  z-index:2;
+  filter:drop-shadow(0 10px 0 rgba(18,52,80,.22));
 }
-#hatch.shake .egg{animation:eggshake .12s linear infinite;}
-#hatch.crack .egg{animation:none;}
+#hatch.drop .egg{animation:eggdrop .55s cubic-bezier(.2,1.35,.3,1) both;}
+#hatch.wobble .egg{animation:eggwobble .55s ease-in-out infinite;}
+#hatch.shake .egg{animation:eggshake .1s linear infinite;}
+#hatch.crack .egg,#hatch.bloom .egg{animation:none;}
 #hatch .egg-shell{
   position:absolute;inset:0;border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;
-  background:linear-gradient(160deg,#fffef8 0%,#f3e8ff 45%,#ffe07a 100%);
-  box-shadow:inset -10px -14px 0 rgba(18,52,80,.06), 0 10px 0 rgba(18,52,80,.18);
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.75), transparent 28%),
+    linear-gradient(160deg,#fffdf6 0%,#fff1c9 42%,#ffd76a 100%);
+  /* inset only — outer drop lives on .egg so the seam never reads as two eggs */
+  box-shadow:inset -12px -16px 0 rgba(18,52,80,.07);
   overflow:hidden;
 }
 #hatch .egg-shell::before{
-  content:"";position:absolute;left:18%;top:28%;width:22%;height:14%;
-  border-radius:50%;background:rgba(192,132,252,.35);transform:rotate(-18deg);
-  box-shadow:28px 18px 0 rgba(255,201,60,.4), 12px 40px 0 rgba(239,77,77,.28);
+  content:"";position:absolute;left:16%;top:26%;width:24%;height:15%;
+  border-radius:50%;background:rgba(255,154,60,.38);transform:rotate(-18deg);
+  box-shadow:30px 20px 0 rgba(255,201,60,.42), 10px 44px 0 rgba(239,77,77,.26);
+}
+/* Intact body — one shell until the crack beat */
+#hatch .egg-whole{
+  position:absolute;inset:0;z-index:3;
+  transition:opacity .05s linear;
+}
+#hatch.crack .egg-whole,#hatch.bloom .egg-whole,#hatch.revealed .egg-whole{
+  opacity:0;pointer-events:none;
 }
 #hatch .egg-top, #hatch .egg-bot{
   position:absolute;left:0;width:100%;overflow:hidden;
-  transition:transform .55s cubic-bezier(.2,1.2,.3,1), opacity .4s ease;
+  opacity:0;pointer-events:none;
+  will-change:transform, opacity;
 }
-#hatch .egg-top{top:0;height:52%;}
-#hatch .egg-bot{bottom:0;height:52%;}
+#hatch .egg-top{top:0;height:54%;z-index:3;}
+#hatch .egg-bot{bottom:0;height:54%;z-index:3;}
 #hatch .egg-top .egg-shell{
-  position:absolute;left:0;right:0;top:0;height:calc(100% / 0.52);
+  position:absolute;left:0;right:0;top:0;height:calc(100% / 0.54);
   border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;
 }
 #hatch .egg-bot .egg-shell{
-  position:absolute;left:0;right:0;bottom:0;height:calc(100% / 0.52);
+  position:absolute;left:0;right:0;bottom:0;height:calc(100% / 0.54);
   border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;
 }
-#hatch.crack .egg-top{transform:translate(-18px,-34px) rotate(-28deg);opacity:0;}
-#hatch.crack .egg-bot{transform:translate(16px,30px) rotate(22deg);opacity:0;}
+/* Crack lines build during shake */
+#hatch .egg-cracks{
+  position:absolute;inset:8% 18% 10%;z-index:4;pointer-events:none;opacity:0;
+}
+#hatch.wobble .egg-cracks{opacity:.35;transition:opacity .35s ease;}
+#hatch.shake .egg-cracks{opacity:1;}
+#hatch .egg-cracks i{
+  position:absolute;background:linear-gradient(180deg, transparent, rgba(18,52,80,.45), transparent);
+  width:2px;border-radius:2px;transform-origin:50% 0;
+  opacity:0;scale:0.4;
+}
+#hatch.wobble .egg-cracks i:nth-child(1),
+#hatch.shake .egg-cracks i{opacity:1;scale:1;transition:opacity .2s ease, scale .25s cubic-bezier(.2,1.3,.3,1);}
+#hatch.shake .egg-cracks i:nth-child(2){transition-delay:.08s;}
+#hatch.shake .egg-cracks i:nth-child(3){transition-delay:.14s;}
+#hatch .egg-cracks i:nth-child(1){left:48%;top:18%;height:42%;transform:rotate(8deg);}
+#hatch .egg-cracks i:nth-child(2){left:38%;top:36%;height:28%;transform:rotate(-26deg);}
+#hatch .egg-cracks i:nth-child(3){left:58%;top:34%;height:30%;transform:rotate(24deg);}
+/* Shell burst — halves appear and fly in one motion */
+#hatch.crack .egg-top{
+  opacity:1;
+  animation:eggshelltop .6s cubic-bezier(.15,1.15,.25,1) both;
+}
+#hatch.crack .egg-bot{
+  opacity:1;
+  animation:eggshellbot .6s cubic-bezier(.15,1.15,.25,1) both;
+}
+#hatch.crack .egg-cracks{opacity:0;}
+/* Flying shards */
+#hatch .shard{
+  position:absolute;left:50%;top:48%;width:14px;height:18px;margin:-9px -7px;
+  border-radius:40% 60% 55% 45% / 55% 40% 60% 45%;
+  background:linear-gradient(140deg,#fffdf6,#ffd76a);
+  box-shadow:0 3px 0 rgba(18,52,80,.18);
+  opacity:0;z-index:5;pointer-events:none;
+}
+#hatch.crack .shard{animation:eggshard .85s cubic-bezier(.12,1.15,.25,1) both;}
+#hatch.crack .shard:nth-child(1){--dx:-98px;--dy:-78px;--rot:-62deg;animation-delay:0s;}
+#hatch.crack .shard:nth-child(2){--dx:94px;--dy:-70px;--rot:54deg;animation-delay:.02s;}
+#hatch.crack .shard:nth-child(3){--dx:-84px;--dy:42px;--rot:-36deg;animation-delay:.04s;}
+#hatch.crack .shard:nth-child(4){--dx:88px;--dy:48px;--rot:44deg;animation-delay:.05s;}
+#hatch.crack .shard:nth-child(5){--dx:-28px;--dy:-108px;--rot:-14deg;animation-delay:.03s;}
+#hatch.crack .shard:nth-child(6){--dx:24px;--dy:96px;--rot:18deg;animation-delay:.06s;}
+/* Glow / bloom / ring */
 #hatch .egg-glow{
-  position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px;
-  border-radius:50%;background:#ffe07a;opacity:0;
-  box-shadow:0 0 40px 20px rgba(255,201,60,.8);
+  position:absolute;left:50%;top:46%;width:24px;height:24px;margin:-12px;
+  border-radius:50%;background:#ffe07a;opacity:0;z-index:1;
+  box-shadow:0 0 50px 28px rgba(255,201,60,.85);
 }
-#hatch.crack .egg-glow{animation:eggglow .6s ease-out both;}
-#hatch .hatch-card{display:none;}
-#hatch.revealed .egg-stage{display:none;}
-#hatch.revealed .hatch-card{display:flex;}
-@keyframes eggidle{50%{transform:translateY(-4px) rotate(-2deg);}}
+#hatch.crack .egg-glow{animation:eggglow .55s ease-out both;}
+#hatch.bloom .egg-glow{animation:eggglow2 .7s ease-out both;}
+#hatch .egg-ring{
+  position:absolute;left:50%;top:46%;width:20px;height:20px;margin:-10px;
+  border-radius:50%;border:3px solid rgba(255,224,122,.9);
+  opacity:0;z-index:1;pointer-events:none;
+}
+#hatch.bloom .egg-ring{animation:eggring .65s cubic-bezier(.15,1.1,.3,1) both;}
+#hatch .spark{
+  position:absolute;left:50%;top:46%;width:8px;height:8px;margin:-4px;
+  border-radius:50%;background:#fff;opacity:0;z-index:6;pointer-events:none;
+  box-shadow:0 0 8px #ffe07a;
+}
+#hatch.bloom .spark{animation:eggspark .7s ease-out both;}
+#hatch.bloom .spark:nth-child(1){--sx:-90px;--sy:-40px;animation-delay:0s;}
+#hatch.bloom .spark:nth-child(2){--sx:86px;--sy:-48px;animation-delay:.04s;}
+#hatch.bloom .spark:nth-child(3){--sx:-70px;--sy:50px;animation-delay:.08s;}
+#hatch.bloom .spark:nth-child(4){--sx:74px;--sy:46px;animation-delay:.1s;}
+#hatch.bloom .spark:nth-child(5){--sx:0px;--sy:-92px;animation-delay:.02s;}
+#hatch.bloom .spark:nth-child(6){--sx:-40px;--sy:78px;animation-delay:.12s;}
+#hatch.bloom .spark:nth-child(7){--sx:48px;--sy:70px;animation-delay:.14s;}
+#hatch.bloom .spark:nth-child(8){--sx:-96px;--sy:8px;animation-delay:.06s;}
+/* Peek critter between crack and card */
+#hatch .egg-peek{
+  position:absolute;left:50%;top:46%;width:88px;height:88px;margin:-44px;
+  border-radius:22px;opacity:0;z-index:2;pointer-events:none;
+  background-color:#ff9a3c;
+  background-size:contain;background-position:center;background-repeat:no-repeat;
+  filter:drop-shadow(0 8px 0 rgba(18,52,80,.22));
+  box-shadow:0 0 0 4px rgba(255,255,255,.35);
+}
+#hatch.crack .egg-peek,#hatch.bloom .egg-peek{
+  animation:eggpeek .55s cubic-bezier(.2,1.4,.35,1) both;
+}
+#hatch.revealed .egg-stage{opacity:0;pointer-events:none;filter:blur(2px);}
+#hatch .hatch-card{
+  display:none;z-index:3;
+  flex-direction:column;align-items:center;gap:8px;
+  /* override shared pop so we own the punchy reveal */
+  animation:none;
+}
+#hatch.revealed .hatch-card{
+  display:flex;
+  animation:hatchcardin .55s cubic-bezier(.2,1.35,.3,1) both;
+}
+#hatch.revealed .swatch{
+  animation:hatchswatch .65s cubic-bezier(.2,1.5,.3,1) both;
+}
+#hatch .hatch-burst{
+  position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0;
+}
+#hatch.bloom .hatch-burst, #hatch.revealed .hatch-burst{
+  opacity:1;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), transparent 18%),
+    radial-gradient(circle at 50% 45%, rgba(255,224,122,.42), transparent 46%);
+  animation:hatchburstfade 1.05s ease-out both;
+}
+/* Impact flash + whole-stage punch on crack */
+#hatch.crack .egg-stage{animation:eggimpact .45s cubic-bezier(.2,1.4,.3,1) both;}
+#hatch::after{
+  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 50% 46%, rgba(255,255,255,.55), transparent 40%);
+  opacity:0;
+}
+#hatch.crack::after{animation:hatchflash .38s ease-out both;}
+#hatch.shake .egg{
+  filter:saturate(1.05);
+}
+@keyframes eggdrop{
+  0%{opacity:0;transform:translateY(-110px) scale(.62) rotate(-10deg);}
+  55%{opacity:1;transform:translateY(14px) scale(1.1, .92) rotate(3deg);}
+  72%{transform:translateY(-10px) scale(.96, 1.05) rotate(-2deg);}
+  88%{transform:translateY(4px) scale(1.03, .97) rotate(1deg);}
+  100%{opacity:1;transform:translateY(0) scale(1) rotate(0);}
+}
+@keyframes eggshadowin{
+  0%{opacity:0;transform:scaleX(.3);}
+  60%{opacity:.8;transform:scaleX(1.15);}
+  100%{opacity:.7;transform:scaleX(1);}
+}
+@keyframes eggshadowpulse{
+  50%{transform:scaleX(1.12);opacity:.55;}
+}
+@keyframes eggwobble{
+  0%,100%{transform:rotate(-5deg) translateY(0) scale(1,1);}
+  25%{transform:rotate(4deg) translateY(-5px) scale(1.02,.97);}
+  50%{transform:rotate(6deg) translateY(-2px) scale(.98,1.03);}
+  75%{transform:rotate(-4deg) translateY(-6px) scale(1.03,.96);}
+}
 @keyframes eggshake{
-  0%{transform:rotate(0) translate(0,0);}
-  25%{transform:rotate(-8deg) translate(-3px,1px);}
-  50%{transform:rotate(8deg) translate(3px,-1px);}
-  75%{transform:rotate(-6deg) translate(-2px,0);}
-  100%{transform:rotate(4deg) translate(2px,0);}
+  0%{transform:rotate(0) translate(0,0) scale(1,1);}
+  12%{transform:rotate(-14deg) translate(-6px,3px) scale(1.06,.94);}
+  25%{transform:rotate(16deg) translate(6px,-3px) scale(.94,1.08);}
+  40%{transform:rotate(-13deg) translate(-5px,2px) scale(1.08,.92);}
+  55%{transform:rotate(15deg) translate(5px,-2px) scale(.93,1.1);}
+  70%{transform:rotate(-11deg) translate(-4px,1px) scale(1.05,.95);}
+  85%{transform:rotate(12deg) translate(4px,0) scale(.96,1.06);}
+  100%{transform:rotate(-6deg) translate(-2px,0) scale(1.12,.88);}
 }
-@keyframes eggglow{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(2.2);}}
+@keyframes eggshard{
+  0%{opacity:1;transform:translate(0,0) rotate(0) scale(1.15);}
+  70%{opacity:1;}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.4);}
+}
+@keyframes eggshelltop{
+  0%{opacity:1;transform:translate(0,0) rotate(0) scale(1);filter:none;}
+  100%{opacity:0;transform:translate(-58px,-72px) rotate(-48deg) scale(1.12);filter:blur(.35px);}
+}
+@keyframes eggshellbot{
+  0%{opacity:1;transform:translate(0,0) rotate(0) scale(1);filter:none;}
+  100%{opacity:0;transform:translate(52px,58px) rotate(42deg) scale(1.12);filter:blur(.35px);}
+}
+@keyframes eggimpact{
+  0%{transform:translate(-50%,-50%) scale(1);}
+  35%{transform:translate(-50%,-50%) scale(1.08);}
+  100%{transform:translate(-50%,-50%) scale(1);}
+}
+@keyframes hatchflash{
+  0%{opacity:.85;}
+  100%{opacity:0;}
+}
+@keyframes eggglow{
+  0%{opacity:0;transform:scale(.2);}
+  40%{opacity:1;transform:scale(1.8);}
+  100%{opacity:.55;transform:scale(2.6);}
+}
+@keyframes eggglow2{
+  0%{opacity:.7;transform:scale(1.6);}
+  100%{opacity:0;transform:scale(3.4);}
+}
+@keyframes eggring{
+  0%{opacity:.95;transform:scale(.4);}
+  100%{opacity:0;transform:scale(6);}
+}
+@keyframes eggspark{
+  0%{opacity:1;transform:translate(0,0) scale(1);}
+  100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.2);}
+}
+@keyframes eggpeek{
+  0%{opacity:0;transform:scale(.2) translateY(18px);}
+  55%{opacity:1;transform:scale(1.18) translateY(-10px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes hatchcardin{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(-8deg);}
+  55%{opacity:1;transform:translate(-50%,-50%) scale(1.1) rotate(2deg);}
+  78%{transform:translate(-50%,-50%) scale(.96) rotate(-1deg);}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-2deg);}
+}
+@keyframes hatchswatch{
+  0%{transform:scale(.35) rotate(-16deg);}
+  45%{transform:scale(1.22) rotate(6deg);}
+  70%{transform:scale(.94) rotate(-2deg);}
+  100%{transform:scale(1) rotate(0);}
+}
+@keyframes hatchburstfade{
+  0%{opacity:.9;}
+  100%{opacity:0;}
+}
 
 /* Lucky Spin wheel */
 #wheel-stage{
@@ -2382,7 +2612,7 @@ kbd{
   #j-mascot .comb,#j-mascot .leg,#j-mascot .ticket-wrap,#j-mascot .ticket .shine,
   #j-mascot .spark,#j-mascot .cta-pill,#j-fomo,#j-claimpulse,#j-dangle::after,
   #j-dangle .jack,#j-progress .bar i,.jcell.claimable,#btn-journey.hot,#btn-journey2.hot,
-  #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,
+  #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,#hatch .egg-whole,#hatch .egg-top,#hatch .egg-bot,#hatch .shard,#hatch .spark,#hatch .egg-ring,#hatch .egg-glow,#hatch .egg-peek,#hatch .egg-shadow,#hatch .egg-stage,#hatch .hatch-card,#hatch .swatch,#hatch::after,
   #j-drops .track,#j-vault.ready .go,#hourlycrate .ico,#mysterydeal .ico,.jtier.jackpot,
   #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
   #j-mascot .shades,
@@ -2644,9 +2874,19 @@ kbd{
     </div>
   </div>
   <div id="hatch" class="hidden">
+    <div class="hatch-burst" aria-hidden="true"></div>
     <div class="egg-stage" aria-hidden="true">
+      <div class="egg-shadow"></div>
+      <div class="egg-peek" id="h-peek"></div>
+      <div class="egg-glow"></div>
+      <div class="egg-ring"></div>
+      <span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span>
+      <span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span>
+      <span class="shard"></span><span class="shard"></span><span class="shard"></span>
+      <span class="shard"></span><span class="shard"></span><span class="shard"></span>
       <div class="egg">
-        <div class="egg-glow"></div>
+        <div class="egg-whole" aria-hidden="true"><div class="egg-shell"></div></div>
+        <div class="egg-cracks" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="egg-top"><div class="egg-shell"></div></div>
         <div class="egg-bot"><div class="egg-shell"></div></div>
       </div>
@@ -117350,19 +117590,22 @@ const Sfx = (()=>{
       tone('triangle', 330, 220, t, 0.14, 0.12);
       tone('sine', 660, 880, t + 0.08, 0.18, 0.08);
     },
-    /** Egg crack — shell splinter. */
+    /** Egg crack — shell splinter + crunch. */
     hatchCrack(){
       if(!live()) return;
       const t = ctx.currentTime;
-      burst(t, 0.1, 0.18, 3200, 500, 1.4);
-      tone('square', 240, 90, t, 0.08, 0.08);
+      burst(t, 0.08, 0.14, 3800, 700, 1.5);
+      burst(t + 0.05, 0.1, 0.2, 2400, 280, 1.2);
+      tone('square', 260, 70, t, 0.09, 0.1);
+      tone('triangle', 180, 90, t + 0.04, 0.12, 0.08);
     },
-    /** Egg pop / reveal. */
+    /** Egg pop / reveal — bright triad punch. */
     hatchPop(){
       if(!live()) return;
       const t = ctx.currentTime;
-      burst(t, 0.16, 0.22, 2800, 200, 1.0);
-      [523, 784, 1047].forEach((f,i)=> tone('triangle', f, f * 1.1, t + i * 0.06, 0.2, 0.12));
+      burst(t, 0.14, 0.2, 3000, 180, 1.15);
+      [392, 523, 784, 1047].forEach((f,i)=> tone('triangle', f, f * 1.15, t + i * 0.055, 0.22, 0.13));
+      tone('sine', 1318, 1760, t + 0.22, 0.18, 0.07);
     },
     /** Continuous rail rumble, gain driven by how close the nearest train is. */
     startRumble(){
@@ -120180,7 +120423,6 @@ function playHatchReveal(opts){
   const legacy = $('reveal');
   if(legacy) legacy.classList.add('hidden');
   if(!hatch){
-    // Fallback to legacy card if hatch DOM missing.
     if(legacy){
       const sw = $('r-swatch');
       if(sw){
@@ -120195,17 +120437,32 @@ function playHatchReveal(opts){
     } else opts.onDone?.();
     return;
   }
-  hatch.classList.remove('hidden', 'shake', 'crack', 'revealed');
+  // Clear any prior run timers
+  if(playHatchReveal._timers){
+    playHatchReveal._timers.forEach(clearTimeout);
+  }
+  const timers = playHatchReveal._timers = [];
+  const later = (fn, ms) => { timers.push(setTimeout(fn, ms)); };
+
+  hatch.classList.remove('hidden', 'drop', 'wobble', 'shake', 'crack', 'bloom', 'revealed');
+  // force reflow so drop animation retriggers
+  void hatch.offsetWidth;
+  hatch.classList.add('drop');
+
   $('h-k').textContent = opts.kind === 'pet' ? 'new pet' : 'new character';
   $('h-n').textContent = opts.name;
   $('h-r').textContent = opts.rarity || 'hatched';
   const sw = $('h-swatch');
+  const peek = $('h-peek');
+  const fill = opts.swatch
+    ? `url(${opts.swatch}) center/contain no-repeat`
+    : (opts.color || 'linear-gradient(#ffe07a,#ffc224)');
   if(sw){
     if(opts.swatch){
-      sw.style.background = `url(${opts.swatch}) center/contain no-repeat`;
+      sw.style.background = fill;
       sw.textContent = '';
     } else {
-      sw.style.background = opts.color || 'linear-gradient(#ffe07a,#ffc224)';
+      sw.style.background = fill;
       sw.textContent = opts.kind === 'pet' ? '♥' : '';
       sw.style.display = 'flex';
       sw.style.alignItems = 'center';
@@ -120213,34 +120470,88 @@ function playHatchReveal(opts){
       sw.style.fontSize = '48px';
     }
   }
-  Sfx.streak();
-  buzz([10, 30, 10]);
-  // Idle → shake → crack → reveal
-  setTimeout(() => {
+  if(peek){
+    peek.style.background = fill;
+    peek.textContent = (!opts.swatch && opts.kind === 'pet') ? '♥' : '';
+    peek.style.display = 'flex';
+    peek.style.alignItems = 'center';
+    peek.style.justifyContent = 'center';
+    peek.style.fontSize = '34px';
+    peek.style.color = '#ef4d4d';
+  }
+
+  const confettiColors = opts.kind === 'pet'
+    ? ['#ff6b6b','#ffe07a','#ffffff','#ff9a3c']
+    : ['#ffc93c','#7dffb0','#ffffff','#67e8f9','#ffe07a'];
+
+  // Beat 1 — drop lands
+  Sfx.thump?.() || Sfx.land?.() || Sfx.streak();
+  buzz([12, 28, 10]);
+
+  // Beat 2 — soft wobble, first hairline crack
+  later(() => {
+    hatch.classList.remove('drop');
+    hatch.classList.add('wobble');
+    try{ Sfx.wheelTick(0.55); }catch(e){}
+    buzz(8);
+  }, 520);
+
+  // Beat 3 — escalating shake
+  later(() => {
+    hatch.classList.remove('wobble');
     hatch.classList.add('shake');
-    Sfx.wheelTick(0.8);
-  }, 280);
-  setTimeout(() => {
+    try{ Sfx.wheelTick(0.85); }catch(e){}
+    buzz([10, 20, 10, 20, 10]);
+  }, 980);
+
+  // Beat 4 — harder shake tick
+  later(() => {
+    try{ Sfx.wheelTick(1.1); }catch(e){}
+    buzz([14, 18, 14]);
+  }, 1280);
+
+  // Beat 4b — anticipation squash (last tense frame before crack)
+  later(() => {
+    try{ Sfx.wheelTick(1.35); }catch(e){}
+    buzz([18, 22, 18]);
+  }, 1520);
+
+  // Beat 5 — CRACK: shells fly, shards, peek
+  later(() => {
     hatch.classList.remove('shake');
     hatch.classList.add('crack');
     Sfx.hatchCrack();
-    buzz([18, 40, 18]);
-  }, 900);
-  setTimeout(() => {
+    buzz([28, 45, 22, 45, 28]);
+    camKick?.(0.06);
+    burstConfetti(10, confettiColors);
+  }, 1680);
+
+  // Beat 6 — bloom / sparks / ring
+  later(() => {
+    hatch.classList.add('bloom');
+    try{ Sfx.streak(); }catch(e){}
+    flashScreen(opts.kind === 'pet' ? 'rose' : 'gold');
+    burstConfetti(24, confettiColors);
+    buzz([16, 30, 16]);
+  }, 1980);
+
+  // Beat 7 — full reveal card
+  later(() => {
     hatch.classList.add('revealed');
     Sfx.hatchPop();
-    flashScreen(opts.kind === 'pet' ? 'rose' : 'gold');
-    burstConfetti(36, opts.kind === 'pet'
-      ? ['#ff6b6b','#ffe07a','#ffffff','#c084fc']
-      : ['#ffc93c','#7dffb0','#ffffff','#67e8f9']);
+    burstConfetti(48, confettiColors);
     badge(opts.kind === 'pet' ? 'Pet hatched!' : 'New character!', opts.name);
-    buzz([18, 60, 18, 60, 30]);
-  }, 1450);
-  setTimeout(() => {
+    buzz([22, 60, 20, 60, 32]);
+    camKick?.(0.085);
+  }, 2380);
+
+  // Done — hold the payoff a beat longer
+  later(() => {
     hatch.classList.add('hidden');
-    hatch.classList.remove('shake', 'crack', 'revealed');
+    hatch.classList.remove('drop', 'wobble', 'shake', 'crack', 'bloom', 'revealed');
+    playHatchReveal._timers = null;
     opts.onDone?.();
-  }, 3200);
+  }, 5000);
 }
 
 /** One free handful of coins per calendar day, escalating with login streak. */
