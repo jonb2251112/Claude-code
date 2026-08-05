@@ -13,14 +13,23 @@ painted into `<canvas>`, and every sound is synthesised with the Web Audio API.
 
 ## Play
 
-Open `index.html` directly, or serve it over HTTP:
+The whole game is **one file**: `crossy-hop/index.html` (~10 MB). GitHub’s
+file viewer often says it’s too large to display — that’s expected. Clone or
+download the repo, then open the file locally:
 
 ```bash
 cd crossy-hop
+# easiest: open the file in Chrome / Edge / Firefox
+open index.html   # macOS
+# xdg-open index.html  # Linux
+
+# or serve it (helps on some mobile browsers)
 python3 -m http.server 8000
 # then visit http://localhost:8000/
-# or open index.html in a browser
 ```
+
+Needs **WebGL**. If the 3D view can’t start, the page shows a clear error card
+instead of a blank screen.
 
 ### Controls
 

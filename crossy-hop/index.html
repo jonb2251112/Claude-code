@@ -50,6 +50,20 @@ html,body{
   -webkit-text-size-adjust:100%;text-size-adjust:100%;
 }
 #app{position:fixed;inset:0;overflow:hidden;height:100%;height:100dvh;}
+#bootfail{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  padding:24px;background:radial-gradient(120% 80% at 50% 30%, #1a3a58, #0a1c30 70%);
+  color:#fff;font-family:system-ui,sans-serif;text-align:center;
+}
+#bootfail.show{display:flex;}
+#bootfail .card{
+  max-width:420px;width:100%;background:rgba(255,253,246,.94);color:#123450;
+  border-radius:22px;padding:22px 18px;box-shadow:0 10px 0 rgba(0,0,0,.25);
+}
+#bootfail h1{margin:0 0 8px;font-size:22px;letter-spacing:.04em;}
+#bootfail p{margin:0 0 10px;font-size:14px;line-height:1.4;font-weight:600;opacity:.9;}
+#bootfail code{display:block;margin-top:10px;padding:10px;border-radius:12px;background:#e8eef5;
+  font-size:11px;text-align:left;white-space:pre-wrap;word-break:break-word;}
 /* A <canvas> is a replaced element: without an explicit CSS size, `inset:0`
    cannot stretch it and a DPR-2 drawing buffer would lay out at twice the
    viewport, showing only the top-left quarter. */
@@ -2778,6 +2792,14 @@ kbd{
 </head>
 <body>
 <div id="app">
+  <div id="bootfail" role="alert" aria-live="assertive">
+    <div class="card">
+      <h1>Couldn&apos;t start 3D</h1>
+      <p>CROSSY HOP needs WebGL. Try Chrome/Edge/Firefox, enable hardware acceleration, then reload.</p>
+      <p>This game is one HTML file — open <b>crossy-hop/index.html</b> locally or serve the folder over HTTP.</p>
+      <code id="bootfail-msg">WebGL unavailable</code>
+    </div>
+  </div>
   <canvas id="gl"></canvas>
 
   <!-- ===================== HUD ===================== -->
@@ -118354,12 +118376,28 @@ function eagleWingGeom(){
  * 6. RENDERER, SCENE, INSTANCED BATCHES
  * ========================================================================== */
 const canvas = $('gl');
-const renderer = new THREE.WebGLRenderer({
-  canvas, antialias: QUALITY.antialias, powerPreference: 'high-performance',
-});
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, QUALITY.dprCap));
-renderer.shadowMap.enabled = QUALITY.shadows;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+function showBootFail(err){
+  const el = $('bootfail');
+  const msg = $('bootfail-msg');
+  if(msg) msg.textContent = (err && (err.stack || err.message || String(err))) || 'WebGL unavailable';
+  if(el) el.classList.add('show');
+  try{ console.error('[CROSSY HOP] boot failed', err); }catch(e){}
+}
+let renderer;
+try{
+  if(typeof THREE === 'undefined' || !THREE.WebGLRenderer){
+    throw new Error('Three.js failed to load from the inlined bundle');
+  }
+  renderer = new THREE.WebGLRenderer({
+    canvas, antialias: QUALITY.antialias, powerPreference: 'high-performance',
+  });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, QUALITY.dprCap));
+  renderer.shadowMap.enabled = QUALITY.shadows;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+}catch(err){
+  showBootFail(err);
+  throw err;
+}
 
 /* How much view depth one row of forward travel costs, which is what turns the
  * fog distances in CFG (expressed in rows) into world units. */
@@ -128400,45 +128438,49 @@ function tickPass(){
 
 
 /* --- boot ----------------------------------------------------------------- */
-load();
-equip(stats.char);
-checkAwards(true);          // credit anything a previous version already earned
-hudBest(); hudCoins(); hudScore();
-$('s-awards').textContent = awardsDone();
-dailyGift();
-ensureQuests();
-ensureDailyMissions();
-addictionOnBoot();
-ensureJourneyClaims();
-if(!stats.seasonId) stats.seasonId = 'classic';
-ensureSeasonApplied();
-journeySeasonEnd();
-startJourneyClock();
-showTip();
-updateBoostHud();
-pulseJourneyMenu();
-$('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
-$('btn-sound').classList.toggle('off', Sfx.muted);
-resize();
-applyWorldTheme(seasonMeta(currentSeasonId()).world);
-seedStart();
-resetPlayer();
-try{ rebuildStatic(); }catch(e){}
-show('start');
-refreshHourlyCrate();
-refreshMysteryDeal();
-refreshStreakVaultChip();
-refreshEchoNest();
-refreshSniperFeed();
-refreshChipBank();
-refreshNewsUi();
-refreshFeaturedDrop();
-applyChrome();
-if(stats.newsPending && newsUnread()){
-  queueSeasonNewsOpen();
-} else if(newsUnread() && !stats.newsSeenSeason){
-  // First boot on a season — soft unread badge only, no force-open.
-  refreshNewsUi();
+try{
+  load();
+  equip(stats.char);
+  checkAwards(true);          // credit anything a previous version already earned
+  hudBest(); hudCoins(); hudScore();
+  if($('s-awards')) $('s-awards').textContent = awardsDone();
+  dailyGift();
+  ensureQuests();
+  ensureDailyMissions();
+  addictionOnBoot();
+  ensureJourneyClaims();
+  if(!stats.seasonId) stats.seasonId = 'classic';
+  ensureSeasonApplied();
+  journeySeasonEnd();
+  startJourneyClock();
+  showTip();
+  updateBoostHud();
+  pulseJourneyMenu();
+  if($('btn-sound')){
+    $('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
+    $('btn-sound').classList.toggle('off', Sfx.muted);
+  }
+  resize();
+  applyWorldTheme(seasonMeta(currentSeasonId()).world);
+  seedStart();
+  resetPlayer();
+  try{ rebuildStatic(); }catch(e){}
+  show('start');
+  refreshHourlyCrate();
+  refreshMysteryDeal();
+  refreshStreakVaultChip();
+  refreshEchoNest();
+  refreshSniperFeed();
+  refreshChipBank();
+  try{ refreshNewsUi(); refreshFeaturedDrop(); }catch(e){ console.warn(e); }
+  applyChrome();
+  try{
+    if(stats.newsPending && newsUnread()) queueSeasonNewsOpen();
+    else if(newsUnread() && !stats.newsSeenSeason) refreshNewsUi();
+  }catch(e){ console.warn(e); }
+}catch(err){
+  showBootFail(err);
+  throw err;
 }
 
 let last = performance.now();
@@ -128471,6 +128513,14 @@ function frame(now){
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
+
+window.addEventListener('error', (ev) => {
+  try{
+    if(ev && ev.message && /WebGL|THREE|Renderer/i.test(String(ev.message))){
+      showBootFail(ev.error || ev.message);
+    }
+  }catch(e){}
+});
 
 /* A small handle for tweaking and driving the game from the console. */
 window.HOP = {
