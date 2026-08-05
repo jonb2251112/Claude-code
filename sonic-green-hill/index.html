@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#2a8cff" />
+  <title>SONIC — Green Hill Zone</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Bungee&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div id="title-card" class="overlay">
+      <div class="title-card-inner">
+        <div class="zone-name">GREEN HILL</div>
+        <div class="zone-row">
+          <span class="zone-word">ZONE</span>
+          <div class="act-badge">
+            <span class="act-label">ACT</span>
+            <span class="act-num">1</span>
+          </div>
+        </div>
+      </div>
+      <button id="btn-start" type="button">TAP TO START</button>
+      <p class="hint">← → move · ↑ / Z jump · ↓ / X roll · Space spindash</p>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="pause-panel">
+        <h2>PAUSED</h2>
+        <button id="btn-resume" type="button">RESUME</button>
+        <button id="btn-restart" type="button">RESTART</button>
+      </div>
+    </div>
+
+    <div id="result-overlay" class="overlay hidden">
+      <div class="result-panel">
+        <h2 id="result-title">ACT CLEAR!</h2>
+        <div class="result-stats">
+          <div><span>TIME</span><strong id="result-time">0:00</strong></div>
+          <div><span>RINGS</span><strong id="result-rings">0</strong></div>
+          <div><span>SCORE</span><strong id="result-score">0</strong></div>
+        </div>
+        <button id="btn-again" type="button">PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <div id="controls" class="controls">
+      <div class="dpad">
+        <button class="ctrl" data-key="left" aria-label="Left">◀</button>
+        <div class="dpad-mid">
+          <button class="ctrl" data-key="up" aria-label="Up">▲</button>
+          <button class="ctrl" data-key="down" aria-label="Down">▼</button>
+        </div>
+        <button class="ctrl" data-key="right" aria-label="Right">▶</button>
+      </div>
+      <div class="action-btns">
+        <button class="ctrl action" data-key="jump" aria-label="Jump">A</button>
+        <button class="ctrl action spin" data-key="spin" aria-label="Spin">B</button>
+      </div>
+    </div>
+
+    <button id="btn-pause" type="button" aria-label="Pause">❚❚</button>
+    <div id="sega-mark">SEGA</div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
