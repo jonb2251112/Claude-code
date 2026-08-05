@@ -1942,6 +1942,15 @@ body.season-halloween-world #streak.overdrive{
 #admin .rowcard .s{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
 #admin .btns{display:flex;flex-wrap:wrap;gap:8px;}
 #admin .btns .btn{flex:1 1 120px;min-width:0;}
+#admin .btns.season-force .btn{flex:1 1 calc(50% - 8px);min-width:132px;}
+#admin #admin-halloween{
+  background:linear-gradient(135deg,#fdba74,#a855f7);color:#2e1065;
+  box-shadow:0 5px 0 #5b21b6;
+}
+#admin #admin-halloween.on{
+  background:linear-gradient(135deg,#f97316,#7c3aed);color:#fff;
+  box-shadow:0 5px 0 #3b0764;
+}
 #admin .btn.on{
   background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;box-shadow:0 5px 0 #0e7490;
 }
@@ -2789,6 +2798,16 @@ body.season-halloween-world #streak.overdrive{
   /* Keep the pass list dominant — collapse secondary FOMO chrome on phones */
   #j-mascot, #j-value, #j-dangle, #j-feed, #j-claimpulse, #j-lanes,
   #j-drops, #j-social, #j-heat, #j-flash, #j-vipbar{display:none !important;}
+  /* Halloween exclusive: keep the pumpkin-head VIP chicken visible on phones */
+  #journey.season-halloween #j-mascot{
+    display:flex !important;
+    margin:2px 0 4px;
+    padding:8px 10px;
+    gap:8px;
+  }
+  #journey.season-halloween #j-mascot .stage{transform:scale(.92);transform-origin:left center;}
+  #journey.season-halloween #j-mascot .copy .h{display:none;}
+  #journey.season-halloween #j-mascot .cta-pill{padding:6px 10px;font-size:11px;}
   #j-fomo{padding:6px 10px;border-radius:12px;gap:1px;}
   #j-fomo .scare{display:none;}
   #j-fomo .clock{font-size:13px;}
@@ -3558,7 +3577,7 @@ body.season-halloween-world #streak.overdrive{
       <div class="rowcard">
         <div class="t">Season force</div>
         <div class="s">lock a themed journey + map for testing</div>
-        <div class="btns">
+        <div class="btns season-force">
           <button type="button" class="btn ghost" id="admin-auto">Auto rotate</button>
           <button type="button" class="btn ghost" id="admin-classic">Classic</button>
           <button type="button" class="btn ghost" id="admin-summer">Summer</button>
@@ -127727,10 +127746,14 @@ function adminForceSeason(mode){
     badge('Admin', 'auto season rotate');
     save();
   }
-  renderAdminPanel();
-  if(state.panel === 'journey') renderJourney();
+  // Force a hard world rebuild so the haunted map shows without a refresh.
+  try{ refreshWorldForSeason(); }catch(e){}
   try{ refreshHourlyCrate(); }catch(e){}
   try{ refreshNewsUi(); }catch(e){}
+  renderAdminPanel();
+  if(state.panel === 'journey') renderJourney();
+  if(state.panel === 'news') renderNews();
+  if(state.panel === 'admin') renderAdminPanel();
 }
 function adminEndSeasonNow(){
   if(stats.adminSeasonForce){
