@@ -672,8 +672,10 @@ kbd{
 #reveal .swatch, #hatch .swatch{
   width:112px;height:112px;border-radius:26px;
   background-size:contain;background-position:center;background-repeat:no-repeat;
+  background-color:#ffe07a;
   box-shadow:0 8px 0 rgba(18,52,80,.25);
 }
+#hatch .swatch{background-color:#ff9a3c;}
 #reveal .k, #hatch .k{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;}
 #reveal .n, #hatch .n{font-size:clamp(24px,8vmin,36px);color:#fff;text-shadow:0 3px 0 rgba(18,52,80,.45);}
 #reveal .r, #hatch .r{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
@@ -681,22 +683,23 @@ kbd{
 
 /* Egg hatch stage — satisfying multi-beat reveal */
 #hatch{
-  background:radial-gradient(120% 80% at 50% 42%, rgba(255,224,122,.18), rgba(10,32,54,.72) 55%, rgba(8,22,40,.86));
+  z-index:40;
+  background:radial-gradient(120% 70% at 50% 46%, rgba(255,224,122,.22), rgba(8,24,42,.78) 48%, rgba(6,16,30,.92));
 }
 /* Stack egg + card dead-center so reveal never drifts sideways */
 #hatch .egg-stage, #hatch .hatch-card{
-  position:absolute;left:50%;top:50%;
+  position:absolute;left:50%;top:46%;
   transform:translate(-50%,-50%);
 }
 #hatch .egg-stage{
-  z-index:2;width:min(72vw,260px);height:min(78vw,280px);
-  display:flex;align-items:flex-end;justify-content:center;
-  filter:drop-shadow(0 18px 0 rgba(18,52,80,.18));
+  z-index:2;width:min(72vw,260px);height:min(72vw,260px);
+  display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 14px 0 rgba(18,52,80,.16));
   transition:opacity .22s ease, filter .22s ease;
 }
 #hatch .egg-shadow{
-  position:absolute;left:50%;bottom:18px;width:88px;height:18px;margin-left:-44px;
-  border-radius:50%;background:rgba(12,38,62,.35);
+  position:absolute;left:50%;bottom:22%;width:96px;height:18px;margin-left:-48px;
+  border-radius:50%;background:rgba(12,38,62,.38);
   transform:scaleX(1);opacity:.7;
   transition:transform .35s ease, opacity .35s ease;
 }
@@ -705,9 +708,10 @@ kbd{
 #hatch.crack .egg-shadow,#hatch.bloom .egg-shadow{transform:scaleX(1.35);opacity:.25;}
 #hatch.revealed .egg-shadow{opacity:0;}
 #hatch .egg{
-  position:relative;width:112px;height:140px;margin-bottom:28px;
+  position:relative;width:124px;height:154px;margin:0;
   transform-origin:50% 88%;
   z-index:2;
+  filter:drop-shadow(0 10px 0 rgba(18,52,80,.22));
 }
 #hatch.drop .egg{animation:eggdrop .55s cubic-bezier(.2,1.35,.3,1) both;}
 #hatch.wobble .egg{animation:eggwobble .55s ease-in-out infinite;}
@@ -718,7 +722,8 @@ kbd{
   background:
     radial-gradient(circle at 32% 28%, rgba(255,255,255,.75), transparent 28%),
     linear-gradient(160deg,#fffdf6 0%,#fff1c9 42%,#ffd76a 100%);
-  box-shadow:inset -12px -16px 0 rgba(18,52,80,.07), 0 12px 0 rgba(18,52,80,.2);
+  /* inset only — outer drop lives on .egg so the seam never reads as two eggs */
+  box-shadow:inset -12px -16px 0 rgba(18,52,80,.07);
   overflow:hidden;
 }
 #hatch .egg-shell::before{
@@ -726,19 +731,27 @@ kbd{
   border-radius:50%;background:rgba(255,154,60,.38);transform:rotate(-18deg);
   box-shadow:30px 20px 0 rgba(255,201,60,.42), 10px 44px 0 rgba(239,77,77,.26);
 }
+/* Intact body — one shell until the crack beat */
+#hatch .egg-whole{
+  position:absolute;inset:0;z-index:3;
+  transition:opacity .05s linear;
+}
+#hatch.crack .egg-whole,#hatch.bloom .egg-whole,#hatch.revealed .egg-whole{
+  opacity:0;pointer-events:none;
+}
 #hatch .egg-top, #hatch .egg-bot{
   position:absolute;left:0;width:100%;overflow:hidden;
-  transition:transform .7s cubic-bezier(.15,1.15,.25,1), opacity .45s ease, filter .45s ease;
+  opacity:0;pointer-events:none;
   will-change:transform, opacity;
 }
-#hatch .egg-top{top:0;height:52%;z-index:3;}
-#hatch .egg-bot{bottom:0;height:52%;z-index:3;}
+#hatch .egg-top{top:0;height:54%;z-index:3;}
+#hatch .egg-bot{bottom:0;height:54%;z-index:3;}
 #hatch .egg-top .egg-shell{
-  position:absolute;left:0;right:0;top:0;height:calc(100% / 0.52);
+  position:absolute;left:0;right:0;top:0;height:calc(100% / 0.54);
   border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;
 }
 #hatch .egg-bot .egg-shell{
-  position:absolute;left:0;right:0;bottom:0;height:calc(100% / 0.52);
+  position:absolute;left:0;right:0;bottom:0;height:calc(100% / 0.54);
   border-radius:50% 50% 46% 46% / 58% 58% 42% 42%;
 }
 /* Crack lines build during shake */
@@ -759,20 +772,15 @@ kbd{
 #hatch .egg-cracks i:nth-child(1){left:48%;top:18%;height:42%;transform:rotate(8deg);}
 #hatch .egg-cracks i:nth-child(2){left:38%;top:36%;height:28%;transform:rotate(-26deg);}
 #hatch .egg-cracks i:nth-child(3){left:58%;top:34%;height:30%;transform:rotate(24deg);}
-/* Shell burst */
+/* Shell burst — halves appear and fly in one motion */
 #hatch.crack .egg-top{
-  transform:translate(-58px,-72px) rotate(-48deg) scale(1.12);
-  opacity:0;filter:blur(.35px);
-  transition-duration:.55s;
+  opacity:1;
+  animation:eggshelltop .6s cubic-bezier(.15,1.15,.25,1) both;
 }
 #hatch.crack .egg-bot{
-  transform:translate(52px,58px) rotate(42deg) scale(1.12);
-  opacity:0;filter:blur(.35px);
-  transition-duration:.55s;
+  opacity:1;
+  animation:eggshellbot .6s cubic-bezier(.15,1.15,.25,1) both;
 }
-/* Tiny seam split during hard shake so the crack reads */
-#hatch.shake .egg-top{transform:translateY(-3px) rotate(-1deg);}
-#hatch.shake .egg-bot{transform:translateY(3px) rotate(1deg);}
 #hatch.crack .egg-cracks{opacity:0;}
 /* Flying shards */
 #hatch .shard{
@@ -819,10 +827,12 @@ kbd{
 #hatch.bloom .spark:nth-child(8){--sx:-96px;--sy:8px;animation-delay:.06s;}
 /* Peek critter between crack and card */
 #hatch .egg-peek{
-  position:absolute;left:50%;top:42%;width:72px;height:72px;margin:-36px;
-  border-radius:20px;opacity:0;z-index:2;pointer-events:none;
+  position:absolute;left:50%;top:46%;width:88px;height:88px;margin:-44px;
+  border-radius:22px;opacity:0;z-index:2;pointer-events:none;
+  background-color:#ff9a3c;
   background-size:contain;background-position:center;background-repeat:no-repeat;
-  filter:drop-shadow(0 6px 0 rgba(18,52,80,.2));
+  filter:drop-shadow(0 8px 0 rgba(18,52,80,.22));
+  box-shadow:0 0 0 4px rgba(255,255,255,.35);
 }
 #hatch.crack .egg-peek,#hatch.bloom .egg-peek{
   animation:eggpeek .55s cubic-bezier(.2,1.4,.35,1) both;
@@ -897,6 +907,14 @@ kbd{
   0%{opacity:1;transform:translate(0,0) rotate(0) scale(1.15);}
   70%{opacity:1;}
   100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.4);}
+}
+@keyframes eggshelltop{
+  0%{opacity:1;transform:translate(0,0) rotate(0) scale(1);filter:none;}
+  100%{opacity:0;transform:translate(-58px,-72px) rotate(-48deg) scale(1.12);filter:blur(.35px);}
+}
+@keyframes eggshellbot{
+  0%{opacity:1;transform:translate(0,0) rotate(0) scale(1);filter:none;}
+  100%{opacity:0;transform:translate(52px,58px) rotate(42deg) scale(1.12);filter:blur(.35px);}
 }
 @keyframes eggimpact{
   0%{transform:translate(-50%,-50%) scale(1);}
@@ -2594,7 +2612,7 @@ kbd{
   #j-mascot .comb,#j-mascot .leg,#j-mascot .ticket-wrap,#j-mascot .ticket .shine,
   #j-mascot .spark,#j-mascot .cta-pill,#j-fomo,#j-claimpulse,#j-dangle::after,
   #j-dangle .jack,#j-progress .bar i,.jcell.claimable,#btn-journey.hot,#btn-journey2.hot,
-  #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,#hatch .shard,#hatch .spark,#hatch .egg-ring,#hatch .egg-glow,#hatch .egg-peek,#hatch .egg-shadow,#hatch .egg-stage,#hatch .hatch-card,#hatch .swatch,#hatch::after,
+  #j-actions .btn.deal::after,.btn::after,#wheel-spin.spinning,#hatch .egg,#hatch .egg-whole,#hatch .egg-top,#hatch .egg-bot,#hatch .shard,#hatch .spark,#hatch .egg-ring,#hatch .egg-glow,#hatch .egg-peek,#hatch .egg-shadow,#hatch .egg-stage,#hatch .hatch-card,#hatch .swatch,#hatch::after,
   #j-drops .track,#j-vault.ready .go,#hourlycrate .ico,#mysterydeal .ico,.jtier.jackpot,
   #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
   #j-mascot .shades,
@@ -2867,6 +2885,7 @@ kbd{
       <span class="shard"></span><span class="shard"></span><span class="shard"></span>
       <span class="shard"></span><span class="shard"></span><span class="shard"></span>
       <div class="egg">
+        <div class="egg-whole" aria-hidden="true"><div class="egg-shell"></div></div>
         <div class="egg-cracks" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="egg-top"><div class="egg-shell"></div></div>
         <div class="egg-bot"><div class="egg-shell"></div></div>
