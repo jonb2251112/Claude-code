@@ -50,6 +50,20 @@ html,body{
   -webkit-text-size-adjust:100%;text-size-adjust:100%;
 }
 #app{position:fixed;inset:0;overflow:hidden;height:100%;height:100dvh;}
+#bootfail{
+  position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;
+  padding:24px;background:radial-gradient(120% 80% at 50% 30%, #1a3a58, #0a1c30 70%);
+  color:#fff;font-family:system-ui,sans-serif;text-align:center;
+}
+#bootfail.show{display:flex;}
+#bootfail .card{
+  max-width:420px;width:100%;background:rgba(255,253,246,.94);color:#123450;
+  border-radius:22px;padding:22px 18px;box-shadow:0 10px 0 rgba(0,0,0,.25);
+}
+#bootfail h1{margin:0 0 8px;font-size:22px;letter-spacing:.04em;}
+#bootfail p{margin:0 0 10px;font-size:14px;line-height:1.4;font-weight:600;opacity:.9;}
+#bootfail code{display:block;margin-top:10px;padding:10px;border-radius:12px;background:#e8eef5;
+  font-size:11px;text-align:left;white-space:pre-wrap;word-break:break-word;}
 /* A <canvas> is a replaced element: without an explicit CSS size, `inset:0`
    cannot stretch it and a DPR-2 drawing buffer would lay out at twice the
    viewport, showing only the top-left quarter. */
@@ -1560,6 +1574,18 @@ kbd{
 }
 #hourlycrate.show, #mysterydeal.show, #streakvaultchip.show{display:flex;}
 #hourlycrate{background:linear-gradient(135deg,#fff7ed,#ffedd5);color:var(--ink);}
+#hourlycrate.haunt{
+  background:linear-gradient(135deg,#2e1065,#431407);
+  color:#fff7ed;
+  border-color:rgba(249,115,22,.45);
+}
+#hourlycrate.haunt .k{color:#fdba74;}
+#hourlycrate.haunt .n{color:#fff7ed;}
+#hourlycrate.haunt .h{color:#e9d5ff;}
+#hourlycrate.haunt .ico{
+  background:linear-gradient(#f97316,#a855f7);color:#fff;
+  box-shadow:0 3px 0 #5b21b6;
+}
 #hourlycrate .ico{
   width:40px;height:40px;border-radius:12px;background:linear-gradient(#fb923c,#ea580c);
   color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;
@@ -1794,6 +1820,118 @@ kbd{
   background:#67e8f9;box-shadow:0 0 8px #22d3ee;
 }
 
+/* --- Season themes: Halloween Haunt -------------------------------------- */
+#journey.season-halloween #j-hero{
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(255,154,60,.4),transparent 55%),
+    radial-gradient(90% 70% at 0% 40%,rgba(124,58,237,.4),transparent 50%),
+    radial-gradient(90% 70% at 100% 30%,rgba(239,68,68,.28),transparent 50%),
+    linear-gradient(180deg,#1a0b2e 0%,#3b0764 45%,#7c2d12 100%);
+}
+#journey.season-halloween #j-fomo{
+  background:linear-gradient(90deg,#f97316,#a855f7,#ef4444);
+  box-shadow:0 0 0 1px rgba(251,146,60,.55), 0 8px 24px rgba(168,85,247,.4);
+}
+#journey.season-halloween #j-value{
+  background:linear-gradient(105deg,#581c87,#7c3aed 45%,#ea580c);
+  box-shadow:0 5px 0 #3b0764, 0 0 20px rgba(249,115,22,.4);
+}
+#journey.season-halloween #j-dangle{
+  background:linear-gradient(105deg,#2e1065 0%,#6b21a8 45%,#ea580c 100%);
+  box-shadow:0 5px 0 #3b0764, 0 0 24px rgba(249,115,22,.4);
+}
+#journey.season-halloween #j-mascot{
+  background:linear-gradient(135deg,rgba(255,247,237,.97),rgba(233,213,255,.9));
+}
+#journey.season-halloween #j-mascot .ticket{
+  background:linear-gradient(135deg,#f97316 0%,#a855f7 55%,#7c2d12 100%);
+  box-shadow:0 3px 0 #5b21b6, 0 6px 12px rgba(249,115,22,.4);
+}
+#journey.season-halloween #j-lanes .vip{color:#fdba74;}
+#journey.season-halloween #j-lanes .free{color:#e9d5ff;}
+#journey.season-halloween .jtier.jackpot{
+  background:linear-gradient(90deg,rgba(249,115,22,.45),rgba(168,85,247,.4));
+  box-shadow:0 0 0 2px #fdba74, 0 0 26px rgba(168,85,247,.55);
+}
+#journey.season-halloween #j-drops .drop.vip{
+  background:linear-gradient(#fdba74,#f97316);color:#431407;box-shadow:0 2px 0 #9a3412;
+}
+#journey.season-halloween #j-drops .drop.hot{
+  background:linear-gradient(#a855f7,#6b21a8);color:#fff;box-shadow:0 2px 0 #3b0764;
+}
+#journey.season-halloween #j-seasonchip{
+  background:linear-gradient(#fdba74,#a855f7);color:#2e1065;box-shadow:0 2px 0 #5b21b6;
+}
+/* Pumpkin head on VIP chicken — Halloween exclusive */
+#j-mascot .pumpkin-head{
+  display:none;position:absolute;left:8px;bottom:38px;width:44px;height:40px;z-index:5;
+  transform-origin:50% 80%;
+  animation:jhead 2.2s cubic-bezier(.45,.05,.55,.95) infinite;
+  pointer-events:none;
+}
+#journey.season-halloween #j-mascot .pumpkin-head{display:block;}
+#journey.season-halloween #j-mascot .comb{display:none;}
+#journey.season-halloween #j-mascot .shades{display:none!important;}
+#journey.season-halloween #j-mascot .eye{opacity:0;}
+#journey.season-halloween #j-mascot .head{opacity:.35;}
+#j-mascot .pumpkin-head .shell{
+  position:absolute;inset:4px 2px 2px;border-radius:45% 45% 40% 40% / 50% 50% 45% 45%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 28%),
+    linear-gradient(160deg,#ffb347 0%,#f97316 42%,#c2410c 100%);
+  box-shadow:inset -6px -8px 0 rgba(0,0,0,.12), 0 3px 0 rgba(69,26,3,.35);
+}
+#j-mascot .pumpkin-head .ridge{
+  position:absolute;left:50%;top:8px;bottom:8px;width:3px;margin-left:-1.5px;
+  background:rgba(120,53,15,.35);border-radius:2px;
+  box-shadow:-8px 0 0 rgba(120,53,15,.22), 8px 0 0 rgba(120,53,15,.22);
+}
+#j-mascot .pumpkin-head .stem{
+  position:absolute;left:50%;top:0;width:8px;height:10px;margin-left:-4px;
+  background:linear-gradient(#4d7c0f,#365314);border-radius:3px 3px 2px 2px;
+  transform:rotate(-8deg);
+}
+#j-mascot .pumpkin-head .eye-cut{
+  position:absolute;top:16px;width:0;height:0;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-bottom:7px solid #1c1917;
+}
+#j-mascot .pumpkin-head .eye-cut.l{left:10px;transform:rotate(-8deg);}
+#j-mascot .pumpkin-head .eye-cut.r{right:10px;transform:rotate(8deg);}
+#j-mascot .pumpkin-head .mouth{
+  position:absolute;left:12px;right:12px;bottom:8px;height:8px;
+  background:#1c1917;border-radius:0 0 10px 10px;
+  clip-path:polygon(0 0,18% 100%,36% 20%,50% 100%,64% 20%,82% 100%,100% 0,100% 100%,0 100%);
+}
+#journey.season-halloween #j-mascot .spark{
+  background:#fdba74;box-shadow:0 0 8px #f97316;
+}
+#journey.season-halloween #j-mascot .cta-pill{
+  background:linear-gradient(#f97316,#a855f7);color:#fff;
+}
+@media (prefers-reduced-motion:reduce){
+  #j-mascot .pumpkin-head{animation:none!important}
+}
+
+/* News halloween skin */
+#news.season-halloween #news-hero{
+  background:
+    radial-gradient(120% 90% at 20% 0%, rgba(249,115,22,.55), transparent 55%),
+    linear-gradient(160deg,#3b0764 0%, #1a0b2e 55%, #431407 100%);
+}
+#news.season-halloween .newsfeat .ico{
+  background:linear-gradient(#fdba74,#f97316);color:#431407;
+}
+
+/* Haunted fever chip tint on Halloween */
+body.season-halloween-world #streak.fever,
+body.season-halloween-world #streak.super,
+body.season-halloween-world #streak.mega,
+body.season-halloween-world #streak.ultra,
+body.season-halloween-world #streak.overdrive{
+  filter:hue-rotate(-25deg) saturate(1.2);
+}
+
 /* Admin panel */
 #admin.screen.sheet .body{padding:12px;display:flex;flex-direction:column;gap:10px;}
 #admin .rowcard{
@@ -1804,6 +1942,15 @@ kbd{
 #admin .rowcard .s{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
 #admin .btns{display:flex;flex-wrap:wrap;gap:8px;}
 #admin .btns .btn{flex:1 1 120px;min-width:0;}
+#admin .btns.season-force .btn{flex:1 1 calc(50% - 8px);min-width:132px;}
+#admin #admin-halloween{
+  background:linear-gradient(135deg,#fdba74,#a855f7);color:#2e1065;
+  box-shadow:0 5px 0 #5b21b6;
+}
+#admin #admin-halloween.on{
+  background:linear-gradient(135deg,#f97316,#7c3aed);color:#fff;
+  box-shadow:0 5px 0 #3b0764;
+}
 #admin .btn.on{
   background:linear-gradient(#67e8f9,#0891b2);color:#042f2e;box-shadow:0 5px 0 #0e7490;
 }
@@ -2651,6 +2798,16 @@ kbd{
   /* Keep the pass list dominant — collapse secondary FOMO chrome on phones */
   #j-mascot, #j-value, #j-dangle, #j-feed, #j-claimpulse, #j-lanes,
   #j-drops, #j-social, #j-heat, #j-flash, #j-vipbar{display:none !important;}
+  /* Halloween exclusive: keep the pumpkin-head VIP chicken visible on phones */
+  #journey.season-halloween #j-mascot{
+    display:flex !important;
+    margin:2px 0 4px;
+    padding:8px 10px;
+    gap:8px;
+  }
+  #journey.season-halloween #j-mascot .stage{transform:scale(.92);transform-origin:left center;}
+  #journey.season-halloween #j-mascot .copy .h{display:none;}
+  #journey.season-halloween #j-mascot .cta-pill{padding:6px 10px;font-size:11px;}
   #j-fomo{padding:6px 10px;border-radius:12px;gap:1px;}
   #j-fomo .scare{display:none;}
   #j-fomo .clock{font-size:13px;}
@@ -2778,6 +2935,14 @@ kbd{
 </head>
 <body>
 <div id="app">
+  <div id="bootfail" role="alert" aria-live="assertive">
+    <div class="card">
+      <h1>Couldn&apos;t start 3D</h1>
+      <p>CROSSY HOP needs WebGL. Try Chrome/Edge/Firefox, enable hardware acceleration, then reload.</p>
+      <p>This game is one HTML file — open <b>crossy-hop/index.html</b> locally or serve the folder over HTTP.</p>
+      <code id="bootfail-msg">WebGL unavailable</code>
+    </div>
+  </div>
   <canvas id="gl"></canvas>
 
   <!-- ===================== HUD ===================== -->
@@ -3117,6 +3282,14 @@ kbd{
               <span class="bridge"></span>
               <span class="lens r"></span><span class="arm r"></span>
             </div>
+            <div class="pumpkin-head" aria-hidden="true">
+              <span class="stem"></span>
+              <span class="shell"></span>
+              <span class="ridge"></span>
+              <span class="eye-cut l"></span>
+              <span class="eye-cut r"></span>
+              <span class="mouth"></span>
+            </div>
             <div class="beak"></div>
             <div class="body"></div>
             <div class="belly"></div>
@@ -3404,10 +3577,11 @@ kbd{
       <div class="rowcard">
         <div class="t">Season force</div>
         <div class="s">lock a themed journey + map for testing</div>
-        <div class="btns">
+        <div class="btns season-force">
           <button type="button" class="btn ghost" id="admin-auto">Auto rotate</button>
           <button type="button" class="btn ghost" id="admin-classic">Classic</button>
           <button type="button" class="btn ghost" id="admin-summer">Summer</button>
+          <button type="button" class="btn ghost" id="admin-halloween">Halloween</button>
         </div>
       </div>
       <div class="rowcard">
@@ -117852,6 +118026,7 @@ function canvasTex(w, h, draw){
  */
 const FOG_SKY = 0xabdff8;
 const FOG_SKY_SUMMER = 0xffe0a8;
+const FOG_SKY_HALLOWEEN = 0x2a1538;
 const TEX_SKY = canvasTex(256, 256, (g,w,h)=>{
   const grd = g.createLinearGradient(0,0,0,h);
   grd.addColorStop(0.00, '#9ed8f6');
@@ -117891,6 +118066,28 @@ const TEX_SKY_SUMMER = canvasTex(256, 256, (g,w,h)=>{
       g.fill();
     }
   }
+  g.globalAlpha = 1;
+});
+/** Halloween sky — bruised purple night, ember horizon. */
+const TEX_SKY_HALLOWEEN = canvasTex(256, 256, (g,w,h)=>{
+  const grd = g.createLinearGradient(0,0,0,h);
+  grd.addColorStop(0.00, '#0f0720');
+  grd.addColorStop(0.35, '#1e0b33');
+  grd.addColorStop(0.62, '#3b1760');
+  grd.addColorStop(0.82, '#7c2d12');
+  grd.addColorStop(1.00, '#c2410c');
+  g.fillStyle = grd; g.fillRect(0,0,w,h);
+  // Sparse stars
+  g.fillStyle = '#fde68a';
+  for(let i=0;i<28;i++){
+    g.globalAlpha = randf(0.25, 0.85);
+    const sx = Math.random()*w, sy = randf(0, h*0.55), r = randf(0.6, 1.6);
+    g.beginPath(); g.arc(sx, sy, r, 0, 6.3); g.fill();
+  }
+  // Moon
+  g.globalAlpha = 0.9;
+  g.fillStyle = '#fef3c7';
+  g.beginPath(); g.arc(w*0.78, h*0.18, 16, 0, 6.3); g.fill();
   g.globalAlpha = 1;
 });
 
@@ -118045,8 +118242,22 @@ const PAL_HEX_SUMMER = {
   bush: [0x4ade80, 0x22c55e],
   log: [0xa16207, 0x854d0e], logEnd: 0xfde68a, pad: 0x2dd4bf,
 };
+const PAL_HEX_HALLOWEEN = {
+  grass: [0x3f2a1e, 0x2d1f16],          // scorched earth
+  grassTint: [0x5b3a24, 0x3b2415, 0x6b4226],
+  road: [0x2a2430, 0x1f1a26],           // asphalt night
+  railBed: 0x3f3a45, railTie: 0x4a2c0a, railSteel: 0xa8a29e,
+  water: 0x312e81, waterDeep: 0x1e1b4b, // haunted lagoon
+  trunk: [0x292524, 0x1c1917],
+  leaf: [0x9a3412, 0xb45309, 0x7c2d12, 0xc2410c], // dead orange canopy
+  rock: [0x57534e, 0x44403c, 0x78716c],
+  bush: [0x713f12, 0x451a03],
+  log: [0x44403c, 0x292524], logEnd: 0xa8a29e, pad: 0x6b21a8,
+};
 let worldThemeId = 'classic';
 function isSummerWorld(){ return worldThemeId === 'summer'; }
+function isHalloweenWorld(){ return worldThemeId === 'halloween'; }
+function isSeasonWorld(id){ return worldThemeId === id; }
 function applyPalHex(src){
   PAL.grass[0].setHex(src.grass[0]); PAL.grass[1].setHex(src.grass[1]);
   for(let i=0;i<PAL.grassTint.length;i++) PAL.grassTint[i].setHex(src.grassTint[i % src.grassTint.length]);
@@ -118061,14 +118272,31 @@ function applyPalHex(src){
   PAL.logEnd.setHex(src.logEnd); PAL.pad.setHex(src.pad);
 }
 function applyWorldTheme(id){
-  worldThemeId = (id === 'summer') ? 'summer' : 'classic';
-  applyPalHex(worldThemeId === 'summer' ? PAL_HEX_SUMMER : PAL_HEX_CLASSIC);
+  if(id === 'summer') worldThemeId = 'summer';
+  else if(id === 'halloween') worldThemeId = 'halloween';
+  else worldThemeId = 'classic';
+  applyPalHex(
+    worldThemeId === 'summer' ? PAL_HEX_SUMMER
+    : worldThemeId === 'halloween' ? PAL_HEX_HALLOWEEN
+    : PAL_HEX_CLASSIC
+  );
   try{
-    scene.background = worldThemeId === 'summer' ? TEX_SKY_SUMMER : TEX_SKY;
-    scene.fog.color.setHex(worldThemeId === 'summer' ? FOG_SKY_SUMMER : FOG_SKY);
+    document.body.classList.toggle('season-halloween-world', worldThemeId === 'halloween');
+    scene.background =
+      worldThemeId === 'summer' ? TEX_SKY_SUMMER
+      : worldThemeId === 'halloween' ? TEX_SKY_HALLOWEEN
+      : TEX_SKY;
+    scene.fog.color.setHex(
+      worldThemeId === 'summer' ? FOG_SKY_SUMMER
+      : worldThemeId === 'halloween' ? FOG_SKY_HALLOWEEN
+      : FOG_SKY
+    );
     if(worldThemeId === 'summer'){
       sun.color.setHex(0xffe7b8);
       sun.intensity = 2.25;
+    } else if(worldThemeId === 'halloween'){
+      sun.color.setHex(0xfdba74);
+      sun.intensity = 1.55;
     } else {
       sun.color.setHex(0xfff6e2);
       sun.intensity = 2.0;
@@ -118354,12 +118582,28 @@ function eagleWingGeom(){
  * 6. RENDERER, SCENE, INSTANCED BATCHES
  * ========================================================================== */
 const canvas = $('gl');
-const renderer = new THREE.WebGLRenderer({
-  canvas, antialias: QUALITY.antialias, powerPreference: 'high-performance',
-});
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, QUALITY.dprCap));
-renderer.shadowMap.enabled = QUALITY.shadows;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+function showBootFail(err){
+  const el = $('bootfail');
+  const msg = $('bootfail-msg');
+  if(msg) msg.textContent = (err && (err.stack || err.message || String(err))) || 'WebGL unavailable';
+  if(el) el.classList.add('show');
+  try{ console.error('[CROSSY HOP] boot failed', err); }catch(e){}
+}
+let renderer;
+try{
+  if(typeof THREE === 'undefined' || !THREE.WebGLRenderer){
+    throw new Error('Three.js failed to load from the inlined bundle');
+  }
+  renderer = new THREE.WebGLRenderer({
+    canvas, antialias: QUALITY.antialias, powerPreference: 'high-performance',
+  });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, QUALITY.dprCap));
+  renderer.shadowMap.enabled = QUALITY.shadows;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+}catch(err){
+  showBootFail(err);
+  throw err;
+}
 
 /* How much view depth one row of forward travel costs, which is what turns the
  * fog distances in CFG (expressed in rows) into world units. */
@@ -118697,7 +118941,66 @@ function addShell(row, x, z, scale = 1){
     color:col, ry:randf(0, 2),
   });
 }
+function addPumpkin(row, x, z, scale = 1){
+  const top = row.top;
+  const body = chance(0.35) ? C(0xea580c) : C(0xf97316);
+  row.boxes.push({
+    x, y: top + 0.22*scale, z, sx:0.42*scale, sy:0.36*scale, sz:0.4*scale,
+    color:body, ry:randf(0, 1.2),
+  });
+  row.boxes.push({
+    x, y: top + 0.42*scale, z, sx:0.12*scale, sy:0.12*scale, sz:0.12*scale,
+    color:C(0x3f6212), ry:0,
+  });
+  if(chance(0.55)){
+    // carved glow
+    row.boxes.push({
+      x: x + 0.02*scale, y: top + 0.24*scale, z: z + 0.18*scale,
+      sx:0.16*scale, sy:0.1*scale, sz:0.06*scale,
+      color:C(0xfde68a), ry:0,
+    });
+  }
+}
+function addTombstone(row, x, z, scale = 1){
+  const top = row.top;
+  const stone = chance(0.5) ? C(0x78716c) : C(0xa8a29e);
+  row.boxes.push({
+    x, y: top + 0.28*scale, z, sx:0.34*scale, sy:0.5*scale, sz:0.14*scale,
+    color:stone, ry:randf(-0.15, 0.15),
+  });
+  row.boxes.push({
+    x, y: top + 0.52*scale, z, sx:0.28*scale, sy:0.16*scale, sz:0.14*scale,
+    color:shade(stone, 1.08), ry:0,
+  });
+}
+function addDeadTree(row, x, z, scale = 1){
+  const top = row.top;
+  const trunkH = randf(0.55, 0.95) * scale;
+  const trunk = pick(PAL.trunk);
+  row.boxes.push({ x, y: top + trunkH/2, z, sx:0.22*scale, sy:trunkH, sz:0.22*scale, color:trunk, ry:0 });
+  // Bare branches
+  for(let i=0;i<3;i++){
+    const a = randf(-1.1, 1.1);
+    const len = randf(0.35, 0.65) * scale;
+    row.boxes.push({
+      x: x + Math.cos(a) * len * 0.35,
+      y: top + trunkH * randf(0.55, 0.9),
+      z: z + Math.sin(a) * len * 0.2,
+      sx: len, sy: 0.08*scale, sz: 0.1*scale,
+      color: shade(trunk, 1.05),
+      ry: a,
+    });
+  }
+}
+function addBatSign(row, x, z, scale = 1){
+  const top = row.top;
+  row.boxes.push({ x, y: top + 0.35*scale, z, sx:0.08*scale, sy:0.7*scale, sz:0.08*scale, color:C(0x44403c), ry:0 });
+  row.boxes.push({ x, y: top + 0.78*scale, z, sx:0.55*scale, sy:0.08*scale, sz:0.18*scale, color:C(0x1c1917), ry:0 });
+  row.boxes.push({ x: x - 0.16*scale, y: top + 0.86*scale, z, sx:0.16*scale, sy:0.1*scale, sz:0.08*scale, color:C(0xa855f7), ry:-0.4 });
+  row.boxes.push({ x: x + 0.16*scale, y: top + 0.86*scale, z, sx:0.16*scale, sy:0.1*scale, sz:0.08*scale, color:C(0xa855f7), ry:0.4 });
+}
 function addTree(row, x, z, scale = 1){
+  if(isHalloweenWorld() && chance(0.78)){ addDeadTree(row, x, z, scale); return; }
   if(isSummerWorld() && chance(0.72)){ addPalm(row, x, z, scale); return; }
   const top = row.top;
   const trunkH = randf(0.30, 0.62) * scale;
@@ -118736,6 +119039,14 @@ function addBush(row, x, z, scale = 1){
 }
 function addScatter(row, x, z){
   const r = Math.random();
+  if(isHalloweenWorld()){
+    if(r < 0.34) addTree(row, x, z, randf(0.9, 1.25));
+    else if(r < 0.58) addPumpkin(row, x, z, randf(0.85, 1.25));
+    else if(r < 0.74) addTombstone(row, x, z, randf(0.85, 1.15));
+    else if(r < 0.88) addBatSign(row, x, z, randf(0.9, 1.15));
+    else addRock(row, x, z, randf(0.7, 1.05));
+    return;
+  }
   if(isSummerWorld()){
     if(r < 0.48) addTree(row, x, z, randf(0.85, 1.2));
     else if(r < 0.68) addUmbrella(row, x, z, randf(0.85, 1.1));
@@ -119686,29 +119997,57 @@ function endFever(){
 }
 
 let _feverId = '';
+function hauntFeverName(f){
+  if(!f || currentSeasonId() !== 'halloween') return f ? f.name : '';
+  const map = {
+    warm: 'Candle Flicker', fever: 'Haunt Fever', super: 'Super Haunt',
+    mega: 'Mega Haunt', ultra: 'Ultra Haunt', overdrive: 'Witch Overdrive',
+  };
+  return map[f.id] || f.name;
+}
+function hauntFeverTag(f){
+  if(!f || currentSeasonId() !== 'halloween') return f ? f.tag : '';
+  const map = {
+    warm: 'candle', fever: 'haunt', super: 'super haunt',
+    mega: 'mega haunt', ultra: 'ultra haunt', overdrive: 'witchdrive',
+  };
+  return map[f.id] || f.tag;
+}
 function enterFever(f, prevId){
   applyFeverState(f);
+  // Halloween exclusive: denser candy rain + luck bump while haunted.
+  if(f && currentSeasonId() === 'halloween'){
+    if(run.feverRain > 0) run.feverRain = Math.max(1, run.feverRain - 1);
+    else if(f.mult >= 3) run.feverRain = 5;
+    run.feverLuck = Math.min(0.45, (run.feverLuck || 0) + 0.06);
+    run.magnet = Math.max(run.magnet || 0, (f.magnet || 0) + 1);
+  }
   const first = !prevId;
   const upgrade = feverIndex(f.id) > feverIndex(prevId);
   if(!first && !upgrade){ hudMult(); return; }
 
-  const sub = f.hint;
-  badge(f.name + '!', sub);
+  const nm = hauntFeverName(f);
+  const sub = currentSeasonId() === 'halloween'
+    ? (f.mult > 1 ? 'candy coins pay ×' + f.mult : 'candles start to glow')
+    : f.hint;
+  badge(nm + '!', sub);
   Sfx.fever();
   // Higher tiers get a thicker buzz pattern.
   const rank = feverIndex(f.id);
   buzz(rank >= 4 ? [14, 35, 14, 35, 14, 50, 20] : rank >= 2 ? [12, 40, 12, 40, 18] : [10, 30, 10]);
-  flashScreen(f.flash);
-  burstConfetti(22 + rank * 8, f.colors);
+  flashScreen(currentSeasonId() === 'halloween' ? 'mega' : f.flash);
+  burstConfetti(22 + rank * 8, currentSeasonId() === 'halloween'
+    ? ['#f97316','#a855f7','#fdba74','#ffffff','#c084fc']
+    : f.colors);
   camKick(0.4 + rank * 0.12);
-  toast(f.name.toUpperCase(), player.x, player.y + 1.2, player.z, f.toastKind);
+  toast(nm.toUpperCase(), player.x, player.y + 1.2, player.z, f.toastKind);
   // A free coin burst on every new tier so the upgrade always pays.
   if(f.mult > 1){
-    const pay = f.mult;
+    const pay = f.mult + (currentSeasonId() === 'halloween' ? 1 : 0);
     addCoins(pay);
     run.coins += pay;
     flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 5));
-    toast(`+${pay} heat`, player.x, player.y + 1.45, player.z, 'big');
+    toast(`+${pay} ` + (currentSeasonId() === 'halloween' ? 'candy' : 'heat'), player.x, player.y + 1.45, player.z, 'big');
   }
   hudMult();
   hudStreak();
@@ -120315,7 +120654,8 @@ function hudStreak(){
   if(n < 3) return;
   const f = feverForStreak(n);
   if(f){
-    streakVal.textContent = f.tag + ' x' + n;
+    const tag = (typeof hauntFeverTag === 'function') ? hauntFeverTag(f) : f.tag;
+    streakVal.textContent = tag + ' x' + n;
     streakEl.classList.add(f.chip);
   } else {
     streakVal.textContent = 'x' + n;
@@ -121203,6 +121543,7 @@ const TITLES = [
   { id:'petlover', name:'Pet Person', hint:'Hatch a pet' },
   { id:'spinner', name:'High Roller', hint:'Spin the wheel 20 times' },
   { id:'journey', name:'Trailblazer', hint:'Clear the Journey track' },
+  { id:'haunted', name:'Haunted Hopper', hint:'Clear the Halloween Spirit Pass' },
   { id:'crosser', name:'Crosser', hint:'Finish Story Mode: The Endless Crossing' },
   { id:'ghosted', name:'Ghosted', hint:'Beat your ghost' },
   { id:'storm', name:'Storm Chaser', hint:'Survive a coin storm' },
@@ -121234,6 +121575,7 @@ function equipTitle(id){
 const JOURNEY_SEASON_MS = 4 * 864e5; // 4-day FOMO season (soft currency satire)
 const VIP_PRICE_FULL = 280;
 const VIP_PRICE_SALE = 180;
+const VIP_PRICE_WITCH = 150; // Halloween-exclusive witching sale
 const SKIP_COST_BASE = 35;
 const STAR_PACK_COST = 25;
 const STAR_PACK_AMOUNT = 8;
@@ -121326,7 +121668,59 @@ function buildSummerJourney(){
 }
 const JOURNEY_SUMMER = buildSummerJourney();
 
-const SEASON_ORDER = ['classic', 'summer'];
+/** Halloween Spirit Pass — denser exclusives + haunted map features. */
+function buildHalloweenJourney(){
+  const tiers = [];
+  for(let i = 1; i <= 40; i++){
+    let goal;
+    if(i <= 5) goal = 2 + i;
+    else if(i <= 15) goal = 4 + i * 2;
+    else if(i <= 25) goal = 28 + (i - 15) * 3;
+    else goal = 52 + (i - 25) * 5;
+
+    let free;
+    if(i % 10 === 0) free = { kind:'chest', pay:'bronze', label:'Candy sack' };
+    else if(i % 5 === 0) free = { kind:'coins', pay:12 + i, label:'+' + (12+i) + ' candy coins' };
+    else if(i % 3 === 0) free = { kind:'xp', pay:12 + i, label:(12+i) + ' spook XP' };
+    else free = { kind:'coins', pay:5 + Math.floor(i/2), label:'+' + (5+Math.floor(i/2)) + ' treats' };
+
+    let vip;
+    if(i === 40) vip = { kind:'title', pay:'haunted', label:'Haunted Hopper title', exclusive:true, jackpot:true, value:'×16' };
+    else if(i === 38) vip = { kind:'trail', pay:'ghost', label:'Ghost Mist trail', exclusive:true, jackpot:true, value:'×13' };
+    else if(i === 35) vip = { kind:'trail', pay:'candy', label:'Candy Corn trail', exclusive:true, jackpot:true, value:'×12' };
+    else if(i === 32) vip = { kind:'pet_egg', pay:1, label:'Spooky pet egg', exclusive:true, jackpot:true, value:'×12' };
+    else if(i === 30) vip = { kind:'trail', pay:'shadow', label:'Shadow trail', exclusive:true, jackpot:true, value:'×11' };
+    else if(i === 28) vip = { kind:'spin', pay:3, label:'+3 trick spins', exclusive:true, jackpot:true, value:'×10' };
+    else if(i === 25) vip = { kind:'chest', pay:'gold', label:'GOLD pumpkin chest', exclusive:true, jackpot:true, value:'×10' };
+    else if(i === 22) vip = { kind:'chest', pay:'gold', label:'GOLD candy chest', exclusive:true, jackpot:true, value:'×9' };
+    else if(i === 20) vip = { kind:'pet_egg', pay:1, label:'Witch pet egg', exclusive:true, jackpot:true, value:'×9' };
+    else if(i === 18) vip = { kind:'chest', pay:'silver', label:'Silver tomb chest', exclusive:true, jackpot:true, value:'×8' };
+    else if(i === 15) vip = { kind:'chest', pay:'gold', label:'GOLD treat chest', exclusive:true, jackpot:true, value:'×8' };
+    else if(i === 12) vip = { kind:'spin', pay:2, label:'+2 haunt spins', exclusive:true, value:'×7' };
+    else if(i === 10) vip = { kind:'chest', pay:'silver', label:'Silver candy chest', exclusive:true, jackpot:true, value:'×7' };
+    else if(i === 8) vip = { kind:'shield', pay:2, label:'+2 Ghost shields', exclusive:true, value:'×6' };
+    else if(i === 5) vip = { kind:'magnet', pay:2, label:'+2 Candy magnets', exclusive:true, jackpot:true, value:'×6' };
+    else if(i % 7 === 0) vip = { kind:'spin', pay:2, label:'+2 trick spins', value:'×5' };
+    else if(i % 5 === 0) vip = { kind:'chest', pay:'silver', label:'Haunted chest', exclusive:true, value:'×5' };
+    else if(i % 4 === 0) vip = { kind:'shield', pay:1, label:'Ghost shield', value:'×4' };
+    else if(i % 3 === 0) vip = { kind:'magnet', pay:1, label:'Candy magnet', value:'×4' };
+    else if(i % 2 === 0) vip = { kind:'coins', pay:40 + i * 6, label:'+' + (40+i*6) + ' candy coins', value:'×4' };
+    else vip = { kind:'xp', pay:55 + i * 4, label:(55+i*4) + ' spook XP', value:'×3' };
+
+    tiers.push({
+      step: i,
+      goal,
+      free,
+      vip,
+      jackpot: !!(vip && vip.jackpot),
+      name: i % 10 === 0 ? ('Haunt Gate ' + i) : ('Trick ' + i),
+    });
+  }
+  return tiers;
+}
+const JOURNEY_HALLOWEEN = buildHalloweenJourney();
+
+const SEASON_ORDER = ['classic', 'summer', 'halloween'];
 const SEASON_META = {
   classic: {
     id: 'classic', name: 'Journey Pass', short: 'CLASSIC',
@@ -121374,16 +121768,43 @@ const SEASON_META = {
       ],
     },
   },
+  halloween: {
+    id: 'halloween', name: 'Halloween Spirit Pass', short: 'HALLOWEEN',
+    theme: 'halloween', world: 'halloween',
+    drops: ['haunt rising','trick spin','gold pumpkin chest','candy corn trail','ghost shield','haunted hopper','witching sale','tomb chest','candy magnet','spooky egg','ghost mist trail','treat crate'],
+    feed: [
+      'beakboss cracked a GOLD pumpkin chest',
+      'nightowl unlocked Candy Corn trail',
+      'chick_fan put on the pumpkin head',
+      'pixelpeck hatched a spooky pet',
+      'vip_whale banked ghost shields',
+      'roadkill_rev claimed Haunted Hopper',
+    ],
+    news: {
+      tag: 'haunt drop',
+      headline: 'Halloween Haunt is live',
+      blurb: 'A whole haunted map, denser VIP exclusives, Trick-or-Treat crates, and a pumpkin-headed chicken holding your pass.',
+      features: [
+        { ico: 'MAP', title: 'Haunted Hollow world', body: 'Night sky, dead trees, pumpkins, and tombstones. Same hop rules — entirely new vibes under your feet.' },
+        { ico: 'PASS', title: 'Spirit Pass exclusives', body: 'More jackpots than Summer: Candy Corn trail, Ghost Mist, spooky pet eggs, pumpkin chests, and the Haunted Hopper title.' },
+        { ico: 'TREAT', title: 'Trick-or-Treat crates', body: 'Hourly drops become candy hauls — denser soft-loot odds, pumpkin chests, and a rare Haunted Hopper drip.' },
+        { ico: 'FEVER', title: 'Haunt Fever + candy rain', body: 'Streak heat renames to Haunt Fever with thicker candy rain, luck, and magnet range — exclusive to Halloween.' },
+        { ico: 'NIGHT', title: 'Haunt-only run events', body: 'Candy Rain, Haunt Night, Pumpkin Patch, and Witching Spark only roll while the season is live.' },
+        { ico: 'SALE', title: 'Witching sale', body: 'Pumpkin Pass dips lower than Summer VIP during the first 48 hours. Soft currency only — miss it and it vanishes.' },
+        { ico: 'VIP', title: 'Pumpkin-head VIP chicken', body: 'The animated chicken enticing VIP now wears a carved pumpkin. Tap it before the witching hour ends.' },
+      ],
+    },
+  },
 };
 
 let JOURNEY = JOURNEY_CLASSIC;
-const JOURNEY_BY_ID = { classic: JOURNEY_CLASSIC, summer: JOURNEY_SUMMER };
+const JOURNEY_BY_ID = { classic: JOURNEY_CLASSIC, summer: JOURNEY_SUMMER, halloween: JOURNEY_HALLOWEEN };
 
 function seasonMeta(id){
   return SEASON_META[id] || SEASON_META.classic;
 }
 function currentSeasonId(){
-  if(stats.adminSeasonForce === 'classic' || stats.adminSeasonForce === 'summer'){
+  if(stats.adminSeasonForce && SEASON_META[stats.adminSeasonForce]){
     return stats.adminSeasonForce;
   }
   return stats.seasonId || 'classic';
@@ -121405,7 +121826,8 @@ function applySeasonTheme(id){
   const sheet = $('journey');
   if(sheet){
     sheet.classList.toggle('season-summer', meta.theme === 'summer');
-    sheet.classList.toggle('season-classic', meta.theme !== 'summer');
+    sheet.classList.toggle('season-halloween', meta.theme === 'halloween');
+    sheet.classList.toggle('season-classic', meta.theme === 'classic' || (!meta.theme));
   }
   const title = $('j-title');
   if(title) title.textContent = meta.name;
@@ -121453,10 +121875,12 @@ function rotateToSeason(id, opts = {}){
   if(opts.announce !== false){
     badge('NEW SEASON!', meta.name);
     Sfx.prize();
-    flashScreen(meta.theme === 'summer' ? 'gold' : 'ultra');
-    burstConfetti(36, meta.theme === 'summer'
-      ? ['#fb923c','#67e8f9','#fde68a','#ffffff']
-      : ['#c084fc','#ffe07a','#ffffff']);
+    flashScreen(meta.theme === 'halloween' ? 'mega' : meta.theme === 'summer' ? 'gold' : 'ultra');
+    burstConfetti(36, meta.theme === 'halloween'
+      ? ['#f97316','#a855f7','#fdba74','#ffffff','#7c2d12']
+      : meta.theme === 'summer'
+        ? ['#fb923c','#67e8f9','#fde68a','#ffffff']
+        : ['#c084fc','#ffe07a','#ffffff']);
     markSeasonNewsUnread(meta.id);
     queueSeasonNewsOpen();
   }
@@ -121481,7 +121905,7 @@ function journeySeasonEnd(){
     save();
   }
   ensureSeasonApplied();
-  if(stats.adminSeasonForce === 'classic' || stats.adminSeasonForce === 'summer'){
+  if(stats.adminSeasonForce && SEASON_META[stats.adminSeasonForce]){
     const started = Number(stats.seasonStartedAt) || now;
     return started + JOURNEY_SEASON_MS;
   }
@@ -121519,7 +121943,10 @@ function vipPrice(){
   // Fake scarcity: sale for the first 48h of a season, or after any upsell tease.
   const age = Date.now() - (Number(stats.seasonStartedAt) || Date.now());
   const sale = age < 48 * 3600e3 || (stats.journeyUpsells|0) >= 1;
-  return sale ? VIP_PRICE_SALE : VIP_PRICE_FULL;
+  if(!sale) return VIP_PRICE_FULL;
+  // Halloween exclusive: deeper witching-hour discount.
+  if(currentSeasonId() === 'halloween') return VIP_PRICE_WITCH;
+  return VIP_PRICE_SALE;
 }
 function vipSaleActive(){
   return vipPrice() < VIP_PRICE_FULL;
@@ -121628,9 +122055,10 @@ function claimJourneyCell(idx, lane, opts = {}){
   stats.claimHeatAt = Date.now();
   stats.claimsTotal = (stats.claimsTotal|0) + 1;
   if((stats.claimHeat % 3) === 0){
-    const bonus = 5 + (stats.claimHeat|0);
+    const haunt = currentSeasonId() === 'halloween';
+    const bonus = (haunt ? 9 : 5) + (stats.claimHeat|0);
     addCoins(bonus);
-    badge('Heat bonus!', '+' + bonus + ' coins');
+    badge(haunt ? 'Haunt bonus!' : 'Heat bonus!', '+' + bonus + (haunt ? ' candy coins' : ' coins'));
   }
   const big = !!(rew && (rew.jackpot || rew.exclusive || lane === 'vip'));
   if(!opts.silent){
@@ -121894,15 +122322,22 @@ function updateJourneyChrome(){
   const fomo = $('j-fomo');
   if(fomo) fomo.classList.toggle('urgent', left < 24 * 3600e3);
   const summer = sid === 'summer';
+  const haunt = sid === 'halloween';
   const fomoLbl = fomo && fomo.querySelector('.row span:not(.clock)');
-  if(fomoLbl) fomoLbl.textContent = summer ? 'Tide turns in' : 'Season ends in';
+  if(fomoLbl){
+    fomoLbl.textContent = haunt ? 'Witching hour in' : summer ? 'Tide turns in' : 'Season ends in';
+  }
   const scare = $('j-scare');
   if(scare){
     let line = left < 24 * 3600e3
-      ? (summer ? 'FINAL HOURS · beach VIP loot washes away' : 'FINAL HOURS · claim VIP before loot resets')
+      ? (haunt ? 'FINAL HOURS · haunted VIP loot fades at dawn'
+        : summer ? 'FINAL HOURS · beach VIP loot washes away'
+        : 'FINAL HOURS · claim VIP before loot resets')
       : vipSaleActive()
-        ? ('FLASH SALE · VIP ' + vipPrice() + ' (was ' + VIP_PRICE_FULL + ')')
-        : (summer ? 'summer VIP loot vanishes with the tide' : 'unclaimed VIP loot vanishes with the season');
+        ? ((haunt ? 'WITCHING SALE · Pumpkin Pass ' : 'FLASH SALE · VIP ') + vipPrice() + ' (was ' + VIP_PRICE_FULL + ')')
+        : (haunt ? 'haunted exclusives vanish with the haunt'
+          : summer ? 'summer VIP loot vanishes with the tide'
+          : 'unclaimed VIP loot vanishes with the season');
     try{
       if(typeof FOMO_LABELS !== 'undefined' && FOMO_LABELS.length){
         const hit = FOMO_LABELS[Math.floor(Date.now() / 90000) % FOMO_LABELS.length];
@@ -121913,10 +122348,12 @@ function updateJourneyChrome(){
   }
   const social = $('j-social');
   if(social){
-    const base = (summer ? 18420 : 12847) + Math.floor((Date.now() % 3600000) / 4000);
-    social.textContent = base.toLocaleString() + (summer
-      ? ' hoppers surfing the VIP lane this summer'
-      : ' hoppers unlocked VIP this season');
+    const base = (haunt ? 22110 : summer ? 18420 : 12847) + Math.floor((Date.now() % 3600000) / 4000);
+    social.textContent = base.toLocaleString() + (haunt
+      ? ' hoppers wearing the pumpkin pass tonight'
+      : summer
+        ? ' hoppers surfing the VIP lane this summer'
+        : ' hoppers unlocked VIP this season');
   }
   // Illegal value meter — show soft-currency VIP loot sitting on the table.
   const missed = estimateVipMissedCoins();
@@ -121975,18 +122412,24 @@ function updateJourneyChrome(){
     badgeEl.textContent = stats.vipPass ? 'VIP' : 'FREE';
     badgeEl.classList.toggle('off', !stats.vipPass);
   }
-  if(title) title.textContent = stats.vipPass ? 'VIP Pass active' : 'VIP locked';
+  if(title){
+    title.textContent = stats.vipPass
+      ? (haunt ? 'Pumpkin Pass active' : 'VIP Pass active')
+      : (haunt ? 'Pumpkin Pass locked' : 'VIP locked');
+  }
   if(sub){
     sub.textContent = stats.vipPass
-      ? 'claim exclusive loot on every cleared tier'
+      ? (haunt ? 'claim haunted exclusives on every cleared tier' : 'claim exclusive loot on every cleared tier')
       : (vipSaleActive()
-        ? ('TODAY ONLY · ' + vipPrice() + ' coins (was ' + VIP_PRICE_FULL + ')')
-        : ('unlock juicier rewards · ' + vipPrice() + ' coins'));
+        ? ((haunt ? 'WITCHING HOUR · ' : 'TODAY ONLY · ') + vipPrice() + ' coins (was ' + VIP_PRICE_FULL + ')')
+        : (haunt ? ('haunt the VIP lane · ' + vipPrice() + ' coins') : ('unlock juicier rewards · ' + vipPrice() + ' coins')));
   }
   const buy = $('btn-buy-vip');
   if(buy){
     buy.disabled = !!stats.vipPass;
-    buy.textContent = stats.vipPass ? 'VIP owned' : ('Unlock VIP · ' + vipPrice());
+    buy.textContent = stats.vipPass
+      ? (haunt ? 'Pumpkin Pass owned' : 'VIP owned')
+      : (haunt ? ('Unlock Pumpkin Pass · ' + vipPrice()) : ('Unlock VIP · ' + vipPrice()));
   }
   const skip = $('btn-skip-tier');
   if(skip){
@@ -122081,9 +122524,13 @@ function updateJourneyMascot(){
   const mascot = $('j-mascot');
   if(!mascot) return;
   const owned = !!stats.vipPass;
-  const summer = currentSeasonId() === 'summer';
+  const sid = currentSeasonId();
+  const summer = sid === 'summer';
+  const haunt = sid === 'halloween';
   mascot.classList.toggle('owned', owned);
-  mascot.setAttribute('aria-label', owned ? 'VIP Pass owned' : 'Unlock VIP Pass');
+  mascot.setAttribute('aria-label', owned
+    ? (haunt ? 'Pumpkin Pass owned' : 'VIP Pass owned')
+    : (haunt ? 'Unlock Pumpkin Pass' : 'Unlock VIP Pass'));
   const k = $('j-mascot-k');
   const n = $('j-mascot-n');
   const h = $('j-mascot-h');
@@ -122091,24 +122538,34 @@ function updateJourneyMascot(){
   const tl = $('j-ticket-lbl');
   const ts = $('j-ticket-sub');
   if(owned){
-    if(k) k.textContent = summer ? 'shades secured' : 'VIP ticket claimed';
-    if(n) n.textContent = summer ? 'Chicken owns the beach VIP lane' : 'Chicken unlocked the good lane';
-    if(h) h.textContent = summer ? 'Claim tropical exclusives on every wave' : 'Claim exclusive loot on every cleared tier';
+    if(k) k.textContent = haunt ? 'pumpkin secured' : summer ? 'shades secured' : 'VIP ticket claimed';
+    if(n) n.textContent = haunt ? 'Chicken owns the haunted VIP lane'
+      : summer ? 'Chicken owns the beach VIP lane'
+      : 'Chicken unlocked the good lane';
+    if(h) h.textContent = haunt ? 'Claim spooky exclusives on every trick'
+      : summer ? 'Claim tropical exclusives on every wave'
+      : 'Claim exclusive loot on every cleared tier';
     if(cta) cta.textContent = 'Owned';
-    if(tl) tl.textContent = 'VIP';
-    if(ts) ts.textContent = summer ? 'surf' : 'owned';
+    if(tl) tl.textContent = haunt ? 'PASS' : 'VIP';
+    if(ts) ts.textContent = haunt ? 'haunt' : summer ? 'surf' : 'owned';
   } else {
     const price = vipPrice();
-    if(k) k.textContent = summer
-      ? (vipSaleActive() ? 'heatwave ticket' : 'summer VIP ticket')
-      : (vipSaleActive() ? 'flash sale ticket' : 'limited VIP ticket');
-    if(n) n.textContent = summer ? 'Shades on · pass in beak' : 'This chicken has your pass';
+    if(k) k.textContent = haunt
+      ? (vipSaleActive() ? 'witching ticket' : 'pumpkin VIP ticket')
+      : summer
+        ? (vipSaleActive() ? 'heatwave ticket' : 'summer VIP ticket')
+        : (vipSaleActive() ? 'flash sale ticket' : 'limited VIP ticket');
+    if(n) n.textContent = haunt ? 'Pumpkin head · pass in beak'
+      : summer ? 'Shades on · pass in beak'
+      : 'This chicken has your pass';
     if(h) h.textContent = vipSaleActive()
       ? ('Only ' + price + ' coins · was ' + VIP_PRICE_FULL)
-      : (summer ? ('Tap for beach VIP · ' + price + ' coins') : ('Tap to unlock · ' + price + ' coins'));
-    if(cta) cta.textContent = summer ? 'Get Summer VIP' : 'Get VIP';
-    if(tl) tl.textContent = 'VIP';
-    if(ts) ts.textContent = summer ? 'splash' : 'pass';
+      : (haunt ? ('Tap for Pumpkin Pass · ' + price + ' coins')
+        : summer ? ('Tap for beach VIP · ' + price + ' coins')
+        : ('Tap to unlock · ' + price + ' coins'));
+    if(cta) cta.textContent = haunt ? 'Get Pumpkin Pass' : summer ? 'Get Summer VIP' : 'Get VIP';
+    if(tl) tl.textContent = haunt ? 'PASS' : 'VIP';
+    if(ts) ts.textContent = haunt ? 'treat' : summer ? 'splash' : 'pass';
   }
 }
 
@@ -122706,6 +123163,13 @@ const RUN_EVENTS = [
   { id:'fever_spark', name:'Fever Spark', hint:'Instant Warm Up', weight:11, duration:12 },
   { id:'treasure', name:'Treasure Row', hint:'A chest waits ahead', weight:7, duration:12 },
 ];
+/** Halloween-exclusive run events — denser candy payouts, haunt-only. */
+const RUN_EVENTS_HALLOWEEN = [
+  { id:'candy_rain', name:'Candy Rain', hint:'Treats pour from the sky', weight:22, duration:14 },
+  { id:'haunt_night', name:'Haunt Night', hint:'Ghost shields bank · candy coins drip', weight:18, duration:14 },
+  { id:'pumpkin_patch', name:'Pumpkin Patch', hint:'A pumpkin chest waits ahead', weight:14, duration:12 },
+  { id:'witching_spark', name:'Witching Spark', hint:'Instant Haunt Fever', weight:16, duration:12 },
+];
 /** Event scheduler noise seed bucket 1. */
 function eventNoise1(t){ return Math.sin(t * 0.730 + 1) * Math.cos(t * 0.210); }
 /** Event scheduler noise seed bucket 2. */
@@ -122835,14 +123299,17 @@ function resetEvents(){
   hideEventBanner();
 }
 function pickEvent(){
+  const pool = currentSeasonId() === 'halloween'
+    ? RUN_EVENTS.concat(RUN_EVENTS_HALLOWEEN)
+    : RUN_EVENTS;
   let total = 0;
-  for(const e of RUN_EVENTS) total += e.weight;
+  for(const e of pool) total += e.weight;
   let roll = Math.random() * total;
-  for(const e of RUN_EVENTS){
+  for(const e of pool){
     roll -= e.weight;
     if(roll <= 0) return e;
   }
-  return RUN_EVENTS[0];
+  return pool[0];
 }
 function startEvent(ev){
   run.event = ev.id;
@@ -122851,15 +123318,22 @@ function startEvent(ev){
   showEventBanner(ev.name, ev.hint);
   badge("Event!", ev.name);
   Sfx.milestone();
-  flashScreen(ev.id === "coin_storm" || ev.id === "golden_road" ? "gold" : "mega");
-  burstConfetti(22, ["#ffc93c","#c084fc","#67e8f9","#ffffff"]);
+  flashScreen(ev.id === "coin_storm" || ev.id === "golden_road" || ev.id === "candy_rain" ? "gold" : "mega");
+  burstConfetti(22, currentSeasonId() === 'halloween'
+    ? ["#f97316","#a855f7","#fdba74","#ffffff"]
+    : ["#ffc93c","#c084fc","#67e8f9","#ffffff"]);
   camKick(0.4);
-  if(ev.id === "fever_spark" && (!run.feverId || feverIndex(run.feverId) < 0)){
-    run.streak = Math.max(run.streak, 5);
+  if((ev.id === "fever_spark" || ev.id === "witching_spark") && (!run.feverId || feverIndex(run.feverId) < 0)){
+    run.streak = Math.max(run.streak, ev.id === "witching_spark" ? 10 : 5);
     updateFeverTier();
   }
-  if(ev.id === "treasure"){
-    grantChest(chance(0.3) ? "silver" : "bronze", "treasure row");
+  if(ev.id === "treasure" || ev.id === "pumpkin_patch"){
+    grantChest(ev.id === "pumpkin_patch" ? (chance(0.4) ? "gold" : "silver") : (chance(0.3) ? "silver" : "bronze"),
+      ev.id === "pumpkin_patch" ? "pumpkin patch" : "treasure row");
+  }
+  if(ev.id === "haunt_night"){
+    stats.bankShield = (stats.bankShield|0) + 1;
+    badge('Haunt Night', '+1 ghost shield banked');
   }
   if(ev.id === "coin_storm") unlockTitle("storm");
   if(ev.id === "golden_road") unlockTitle("golden");
@@ -123661,29 +124135,32 @@ function crateReady(){
 function refreshHourlyCrate(){
   const el = $('hourlycrate');
   if(!el) return;
+  const haunt = currentSeasonId() === 'halloween';
   const ready = crateReady();
   el.classList.toggle('show', true);
+  el.classList.toggle('haunt', haunt);
   const n = $('crate-n');
   const h = $('crate-h');
   const k = $('crate-k');
   if(ready){
-    if(k) k.textContent = 'hourly drop · READY';
-    if(n) n.textContent = 'Crate ready';
-    if(h) h.textContent = 'tap to rip it open';
-    el.querySelector('.ico') && (el.querySelector('.ico').textContent = 'OPEN');
+    if(k) k.textContent = haunt ? 'trick-or-treat · READY' : 'hourly drop · READY';
+    if(n) n.textContent = haunt ? 'Treat crate ready' : 'Crate ready';
+    if(h) h.textContent = haunt ? 'tap for haunted soft loot' : 'tap to rip it open';
+    el.querySelector('.ico') && (el.querySelector('.ico').textContent = haunt ? 'TREAT' : 'OPEN');
   } else {
     const left = HOURLY_CRATE_MS - (Date.now() - (Number(stats.crateAt) || 0));
-    if(k) k.textContent = 'hourly drop';
-    if(n) n.textContent = 'Next crate in ' + formatHMS(left).replace(/^00:/, '');
-    if(h) h.textContent = 'come back · free soft loot';
+    if(k) k.textContent = haunt ? 'trick-or-treat' : 'hourly drop';
+    if(n) n.textContent = (haunt ? 'Next treat in ' : 'Next crate in ') + formatHMS(left).replace(/^00:/, '');
+    if(h) h.textContent = haunt ? 'candy odds · haunt exclusive' : 'come back · free soft loot';
     el.querySelector('.ico') && (el.querySelector('.ico').textContent = 'WAIT');
   }
   try{ refreshFeaturedDrop(); }catch(e){}
 }
 function openHourlyCrate(){
+  const haunt = currentSeasonId() === 'halloween';
   if(!crateReady()){
     const left = HOURLY_CRATE_MS - (Date.now() - (Number(stats.crateAt) || 0));
-    badge('Crate cooling', formatHMS(left).replace(/^00:/, '') + ' left');
+    badge(haunt ? 'Treat cooling' : 'Crate cooling', formatHMS(left).replace(/^00:/, '') + ' left');
     Sfx.bump();
     refreshHourlyCrate();
     return false;
@@ -123691,15 +124168,29 @@ function openHourlyCrate(){
   stats.crateAt = Date.now();
   const roll = Math.random();
   let label = '';
-  if(roll < 0.12){ grantChest('silver', 'Hourly crate'); label = 'Silver chest'; }
-  else if(roll < 0.28){ stats.spins = (stats.spins|0) + 1; label = '+1 spin'; }
-  else if(roll < 0.42){ stats.bankShield = (stats.bankShield|0) + 1; label = '+1 shield'; }
-  else if(roll < 0.55){ addJourneyStars(3); label = '+3 stars'; }
-  else { const c = 12 + Math.floor(Math.random() * 28); addCoins(c); label = '+' + c + ' coins'; }
-  badge('Hourly crate!', label);
+  if(haunt){
+    // Halloween exclusive: denser soft-loot table + rare title drip.
+    if(roll < 0.08 && (!stats.titles || !stats.titles.includes('haunted'))){
+      unlockTitle('haunted'); label = 'Haunted Hopper title';
+    } else if(roll < 0.22){ grantChest(chance(0.35) ? 'gold' : 'silver', 'Treat crate'); label = 'Pumpkin chest'; }
+    else if(roll < 0.38){ stats.spins = (stats.spins|0) + 2; label = '+2 trick spins'; }
+    else if(roll < 0.52){ stats.bankShield = (stats.bankShield|0) + 1; label = '+1 ghost shield'; }
+    else if(roll < 0.66){ stats.bankMagnet = (stats.bankMagnet|0) + 1; label = '+1 candy magnet'; }
+    else if(roll < 0.80){ addJourneyStars(5); label = '+5 haunt stars'; }
+    else { const c = 28 + Math.floor(Math.random() * 42); addCoins(c); label = '+' + c + ' candy coins'; }
+    badge('Treat crate!', label);
+    burstConfetti(28, ['#f97316','#a855f7','#fdba74','#ffffff']);
+  } else {
+    if(roll < 0.12){ grantChest('silver', 'Hourly crate'); label = 'Silver chest'; }
+    else if(roll < 0.28){ stats.spins = (stats.spins|0) + 1; label = '+1 spin'; }
+    else if(roll < 0.42){ stats.bankShield = (stats.bankShield|0) + 1; label = '+1 shield'; }
+    else if(roll < 0.55){ addJourneyStars(3); label = '+3 stars'; }
+    else { const c = 12 + Math.floor(Math.random() * 28); addCoins(c); label = '+' + c + ' coins'; }
+    badge('Hourly crate!', label);
+    burstConfetti(22, ['#fb923c','#ffe07a','#ffffff']);
+  }
   Sfx.prize();
   flashScreen('gold');
-  burstConfetti(22, ['#fb923c','#ffe07a','#ffffff']);
   save();
   refreshHourlyCrate();
   hudMeta();
@@ -124787,7 +125278,8 @@ function renderNews(){
   const sheet = $('news');
   if(sheet){
     sheet.classList.toggle('season-summer', meta.theme === 'summer');
-    sheet.classList.toggle('season-classic', meta.theme !== 'summer');
+    sheet.classList.toggle('season-halloween', meta.theme === 'halloween');
+    sheet.classList.toggle('season-classic', meta.theme === 'classic' || !meta.theme);
   }
   const set = (i, v) => { const el = $(i); if(el) el.textContent = v; };
   set('news-count', meta.short + ' · features');
@@ -124808,7 +125300,9 @@ function renderNews(){
   }
   const cta = $('news-cta');
   if(cta){
-    cta.textContent = meta.theme === 'summer' ? 'Ride the tide' : 'Open Journey';
+    cta.textContent = meta.theme === 'halloween' ? 'Haunt the night'
+      : meta.theme === 'summer' ? 'Ride the tide'
+      : 'Open Journey';
   }
 }
 function refreshNewsUi(){
@@ -125003,12 +125497,19 @@ function addictionOnProgress(){
     addCoins(pay); run.coins += pay;
     toast("midas +" + pay, player.x, player.y + 0.85, player.z, "big");
   }
-  if(run.event === "golden_road" || run.event === "coin_storm"){
-    if(chance(run.event === "coin_storm" ? 0.55 : 0.35)){
-      const pay = Math.max(1, run.coinMult||1);
+  if(run.event === "golden_road" || run.event === "coin_storm" || run.event === "candy_rain"){
+    const p = run.event === "candy_rain" ? 0.7 : run.event === "coin_storm" ? 0.55 : 0.35;
+    if(chance(p)){
+      const pay = Math.max(1, run.coinMult||1) + (run.event === "candy_rain" ? 1 : 0);
       addCoins(pay); run.coins += pay;
       flyCoins(player.x, player.y + 0.5, player.z, 1);
+      if(run.event === "candy_rain") toast("candy +" + pay, player.x, player.y + 0.85, player.z, "big");
     }
+  }
+  if(run.event === "haunt_night" && chance(0.45)){
+    const pay = Math.max(1, (run.coinMult||1) + 1);
+    addCoins(pay); run.coins += pay;
+    toast("haunt +" + pay, player.x, player.y + 0.9, player.z, "big");
   }
   if(run.event === "stampede" && chance(0.4)){
     const pay = Math.max(1, (run.coinMult||1) * 2);
@@ -125464,6 +125965,8 @@ const TRAILS = [
   { id:'ember', name:'Ember', cost:80, color:'#ff6a3c' },
   { id:'ice', name:'Ice', cost:80, color:'#67e8f9' },
   { id:'shadow', name:'Shadow', cost:100, color:'#2a2030' },
+  { id:'candy', name:'Candy Corn', cost:120, color:'#fb923c' },
+  { id:'ghost', name:'Ghost Mist', cost:120, color:'#e9d5ff' },
 ];
 /** Trail particle palette entry 1. */
 const TRAIL_PAL_1 = { h:3.6, s:61, l:46 };
@@ -127209,11 +127712,14 @@ function renderAdminPanel(){
   const forced = stats.adminSeasonForce || '';
   const left = formatSeasonClock(journeyMsLeft());
   if(st){
+    const worldLbl = isHalloweenWorld() ? 'haunted hollow'
+      : isSummerWorld() ? 'summer beach'
+      : 'classic roads';
     st.innerHTML =
       'live season · <b>' + meta.name + '</b><br>' +
       'force · <b>' + (forced || 'AUTO') + '</b><br>' +
       'clock · <b>' + left + '</b><br>' +
-      'world · <b>' + (isSummerWorld() ? 'summer beach' : 'classic roads') + '</b><br>' +
+      'world · <b>' + worldLbl + '</b><br>' +
       'pass tier · <b>' + (stats.journeyStep|0) + '</b> / ' + JOURNEY.length +
       ' · VIP · <b>' + (stats.vipPass ? 'yes' : 'no') + '</b>';
   }
@@ -127221,15 +127727,16 @@ function renderAdminPanel(){
     ['admin-auto', !forced],
     ['admin-classic', forced === 'classic'],
     ['admin-summer', forced === 'summer'],
+    ['admin-halloween', forced === 'halloween'],
   ]){
     const el = $(bid);
     if(el) el.classList.toggle('on', !!on);
   }
 }
 function adminForceSeason(mode){
-  // mode: '' | 'classic' | 'summer'
+  // mode: '' | 'classic' | 'summer' | 'halloween'
   stats.adminSeasonForce = mode || '';
-  if(mode === 'classic' || mode === 'summer'){
+  if(mode && SEASON_META[mode]){
     rotateToSeason(mode, { resetProgress: true, announce: true });
   } else {
     // Return to auto — keep current seasonId, clear force.
@@ -127239,8 +127746,14 @@ function adminForceSeason(mode){
     badge('Admin', 'auto season rotate');
     save();
   }
+  // Force a hard world rebuild so the haunted map shows without a refresh.
+  try{ refreshWorldForSeason(); }catch(e){}
+  try{ refreshHourlyCrate(); }catch(e){}
+  try{ refreshNewsUi(); }catch(e){}
   renderAdminPanel();
   if(state.panel === 'journey') renderJourney();
+  if(state.panel === 'news') renderNews();
+  if(state.panel === 'admin') renderAdminPanel();
 }
 function adminEndSeasonNow(){
   if(stats.adminSeasonForce){
@@ -127264,6 +127777,7 @@ function wireAdminButtons(){
     ['admin-auto', () => adminForceSeason('')],
     ['admin-classic', () => adminForceSeason('classic')],
     ['admin-summer', () => adminForceSeason('summer')],
+    ['admin-halloween', () => adminForceSeason('halloween')],
     ['admin-end-season', () => adminEndSeasonNow()],
     ['admin-reset-pass', () => adminResetPass()],
     ['admin-rebuild', () => { refreshWorldForSeason(); badge('Admin', 'map rebuilt'); renderAdminPanel(); }],
@@ -128400,45 +128914,49 @@ function tickPass(){
 
 
 /* --- boot ----------------------------------------------------------------- */
-load();
-equip(stats.char);
-checkAwards(true);          // credit anything a previous version already earned
-hudBest(); hudCoins(); hudScore();
-$('s-awards').textContent = awardsDone();
-dailyGift();
-ensureQuests();
-ensureDailyMissions();
-addictionOnBoot();
-ensureJourneyClaims();
-if(!stats.seasonId) stats.seasonId = 'classic';
-ensureSeasonApplied();
-journeySeasonEnd();
-startJourneyClock();
-showTip();
-updateBoostHud();
-pulseJourneyMenu();
-$('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
-$('btn-sound').classList.toggle('off', Sfx.muted);
-resize();
-applyWorldTheme(seasonMeta(currentSeasonId()).world);
-seedStart();
-resetPlayer();
-try{ rebuildStatic(); }catch(e){}
-show('start');
-refreshHourlyCrate();
-refreshMysteryDeal();
-refreshStreakVaultChip();
-refreshEchoNest();
-refreshSniperFeed();
-refreshChipBank();
-refreshNewsUi();
-refreshFeaturedDrop();
-applyChrome();
-if(stats.newsPending && newsUnread()){
-  queueSeasonNewsOpen();
-} else if(newsUnread() && !stats.newsSeenSeason){
-  // First boot on a season — soft unread badge only, no force-open.
-  refreshNewsUi();
+try{
+  load();
+  equip(stats.char);
+  checkAwards(true);          // credit anything a previous version already earned
+  hudBest(); hudCoins(); hudScore();
+  if($('s-awards')) $('s-awards').textContent = awardsDone();
+  dailyGift();
+  ensureQuests();
+  ensureDailyMissions();
+  addictionOnBoot();
+  ensureJourneyClaims();
+  if(!stats.seasonId) stats.seasonId = 'classic';
+  ensureSeasonApplied();
+  journeySeasonEnd();
+  startJourneyClock();
+  showTip();
+  updateBoostHud();
+  pulseJourneyMenu();
+  if($('btn-sound')){
+    $('btn-sound').textContent = Sfx.muted ? '✕' : '♪';
+    $('btn-sound').classList.toggle('off', Sfx.muted);
+  }
+  resize();
+  applyWorldTheme(seasonMeta(currentSeasonId()).world);
+  seedStart();
+  resetPlayer();
+  try{ rebuildStatic(); }catch(e){}
+  show('start');
+  refreshHourlyCrate();
+  refreshMysteryDeal();
+  refreshStreakVaultChip();
+  refreshEchoNest();
+  refreshSniperFeed();
+  refreshChipBank();
+  try{ refreshNewsUi(); refreshFeaturedDrop(); }catch(e){ console.warn(e); }
+  applyChrome();
+  try{
+    if(stats.newsPending && newsUnread()) queueSeasonNewsOpen();
+    else if(newsUnread() && !stats.newsSeenSeason) refreshNewsUi();
+  }catch(e){ console.warn(e); }
+}catch(err){
+  showBootFail(err);
+  throw err;
 }
 
 let last = performance.now();
@@ -128472,6 +128990,14 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 
+window.addEventListener('error', (ev) => {
+  try{
+    if(ev && ev.message && /WebGL|THREE|Renderer/i.test(String(ev.message))){
+      showBootFail(ev.error || ev.message);
+    }
+  }catch(e){}
+});
+
 /* A small handle for tweaking and driving the game from the console. */
 window.HOP = {
   CFG, state, stats, run, player, world, cam, camera, avatar, Sfx, THREE, scene, renderer,
@@ -128484,7 +129010,7 @@ window.HOP = {
   openHourlyCrate, buyMysteryDeal, cashStreakVault, cashStarVault,
   openEchoNest, acceptWager, doComebackRevive, detonateFuse, startClutchSalvage, tapClutch,
   rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
-  JOURNEY_CLASSIC, JOURNEY_SUMMER, SEASON_META,
+  JOURNEY_CLASSIC, JOURNEY_SUMMER, JOURNEY_HALLOWEEN, SEASON_META,
   STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
   refreshFeaturedDrop, parkLooprailInMore,
   renderNews, refreshNewsUi, newsUnread, markSeasonNewsSeen,
