@@ -94,7 +94,13 @@ html,body{
 }
 .btn:hover::after{animation:btnshine .7s ease;}
 .btn:hover{filter:brightness(1.05);transform:translateY(-1px);}
-.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--gold-dk);filter:brightness(.98);}
+.btn:active{transform:translateY(4px) scale(.985);box-shadow:0 2px 0 var(--gold-dk);filter:brightness(.98);}
+.btn.pop{animation:btnpop .42s cubic-bezier(.2,1.5,.3,1);}
+@keyframes btnpop{
+  0%{transform:scale(.92);}
+  55%{transform:scale(1.05);}
+  100%{transform:scale(1);}
+}
 .btn.ghost{
   background:rgba(255,253,246,.92);color:var(--ink);
   box-shadow:0 5px 0 rgba(18,52,80,.25), 0 10px 18px rgba(18,52,80,.18);
@@ -108,8 +114,9 @@ html,body{
   animation:sheetin .38s cubic-bezier(.2,1.15,.3,1) both;
 }
 @keyframes sheetin{
-  from{opacity:0;transform:translateY(18px) scale(.98);}
-  to{opacity:1;transform:translateY(0) scale(1);}
+  0%{opacity:0;transform:translateY(28px) scale(.94);}
+  60%{opacity:1;transform:translateY(-4px) scale(1.015);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
 }
 #title .one,#title .two{display:inline-block;}
 #start:not(.hidden) #title .one{animation:titlebob 2.8s ease-in-out infinite;}
@@ -2219,6 +2226,11 @@ kbd{
 #slimmeta .soft{opacity:.8;letter-spacing:.1em;font-size:.92em;}
 #xpbar.slim{width:min(72vw,260px);height:7px;margin:2px auto 0;}
 #banners{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:0;}
+#banners > :not(.hidden){animation:bannerpop .45s cubic-bezier(.2,1.4,.3,1) both;}
+@keyframes bannerpop{
+  0%{opacity:0;transform:translateY(-8px) scale(.92);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
 #start{
   gap:clamp(10px,2.2vh,18px);
   padding-top:calc(var(--safe-t) + 4vh);
@@ -2237,9 +2249,13 @@ kbd{
 #start #looprail > .featured.show,
 #start #looprail > .featured.soft{display:flex!important;}
 #start #looprail > .featured{
-  transform:scale(1.02);
-  box-shadow:0 6px 0 rgba(18,52,80,.28), 0 14px 28px rgba(18,52,80,.28);
-  animation:jmenupulse 1.35s ease-in-out infinite;
+  transform:scale(1.03);
+  box-shadow:0 6px 0 rgba(18,52,80,.28), 0 16px 32px rgba(18,52,80,.3);
+  animation:featuredpulse 1.3s ease-in-out infinite;
+}
+@keyframes featuredpulse{
+  0%,100%{transform:scale(1.02);}
+  50%{transform:scale(1.045);}
 }
 #btn-more-drops{
   border:0;background:transparent;color:#fff;opacity:.85;cursor:pointer;
@@ -2257,6 +2273,12 @@ kbd{
 #playdock #btn-play{
   width:min(92vw,360px);min-height:56px;font-size:clamp(18px,5.2vw,24px);
   border-radius:22px;
+  animation:playpulse 2.4s ease-in-out infinite;
+}
+#playdock #btn-play:active{animation:none;}
+@keyframes playpulse{
+  0%,100%{transform:translateY(0) scale(1); box-shadow:0 6px 0 var(--gold-dk), 0 14px 22px rgba(18,52,80,.28);}
+  50%{transform:translateY(-2px) scale(1.025); box-shadow:0 8px 0 var(--gold-dk), 0 18px 28px rgba(18,52,80,.32);}
 }
 #playdock .playhint{
   font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;opacity:.8;
@@ -2270,12 +2292,31 @@ kbd{
   min-width:0;max-width:none;width:100%;
   min-height:48px;padding:12px 6px;font-size:clamp(12px,3.2vw,14px);
   border-radius:16px;
+  transition:transform .14s cubic-bezier(.2,1.4,.3,1), box-shadow .14s ease, filter .14s ease;
+}
+#hotbar .btn.ghost:active, #hotbar2 .btn.ghost:active{
+  transform:translateY(3px) scale(.96);
+}
+#hotbar .btn.ghost.hot, #hotbar2 .btn.ghost.hot,
+#btn-news.hot, #btn-news2.hot{
+  background:linear-gradient(#fff7d1,#ffe07a)!important;
+  color:#3c2500!important;
+  animation:jmenupulse 1.25s ease-in-out infinite;
+  box-shadow:0 5px 0 rgba(18,52,80,.28), 0 12px 22px rgba(255,201,60,.35)!important;
 }
 .morebtn{
   width:min(92vw,400px)!important;min-height:46px!important;
   font-size:14px!important;letter-spacing:.14em;
   background:rgba(255,253,246,.78)!important;
+  position:relative;overflow:visible!important;
 }
+.morebtn.has-news::before{
+  content:"";position:absolute;top:10px;right:16px;width:10px;height:10px;z-index:2;
+  border-radius:50%;background:#ef4d4d;
+  box-shadow:0 0 0 3px rgba(239,77,77,.25);
+  animation:newsdot 1.1s ease-in-out infinite;
+}
+@keyframes newsdot{50%{transform:scale(1.2);opacity:.85;}}
 #tapcue, #tapcue2{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;opacity:.7;
   text-shadow:0 2px 0 rgba(18,52,80,.3);margin-top:2px;
@@ -2284,6 +2325,115 @@ kbd{
 #over > .card{max-width:min(92vw,400px);}
 #retrydock{width:min(92vw,400px);}
 #retrydock #btn-retry{width:100%;min-height:56px;font-size:clamp(18px,5vw,22px);}
+
+/* News sheet — season switch explainer */
+#news.sheet .body{display:flex;flex-direction:column;gap:12px;padding-bottom:18px;}
+#news-hero{
+  position:relative;overflow:hidden;
+  border-radius:22px;padding:18px 16px 16px;
+  background:
+    radial-gradient(120% 90% at 20% 0%, rgba(255,224,122,.55), transparent 55%),
+    linear-gradient(160deg,#1a3a58 0%, #0f2740 55%, #0a1c30 100%);
+  box-shadow:0 8px 0 rgba(18,52,80,.22);
+  color:#fff;
+}
+#news.season-summer #news-hero{
+  background:
+    radial-gradient(120% 90% at 80% 0%, rgba(103,232,249,.45), transparent 50%),
+    linear-gradient(160deg,#155e75 0%, #0e4a5c 45%, #123047 100%);
+}
+#news-hero .tag{
+  display:inline-block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:900;color:#3c2500;background:linear-gradient(#ffe07a,#ffc224);
+  border-radius:999px;padding:5px 10px;margin-bottom:10px;
+  box-shadow:0 3px 0 rgba(18,52,80,.25);
+  animation:btnpop .5s cubic-bezier(.2,1.5,.3,1) both;
+}
+#news-hero h3{
+  margin:0 0 6px;font-size:clamp(22px,6vw,28px);letter-spacing:.04em;
+  text-shadow:0 3px 0 rgba(0,0,0,.25);line-height:1.1;
+}
+#news-hero p{
+  margin:0;font-size:13px;line-height:1.4;opacity:.92;font-weight:700;
+  max-width:34ch;
+}
+#news-hero .shine{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.22) 50%,transparent 60%);
+  transform:translateX(-120%);
+  animation:btnshine 2.8s ease-in-out 0.4s infinite;
+}
+#news-features{display:flex;flex-direction:column;gap:8px;}
+.newsfeat{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(255,253,246,.92);border-radius:18px;padding:12px 12px;
+  box-shadow:0 4px 0 rgba(18,52,80,.18);
+  color:var(--ink);
+  animation:newsfeat 0.45s cubic-bezier(.2,1.35,.3,1) both;
+}
+.newsfeat:nth-child(1){animation-delay:.05s;}
+.newsfeat:nth-child(2){animation-delay:.12s;}
+.newsfeat:nth-child(3){animation-delay:.18s;}
+.newsfeat:nth-child(4){animation-delay:.24s;}
+@keyframes newsfeat{
+  from{opacity:0;transform:translateY(14px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.newsfeat .ico{
+  flex:0 0 auto;width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;letter-spacing:.08em;
+  background:linear-gradient(#ffe07a,#ffc224);color:#3c2500;
+  box-shadow:0 3px 0 rgba(18,52,80,.2);
+}
+#news.season-summer .newsfeat .ico{
+  background:linear-gradient(#67e8f9,#22d3ee);color:#0c4a6e;
+}
+.newsfeat .copy{min-width:0;flex:1;}
+.newsfeat .t{font-size:14px;font-weight:900;letter-spacing:.04em;margin:0 0 2px;}
+.newsfeat .b{font-size:12px;line-height:1.35;opacity:.78;margin:0;font-weight:700;}
+#news-cta{width:100%;min-height:52px;margin-top:4px;}
+#news-foot{
+  font-size:11px;letter-spacing:.04em;color:#fff;opacity:.75;line-height:1.4;
+  text-shadow:0 2px 0 rgba(18,52,80,.3);font-weight:700;margin:0 2px;
+}
+#newschip{
+  display:none;align-items:center;gap:12px;width:100%;
+  border:0;cursor:pointer;pointer-events:auto;
+  background:linear-gradient(135deg,#fff7d1,#ffe07a 55%,#ffc224);
+  color:#3c2500;border-radius:20px;padding:12px 14px;min-height:64px;
+  box-shadow:0 6px 0 rgba(18,52,80,.25), 0 14px 24px rgba(255,201,60,.28);
+  font-family:inherit;text-align:left;
+}
+#newschip.show{display:flex;}
+#newschip .ico{
+  flex:0 0 auto;width:48px;height:48px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;font-size:12px;font-weight:900;letter-spacing:.08em;
+  box-shadow:0 3px 0 rgba(18,52,80,.18);
+}
+#newschip .copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#newschip .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.75;font-weight:900;}
+#newschip .n{font-size:15px;font-weight:900;letter-spacing:.02em;}
+#newschip .h{font-size:11px;opacity:.7;font-weight:700;}
+#more .newsrow{
+  width:100%;
+}
+#more #btn-news-more{
+  width:100%;min-height:54px;justify-content:space-between;
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(#fff7d1,#ffe07a)!important;
+  color:#3c2500!important;
+}
+#more #btn-news-more .dot{
+  width:10px;height:10px;border-radius:50%;background:#ef4d4d;
+  box-shadow:0 0 0 3px rgba(239,77,77,.22);
+  animation:newsdot 1.1s ease-in-out infinite;
+}
+#more #btn-news-more:not(.hot) .dot{display:none;}
+#more #btn-spin-more{
+  width:100%;min-height:50px;
+}
 
 /* More sheet */
 #more.sheet .body{display:flex;flex-direction:column;gap:8px;}
@@ -2617,6 +2767,8 @@ kbd{
   #dopafuse .bar i,#wagerchip .ico,#echonest .ico,#clutch .mash,#btn-comeback.show,
   #j-mascot .shades,
   #start:not(.hidden) #title .one,#start:not(.hidden) #title .two,
+  #playdock #btn-play,#banners > :not(.hidden),.newsfeat,#news-hero .tag,#news-hero .shine,
+  #newschip.show,#hotbar .btn.ghost.hot,#hotbar2 .btn.ghost.hot,
   .screen.sheet:not(.hidden),#reveal::before,#hatch::before,
   #storycut .sc-chick,#storycut .sc-truck,#storycut .sc-log,#storycut .sc-sun,#storycut .sc-road::after,#btn-story.hot,#btn-story2.hot,#storychip .ico{animation:none!important;transition:none!important;}
 }
@@ -2734,6 +2886,14 @@ kbd{
           <span class="n" id="storychip-n">The Endless Crossing</span>
         </span>
       </button>
+      <button type="button" id="newschip" aria-label="Open season news">
+        <span class="ico">NEW</span>
+        <span class="copy">
+          <span class="k">season news</span>
+          <span class="n" id="newschip-n">What just dropped</span>
+          <span class="h" id="newschip-h">tap for the new features</span>
+        </span>
+      </button>
       <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
       <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
     </div>
@@ -2746,7 +2906,7 @@ kbd{
       <button id="btn-quests" class="btn ghost">Today</button>
       <button id="btn-journey" class="btn ghost">Journey</button>
       <button id="btn-story" class="btn ghost">Story</button>
-      <button id="btn-spin" class="btn ghost">Spin</button>
+      <button id="btn-news" class="btn ghost">News</button>
     </div>
     <button type="button" id="btn-more" class="btn ghost morebtn">More</button>
     <div id="gametip" class="sr-only">One more hop is always justified.</div>
@@ -2791,12 +2951,32 @@ kbd{
       <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-journey2" class="btn ghost">Journey</button>
       <button id="btn-story2" class="btn ghost">Story</button>
-      <button id="btn-spin2" class="btn ghost">Spin</button>
+      <button id="btn-news2" class="btn ghost">News</button>
     </div>
     <button type="button" id="btn-more2" class="btn ghost morebtn">More</button>
     <div id="tapcue2">or tap anywhere to hop again</div>
   </div>
 
+
+  <!-- ===================== NEWS (season switch features) ===================== -->
+  <div id="news" class="screen sheet hidden">
+    <div class="head">
+      <h2>News</h2>
+      <span class="count" id="news-count">season update</span>
+      <button class="close-btn" data-close="news" aria-label="Close">✕</button>
+    </div>
+    <div class="body">
+      <div id="news-hero">
+        <div class="shine" aria-hidden="true"></div>
+        <span class="tag" id="news-tag">season drop</span>
+        <h3 id="news-headline">New season</h3>
+        <p id="news-blurb">Fresh features just landed.</p>
+      </div>
+      <div id="news-features" aria-live="polite"></div>
+      <button type="button" id="news-cta" class="btn">Hop into it</button>
+      <p class="morenote" id="news-foot">Seasons rotate every few days — open News anytime a pass flips.</p>
+    </div>
+  </div>
 
   <!-- ===================== MORE (secondary menus + parked rewards) ===================== -->
   <div id="more" class="screen sheet hidden">
@@ -2806,7 +2986,17 @@ kbd{
       <button class="close-btn" data-close="more" aria-label="Close">✕</button>
     </div>
     <div class="body">
+      <div class="subhead">What&apos;s new</div>
+      <div class="newsrow">
+        <button id="btn-news-more" class="btn ghost" type="button">
+          <span>Season News</span>
+          <span class="dot" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="subhead">Play loops</div>
+      <div class="newsrow">
+        <button id="btn-spin" class="btn ghost" type="button">Lucky Spin</button>
+      </div>
       <div class="moregrid">
         <button id="btn-chars" class="btn ghost">Characters</button>
         <button id="btn-pets" class="btn ghost">Pets</button>
@@ -120025,7 +120215,7 @@ const streakEl = $('streak'), streakVal = streakEl.querySelector('.val');
 const screens = {
   start: $('start'), over: $('over'), pause: $('pause'),
   chars: $('chars'), awards: $('awards'), quests: $('quests'),
-  journey: $('journey'), story: $('story'), more: $('more'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
+  journey: $('journey'), story: $('story'), news: $('news'), more: $('more'), spin: $('spin'), pets: $('pets'), titles: $('titles'),
   weekly: $('weekly'), shop: $('shop'), bank: $('bank'), encyc: $('encyc'),
   admin: $('admin'),
 };
@@ -120390,6 +120580,7 @@ function closePanel(){
   show(back);
   applyChrome();
   $('s-awards').textContent = awardsDone();
+  refreshNewsUi();
   refreshFeaturedDrop();
 }
 
@@ -120724,7 +120915,8 @@ for(const [id, panel] of [
   ['btn-quests','quests'], ['btn-quests2','quests'],
   ['btn-journey','journey'], ['btn-journey2','journey'],
   ['btn-story','story'], ['btn-story2','story'],
-  ['btn-spin','spin'], ['btn-spin2','spin'],
+  ['btn-news','news'], ['btn-news2','news'], ['btn-news-more','news'],
+  ['btn-spin','spin'],
   ['btn-pets','pets'], ['btn-titles','titles'],
   ['btn-weekly','weekly'], ['btn-shop','shop'],
   ['btn-bank','bank'], ['btn-encyc','encyc'],
@@ -121145,6 +121337,17 @@ const SEASON_META = {
       'chick_fan opened a Silver chest',
       'roadkill_rev claimed Pet egg',
     ],
+    news: {
+      tag: 'season drop',
+      headline: 'Journey Pass is live',
+      blurb: 'A clean classic track — chase stars, crack chests, and bank soft-currency power-ups.',
+      features: [
+        { ico: 'PASS', title: '40-tier Journey track', body: 'Free lane + VIP lane. Stars unlock loot as you hop — always see the next reward.' },
+        { ico: 'LOOT', title: 'Chests, trails, pet eggs', body: 'Gold chests, rainbow trails, and pet eggs sit on the board so every session has a goal.' },
+        { ico: 'VIP', title: 'Flash VIP windows', body: 'Short soft-currency sales pop when the season heats up. Miss them and they vanish with the pass.' },
+        { ico: 'BANK', title: 'Shield & magnet bank', body: 'Stock saves between runs. Arm them before a sweaty hop for that one-more-try feeling.' },
+      ],
+    },
   },
   summer: {
     id: 'summer', name: 'Summer Splash Pass', short: 'SUMMER',
@@ -121157,6 +121360,17 @@ const SEASON_META = {
       'pixelpeck hatched a tropical pet',
       'vip_whale banked sunscreen shields',
     ],
+    news: {
+      tag: 'new season',
+      headline: 'Summer Splash just dropped',
+      blurb: 'Boardwalk vibes, hotter VIP loot, and a tide that turns every few days — here’s what changed.',
+      features: [
+        { ico: 'SURF', title: 'Splash world theme', body: 'Roads lean tropical. Same hop rules, fresher look — your brain knows the season flipped.' },
+        { ico: 'PASS', title: 'Summer Splash Pass', body: 'New reward labels and a sun-soaked track. Progress resets so everyone starts the chase together.' },
+        { ico: 'HEAT', title: 'Heatwave VIP sale', body: 'Limited soft-currency discounts while the tide is high. The scare copy is the timer — use it.' },
+        { ico: 'LOOT', title: 'Sunset trails & tropical eggs', body: 'Fresh cosmetics and pet eggs on the VIP lane. Claim early — unclaimed loot washes out with the season.' },
+      ],
+    },
   },
 };
 
@@ -121241,10 +121455,13 @@ function rotateToSeason(id, opts = {}){
     burstConfetti(36, meta.theme === 'summer'
       ? ['#fb923c','#67e8f9','#fde68a','#ffffff']
       : ['#c084fc','#ffe07a','#ffffff']);
+    markSeasonNewsUnread(meta.id);
+    queueSeasonNewsOpen();
   }
   save();
   if(state.panel === 'journey') renderJourney();
   if(state.panel === 'admin') renderAdminPanel();
+  refreshNewsUi();
   return meta.id;
 }
 function ensureSeasonApplied(){
@@ -124528,6 +124745,108 @@ function storyIsHot(){
     return storyChapterReady(ch) || !storyCutsceneSeen(ch.cutscene) || ((stats.storyChapter|0) === 0 && !storyCutsceneSeen('prologue'));
   }catch(e){ return false; }
 }
+function newsUnread(){
+  const id = currentSeasonId();
+  return !stats.newsSeenSeason || stats.newsSeenSeason !== id;
+}
+function markSeasonNewsUnread(id){
+  // Keep seen pointer on the previous season so the new one reads as unread.
+  if(stats.newsSeenSeason === id) stats.newsSeenSeason = '';
+  stats.newsPending = id || currentSeasonId();
+}
+function markSeasonNewsSeen(){
+  stats.newsSeenSeason = currentSeasonId();
+  stats.newsPending = '';
+  save();
+  refreshNewsUi();
+  refreshFeaturedDrop();
+}
+let _newsOpenTimer = null;
+function queueSeasonNewsOpen(){
+  if(_newsOpenTimer) clearTimeout(_newsOpenTimer);
+  _newsOpenTimer = setTimeout(() => {
+    _newsOpenTimer = null;
+    try{
+      if(state.mode === 'play' || state.mode === 'dying' || state.mode === 'paused') return;
+      if(state.panel && state.panel !== 'news' && state.panel !== 'more' && state.panel !== 'admin') return;
+      openPanel('news');
+    }catch(e){}
+  }, 700);
+}
+function renderNews(){
+  const id = currentSeasonId();
+  const meta = seasonMeta(id);
+  const news = meta.news || {
+    tag: 'season drop',
+    headline: meta.name,
+    blurb: 'A fresh season just rotated in.',
+    features: [],
+  };
+  const sheet = $('news');
+  if(sheet){
+    sheet.classList.toggle('season-summer', meta.theme === 'summer');
+    sheet.classList.toggle('season-classic', meta.theme !== 'summer');
+  }
+  const set = (i, v) => { const el = $(i); if(el) el.textContent = v; };
+  set('news-count', meta.short + ' · features');
+  set('news-tag', news.tag || 'season drop');
+  set('news-headline', news.headline || meta.name);
+  set('news-blurb', news.blurb || '');
+  set('newschip-n', news.headline || meta.name);
+  set('newschip-h', newsUnread() ? 'new features · tap to read' : 'season briefing');
+  const host = $('news-features');
+  if(host){
+    const feats = Array.isArray(news.features) ? news.features : [];
+    host.innerHTML = feats.map(f => (
+      '<div class="newsfeat">' +
+        '<div class="ico">' + (f.ico || 'NEW') + '</div>' +
+        '<div class="copy"><p class="t">' + (f.title || '') + '</p><p class="b">' + (f.body || '') + '</p></div>' +
+      '</div>'
+    )).join('');
+  }
+  const cta = $('news-cta');
+  if(cta){
+    cta.textContent = meta.theme === 'summer' ? 'Ride the tide' : 'Open Journey';
+  }
+}
+function refreshNewsUi(){
+  const unread = newsUnread();
+  for(const id of ['btn-news','btn-news2','btn-news-more']){
+    const el = $(id);
+    if(!el) continue;
+    el.classList.toggle('hot', unread);
+  }
+  for(const id of ['btn-more','btn-more2']){
+    const el = $(id);
+    if(el) el.classList.toggle('has-news', unread);
+  }
+  const chip = $('newschip');
+  if(chip){
+    chip.classList.toggle('show', unread);
+    const meta = seasonMeta(currentSeasonId());
+    const n = $('newschip-n');
+    if(n) n.textContent = (meta.news && meta.news.headline) || meta.name;
+  }
+  renderNews();
+}
+function wireNewsUi(){
+  const chip = $('newschip');
+  if(chip && !chip.dataset.wired){
+    chip.dataset.wired = '1';
+    chip.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); openPanel('news'); });
+  }
+  const cta = $('news-cta');
+  if(cta && !cta.dataset.wired){
+    cta.dataset.wired = '1';
+    cta.addEventListener('click', e => {
+      e.stopPropagation(); Sfx.click();
+      markSeasonNewsSeen();
+      openPanel('journey');
+    });
+  }
+}
+wireNewsUi();
+
 function refreshFeaturedDrop(){
   const rail = $('looprail');
   if(!rail) return;
@@ -124538,7 +124857,7 @@ function refreshFeaturedDrop(){
     }
     return;
   }
-  const ids = ['hourlycrate','echonest','storychip','mysterydeal','streakvaultchip','sniperfeed','chipbank'];
+  const ids = ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip','sniperfeed','chipbank'];
   for(const id of ids){
     const el = $(id);
     if(el){ el.classList.remove('featured','soft','parked'); }
@@ -124547,11 +124866,13 @@ function refreshFeaturedDrop(){
   let soft = false;
   const crate = $('hourlycrate');
   const nest = $('echonest');
+  const news = $('newschip');
   const story = $('storychip');
   const deal = $('mysterydeal');
   const vault = $('streakvaultchip');
   if(crate && crate.classList.contains('show') && crateIsReady()) pick = crate;
   else if(nest && nestIsReady()) pick = nest;
+  else if(news && news.classList.contains('show') && newsUnread()) pick = news;
   else if(story && story.classList.contains('show') && storyIsHot()) pick = story;
   else if(deal && deal.classList.contains('show')) pick = deal;
   else if(vault && vault.classList.contains('show')) pick = vault;
@@ -124567,7 +124888,7 @@ function refreshFeaturedDrop(){
     if(el) el.classList.add('parked');
   }
   let extras = 0;
-  for(const id of ['hourlycrate','echonest','storychip','mysterydeal','streakvaultchip']){
+  for(const id of ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip']){
     const el = $(id);
     if(!el || el === pick) continue;
     if(el.classList.contains('show')) extras++;
@@ -124852,6 +125173,8 @@ function addictionLoad(raw){
   stats.comebackChips = raw.comebackChips|0;
   stats.seasonId = raw.seasonId || 'classic';
   stats.adminSeasonForce = raw.adminSeasonForce || '';
+  stats.newsSeenSeason = raw.newsSeenSeason || '';
+  stats.newsPending = raw.newsPending || '';
   stats.storyChapter = raw.storyChapter|0;
   stats.storyObjs = (raw.storyObjs && typeof raw.storyObjs === 'object') ? raw.storyObjs : {};
   stats.storyDone = Array.isArray(raw.storyDone) ? raw.storyDone : [];
@@ -124889,6 +125212,8 @@ function addictionSaveFields(){
     nestAt: Number(stats.nestAt) || 0, comebackChips: stats.comebackChips|0,
     seasonId: stats.seasonId || 'classic',
     adminSeasonForce: stats.adminSeasonForce || '',
+    newsSeenSeason: stats.newsSeenSeason || '',
+    newsPending: stats.newsPending || '',
     storyChapter: stats.storyChapter|0,
     storyObjs: stats.storyObjs || {},
     storyDone: stats.storyDone || [],
@@ -126967,7 +127292,17 @@ function addictionOpenPanel(name){
       setTimeout(() => playStoryCutscene('prologue'), 280);
     }
   }
-  else if(name === "more"){ parkLooprailInMore(true); }
+  else if(name === "news"){
+    const fresh = newsUnread();
+    renderNews();
+    markSeasonNewsSeen();
+    if(fresh){
+      try{ buzz([10, 30, 10]); }catch(e){}
+      try{ burstConfetti(14, ['#ffe07a','#ffffff','#67e8f9']); }catch(e){}
+      try{ badge('SEASON NEWS', seasonMeta(currentSeasonId()).short); }catch(e){}
+    }
+  }
+  else if(name === "more"){ parkLooprailInMore(true); refreshNewsUi(); }
   else if(name === "spin") renderSpin();
   else if(name === "pets") renderPets();
   else if(name === "titles") renderTitles();
@@ -128087,7 +128422,15 @@ refreshStreakVaultChip();
 refreshEchoNest();
 refreshSniperFeed();
 refreshChipBank();
+refreshNewsUi();
+refreshFeaturedDrop();
 applyChrome();
+if(stats.newsPending && newsUnread()){
+  queueSeasonNewsOpen();
+} else if(newsUnread() && !stats.newsSeenSeason){
+  // First boot on a season — soft unread badge only, no force-open.
+  refreshNewsUi();
+}
 
 let last = performance.now();
 function frame(now){
