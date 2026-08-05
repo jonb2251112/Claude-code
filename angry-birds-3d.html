@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Angry Birds 3D</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a0a00;
+      font-family: 'Nunito', system-ui, sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #game-canvas.aiming { cursor: grabbing; }
+
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 18px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%);
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #ffe566 0%, #f5a623 100%);
+      border: 3px solid #8b4513;
+      border-radius: 16px;
+      padding: 8px 16px;
+      box-shadow: 0 4px 0 #5c2e0a, 0 6px 16px rgba(0,0,0,0.35);
+      color: #5c2e0a;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    #score-panel { min-width: 140px; text-align: center; }
+    #score-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+    #score-value { font-family: 'Fredoka One', cursive; font-size: 28px; line-height: 1.1; }
+
+    #birds-panel {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 8px 12px;
+    }
+
+    .bird-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ff6b5a, #c41e1e 70%);
+      border: 2px solid #5c1010;
+      position: relative;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2);
+      opacity: 0.35;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .bird-icon.ready { opacity: 1; transform: scale(1.05); }
+    .bird-icon.used { opacity: 0.2; filter: grayscale(1); }
+
+    #level-title {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(18px, 3vw, 28px);
+      color: #fff;
+      text-shadow:
+        0 2px 0 #8b4513,
+        0 4px 8px rgba(0,0,0,0.45);
+      white-space:nowrap;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      opacity: 1;
+      transition: opacity 0.6s;
+      backdrop-filter: blur(4px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    #hint.hidden { opacity: 0; pointer-events: none; }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,200,80,0.25), transparent 55%),
+        rgba(20, 8, 0, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    #overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: linear-gradient(180deg, #fff8e0 0%, #f5d78a 55%, #e8b84a 100%);
+      border: 5px solid #8b4513;
+      border-radius: 28px;
+      padding: 36px 44px 32px;
+      text-align: center;
+      box-shadow:
+        0 8px 0 #5c2e0a,
+        0 20px 50px rgba(0,0,0,0.45),
+        inset 0 2px 0 rgba(255,255,255,0.6);
+      max-width: 92vw;
+      width: 420px;
+      transform: scale(0.85);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #overlay.visible .modal { transform: scale(1); }
+
+    .modal h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(28px, 6vw, 42px);
+      color: #c41e1e;
+      text-shadow: 0 3px 0 #5c1010;
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+    .modal.fail h1 { color: #4a5568; text-shadow: 0 3px 0 #1a202c; }
+    .modal p {
+      color: #5c2e0a;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    #stars {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 8px 0 22px;
+      min-height: 56px;
+    }
+    .star {
+      font-size: 48px;
+      filter: grayscale(1) brightness(0.7);
+      transform: scale(0.7);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+    .star.lit {
+      filter: none;
+      transform: scale(1) rotate(-8deg);
+      color: transparent;
+      background: linear-gradient(180deg, #ffe566, #f5a623);
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 3px 0 #b45309);
+    }
+    .star.lit:nth-child(2) { transform: scale(1.15) rotate(0deg); }
+    .star.lit:nth-child(3) { transform: scale(1) rotate(8deg); }
+
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    button.game-btn {
+      pointer-events: auto;
+      font-family: 'Fredoka One', cursive;
+      font-size: 20px;
+      padding: 12px 28px;
+      border: 3px solid #5c2e0a;
+      border-radius: 16px;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(180deg, #7ed957 0%, #3a9e1e 100%);
+      box-shadow: 0 4px 0 #1f5c0a, 0 6px 12px rgba(0,0,0,0.25);
+      text-shadow: 0 2px 0 rgba(0,0,0,0.25);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button.game-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #1f5c0a, 0 8px 16px rgba(0,0,0,0.3); }
+    button.game-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1f5c0a; }
+    button.game-btn.secondary {
+      background: linear-gradient(180deg, #ff8a65 0%, #d84315 100%);
+      box-shadow: 0 4px 0 #8b2500, 0 6px 12px rgba(0,0,0,0.25);
+    }
+    button.game-btn.secondary:hover { box-shadow: 0 6px 0 #8b2500, 0 8px 16px rgba(0,0,0,0.3); }
+
+    #title-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, #5ec8d8 0%, #87ceeb 35%, #a8e6a0 70%, #6bbf4a 100%);
+      overflow: hidden;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    #title-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 0 8%, transparent 9%),
+        radial-gradient(circle at 70% 75%, rgba(255,255,255,0.12) 0 12%, transparent 13%),
+        radial-gradient(circle at 45% 85%, rgba(255,255,255,0.1) 0 6%, transparent 7%);
+      pointer-events: none;
+    }
+    #title-screen.hidden { display: none; }
+
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(42px, 10vw, 80px);
+      color: #c41e1e;
+      text-shadow:
+        0 4px 0 #5c1010,
+        0 8px 0 #3a0a0a,
+        0 12px 24px rgba(0,0,0,0.35);
+      letter-spacing: 2px;
+      line-height: 0.95;
+      text-align: center;
+      z-index: 1;
+      animation: bounce-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .logo span {
+      display: block;
+      font-size: 0.45em;
+      color: #f5a623;
+      text-shadow:
+        0 3px 0 #8b4513,
+        0 6px 12px rgba(0,0,0,0.3);
+      letter-spacing: 6px;
+      margin-top: 4px;
+    }
+    .logo-sub {
+      margin-top: 12px;
+      color: #5c2e0a;
+      font-weight: 900;
+      font-size: 18px;
+      z-index: 1;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    }
+    #play-btn {
+      margin-top: 36px;
+      font-size: 28px;
+      padding: 16px 48px;
+      z-index: 1;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes bounce-in {
+      from { transform: scale(0) rotate(-12deg); opacity: 0; }
+      to { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    #floating-score {
+      position: fixed;
+      pointer-events: none;
+      z-index: 15;
+      font-family: 'Fredoka One', cursive;
+      font-size: 28px;
+      color: #ffe566;
+      text-shadow: 0 2px 0 #8b4513, 0 4px 8px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: none;
+    }
+
+    #power-bar-wrap {
+      position: absolute;
+      bottom: 80px;
+      left: 24px;
+      width: 18px;
+      height: 120px;
+      background: rgba(0,0,0,0.35);
+      border: 3px solid #8b4513;
+      border-radius: 10px;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #power-bar-wrap.visible { opacity: 1; }
+    #power-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      background: linear-gradient(0deg, #c41e1e, #f5a623, #7ed957);
+      border-radius: 6px;
+      transition: height 0.05s linear;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <div id="title-screen">
+    <div class="logo">ANGRY BIRDS<span>3D CLASSIC</span></div>
+    <p class="logo-sub">Pull back · Aim · Launch!</p>
+    <button class="game-btn" id="play-btn">PLAY!</button>
+  </div>
+
+  <div id="hud">
+    <div id="top-bar">
+      <div class="panel" id="score-panel">
+        <div id="score-label">Score</div>
+        <div id="score-value">0</div>
+      </div>
+      <div id="level-title">Poached Eggs — 1-1</div>
+      <div class="panel" id="birds-panel"></div>
+    </div>
+    <div id="hint">Drag the bird back to aim, release to launch! (or ←↑ + Space)</div>
+    <div id="power-bar-wrap"><div id="power-bar"></div></div>
+  </div>
+
+  <div id="floating-score"></div>
+
+  <div id="overlay">
+    <div class="modal" id="result-modal">
+      <h1 id="result-title">Level Cleared!</h1>
+      <p id="result-sub">Great shot!</p>
+      <div id="stars">
+        <div class="star">★</div>
+        <div class="star">★</div>
+        <div class="star">★</div>
+      </div>
+      <div class="btn-row">
+        <button class="game-btn secondary" id="retry-btn">Retry</button>
+        <button class="game-btn" id="next-btn">Next Level</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
+
+/* ============================================================
+   ANGRY BIRDS 3D — Classic Style
+   ============================================================ */
+
+const canvas = document.getElementById('game-canvas');
+const scoreEl = document.getElementById('score-value');
+const birdsPanel = document.getElementById('birds-panel');
+const hintEl = document.getElementById('hint');
+const overlay = document.getElementById('overlay');
+const resultModal = document.getElementById('result-modal');
+const resultTitle = document.getElementById('result-title');
+const resultSub = document.getElementById('result-sub');
+const nextBtn = document.getElementById('next-btn');
+const retryBtn = document.getElementById('retry-btn');
+const titleScreen = document.getElementById('title-screen');
+const playBtn = document.getElementById('play-btn');
+const levelTitle = document.getElementById('level-title');
+const powerWrap = document.getElementById('power-bar-wrap');
+const powerBar = document.getElementById('power-bar');
+const floatingScore = document.getElementById('floating-score');
+const starEls = [...document.querySelectorAll('#stars .star')];
+
+/* ---------- Renderer / Scene ---------- */
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x87ceeb, 40, 95);
+
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
+// Classic side-view: slingshot left, fortress right — both in frame
+camera.position.set(-0.8, 4.6, 13.2);
+camera.lookAt(0.8, 2.0, 0);
+
+/* ---------- Lighting ---------- */
+const hemi = new THREE.HemisphereLight(0xb1e1ff, 0x6bbf4a, 0.7);
+scene.add(hemi);
+
+const sun = new THREE.DirectionalLight(0xfff2d6, 1.35);
+sun.position.set(-20, 35, 20);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 90;
+sun.shadow.camera.left = -40;
+sun.shadow.camera.right = 40;
+sun.shadow.camera.top = 40;
+sun.shadow.camera.bottom = -40;
+sun.shadow.bias = -0.0003;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xa0d8ff, 0.35);
+fill.position.set(15, 10, -10);
+scene.add(fill);
+
+/* ---------- Physics World ---------- */
+const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -22, 0) });
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
+world.defaultContactMaterial.friction = 0.45;
+world.defaultContactMaterial.restitution = 0.15;
+
+const materials = {
+  bird: new CANNON.Material('bird'),
+  wood: new CANNON.Material('wood'),
+  glass: new CANNON.Material('glass'),
+  stone: new CANNON.Material('stone'),
+  pig: new CANNON.Material('pig'),
+  ground: new CANNON.Material('ground'),
+};
+
+function addCM(a, b, friction, restitution) {
+  world.addContactMaterial(new CANNON.ContactMaterial(a, b, { friction, restitution }));
+}
+addCM(materials.bird, materials.wood, 0.35, 0.2);
+addCM(materials.bird, materials.glass, 0.2, 0.25);
+addCM(materials.bird, materials.stone, 0.4, 0.1);
+addCM(materials.bird, materials.pig, 0.3, 0.2);
+addCM(materials.bird, materials.ground, 0.5, 0.15);
+addCM(materials.wood, materials.wood, 0.4, 0.1);
+addCM(materials.wood, materials.ground, 0.55, 0.05);
+addCM(materials.glass, materials.ground, 0.3, 0.1);
+addCM(materials.stone, materials.ground, 0.6, 0.05);
+addCM(materials.pig, materials.ground, 0.5, 0.2);
+addCM(materials.wood, materials.pig, 0.35, 0.15);
+addCM(materials.stone, materials.pig, 0.4, 0.1);
+addCM(materials.glass, materials.pig, 0.25, 0.2);
+
+/* ---------- Game State ---------- */
+const SLING_ORIGIN = new THREE.Vector3(-6.5, 2.05, 0);
+const MAX_PULL = 3.0;
+const LAUNCH_POWER = 15.5;
+const DRAG_PIXELS_FOR_MAX = 110; // pixels of drag ≈ full power
+
+let score = 0;
+let levelIndex = 0;
+let birdsLeft = 0;
+let currentBird = null;
+let aiming = false;
+let launched = false;
+let dragMoved = false;
+let aimStartX = 0;
+let aimStartY = 0;
+let settledTimer = 0;
+let waitingSettle = false;
+let gameActive = false;
+let levelComplete = false;
+let pullOffset = new THREE.Vector3();
+let trajectoryLine = null;
+let particles = [];
+let entities = []; // { mesh, body, type, hp, broken }
+let pigsAlive = 0;
+let hintShown = true;
+let cameraBase = new THREE.Vector3(-0.8, 4.6, 13.2);
+let cameraLook = new THREE.Vector3(0.8, 2.0, 0);
+let camShake = 0;
+let levelReady = false;
+let levelAge = 0;
+let shotsFired = 0;
+
+/* ---------- Materials (visual) ---------- */
+const matWood = new THREE.MeshStandardMaterial({
+  color: 0xc4843a, roughness: 0.85, metalness: 0.05,
+});
+const matWoodDark = new THREE.MeshStandardMaterial({
+  color: 0x8b5a2b, roughness: 0.9, metalness: 0.05,
+});
+const matGlass = new THREE.MeshStandardMaterial({
+  color: 0x7ec8e8, roughness: 0.15, metalness: 0.1,
+  transparent: true, opacity: 0.55, side: THREE.DoubleSide,
+});
+const matStone = new THREE.MeshStandardMaterial({
+  color: 0x8a8f98, roughness: 0.95, metalness: 0.15,
+});
+const matGrass = new THREE.MeshStandardMaterial({
+  color: 0x5cb83a, roughness: 0.95, metalness: 0,
+});
+const matDirt = new THREE.MeshStandardMaterial({
+  color: 0x8b6914, roughness: 1, metalness: 0,
+});
+const matSling = new THREE.MeshStandardMaterial({
+  color: 0x6b3a1f, roughness: 0.8, metalness: 0.05,
+});
+
+/* ---------- Environment ---------- */
+function buildSky() {
+  const skyGeo = new THREE.SphereGeometry(100, 32, 16);
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: {
+      topColor: { value: new THREE.Color(0x4eb8d0) },
+      midColor: { value: new THREE.Color(0x87ceeb) },
+      botColor: { value: new THREE.Color(0xc8eef5) },
+    },
+    vertexShader: `
+      varying vec3 vWorldPos;
+      void main() {
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorldPos = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 topColor;
+      uniform vec3 midColor;
+      uniform vec3 botColor;
+      varying vec3 vWorldPos;
+      void main() {
+        float h = normalize(vWorldPos).y;
+        vec3 col = mix(botColor, midColor, smoothstep(-0.2, 0.25, h));
+        col = mix(col, topColor, smoothstep(0.2, 0.85, h));
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `,
+  });
+  scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  // Clouds
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 1, transparent: true, opacity: 0.9,
+  });
+  for (let i = 0; i < 10; i++) {
+    const g = new THREE.Group();
+    const sizes = [2.5, 1.8, 2.0, 1.4];
+    sizes.forEach((s, j) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(s, 12, 10), cloudMat);
+      m.position.set((j - 1.5) * 1.4, Math.sin(j) * 0.4, (j % 2) * 0.6);
+      m.scale.y = 0.55;
+      g.add(m);
+    });
+    g.position.set(-30 + i * 12 + Math.random() * 4, 14 + Math.random() * 8, -25 - Math.random() * 20);
+    g.scale.setScalar(1.2 + Math.random());
+    scene.add(g);
+  }
+
+  // Distant hills
+  const hillMat = new THREE.MeshStandardMaterial({ color: 0x4a9e32, roughness: 1 });
+  for (let i = 0; i < 8; i++) {
+    const hill = new THREE.Mesh(
+      new THREE.SphereGeometry(8 + Math.random() * 6, 16, 12),
+      hillMat
+    );
+    hill.scale.y = 0.35;
+    hill.position.set(-20 + i * 14, -2, -30 - Math.random() * 10);
+    scene.add(hill);
+  }
+}
+
+function buildGround() {
+  // Visual ground strips
+  const groundGroup = new THREE.Group();
+
+  const grass = new THREE.Mesh(new THREE.BoxGeometry(120, 0.6, 40), matGrass);
+  grass.position.set(10, -0.3, 0);
+  grass.receiveShadow = true;
+  groundGroup.add(grass);
+
+  // Dirt edge
+  const dirt = new THREE.Mesh(new THREE.BoxGeometry(120, 1.2, 40), matDirt);
+  dirt.position.set(10, -1.2, 0);
+  dirt.receiveShadow = true;
+  groundGroup.add(dirt);
+
+  // Grass tufts
+  const tuftMat = new THREE.MeshStandardMaterial({ color: 0x3d9a28, roughness: 0.9 });
+  for (let i = 0; i < 40; i++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 5), tuftMat);
+    t.position.set(-15 + Math.random() * 55, 0.15, -8 + Math.random() * 16);
+    t.rotation.y = Math.random() * Math.PI;
+    groundGroup.add(t);
+  }
+
+  // Wooden fence posts near slingshot
+  for (let i = 0; i < 5; i++) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 1.2, 8), matSling);
+    post.position.set(-14 + i * 0.8, 0.5, -6);
+    post.castShadow = true;
+    groundGroup.add(post);
+  }
+
+  scene.add(groundGroup);
+
+  // Physics ground
+  const groundBody = new CANNON.Body({
+    type: CANNON.Body.STATIC,
+    shape: new CANNON.Box(new CANNON.Vec3(60, 0.5, 20)),
+    material: materials.ground,
+  });
+  groundBody.position.set(10, -0.5, 0);
+  world.addBody(groundBody);
+
+  // Invisible side walls to keep things on stage
+  [[0, 0, 12], [0, 0, -12]].forEach(([x, y, z]) => {
+    const wall = new CANNON.Body({
+      type: CANNON.Body.STATIC,
+      shape: new CANNON.Box(new CANNON.Vec3(60, 20, 0.5)),
+    });
+    wall.position.set(10, 10, z);
+    world.addBody(wall);
+  });
+}
+
+function buildSlingshot() {
+  const group = new THREE.Group();
+
+  // Classic Y-shaped wooden slingshot — larger & clearer in side view
+  const postMat = matSling;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 2.2, 10), postMat);
+  base.position.set(0, 1.1, 0);
+  base.castShadow = true;
+  group.add(base);
+
+  // Forks open in Z so the Y reads clearly from the side camera
+  const left = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 1.9, 10), postMat);
+  left.position.set(0.05, 2.55, -0.72);
+  left.rotation.x = 0.55;
+  left.castShadow = true;
+  group.add(left);
+
+  const right = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 1.9, 10), postMat);
+  right.position.set(0.05, 2.55, 0.72);
+  right.rotation.x = -0.55;
+  right.castShadow = true;
+  group.add(right);
+
+  // Knobs on fork tips
+  [ -0.95, 0.95 ].forEach(z => {
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), matWoodDark);
+    knob.position.set(0.08, 3.35, z);
+    group.add(knob);
+  });
+
+  const brace = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 1.1), matWoodDark);
+  brace.position.set(0, 1.95, 0);
+  group.add(brace);
+
+  // Ground stake
+  const stake = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.25, 0.5), matWoodDark);
+  stake.position.set(0, 0.12, 0);
+  group.add(stake);
+
+  group.position.set(SLING_ORIGIN.x, 0, SLING_ORIGIN.z);
+  scene.add(group);
+
+  const bandMat = new THREE.MeshStandardMaterial({
+    color: 0x2b1810, roughness: 0.85, metalness: 0.05,
+  });
+  // Thick rubber-band tubes (Line linewidth is ignored by most GPUs)
+  const bandL = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1, 6), bandMat);
+  const bandR = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 1, 6), bandMat);
+  scene.add(bandL, bandR);
+
+  const pouch = new THREE.Mesh(
+    new THREE.SphereGeometry(0.22, 10, 8),
+    new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 })
+  );
+  pouch.scale.set(1.1, 0.55, 1.3);
+  scene.add(pouch);
+
+  return {
+    leftFork: new THREE.Vector3(SLING_ORIGIN.x + 0.08, 3.35, -0.95),
+    rightFork: new THREE.Vector3(SLING_ORIGIN.x + 0.08, 3.35, 0.95),
+    bandL, bandR, pouch, group,
+  };
+}
+
+const sling = buildSlingshot();
+
+function placeBand(mesh, from, to) {
+  const mid = from.clone().add(to).multiplyScalar(0.5);
+  const dir = to.clone().sub(from);
+  const len = Math.max(dir.length(), 0.05);
+  mesh.position.copy(mid);
+  mesh.scale.set(1, len, 1);
+  mesh.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    dir.clone().normalize()
+  );
+}
+
+function updateBands(birdPos) {
+  const pos = birdPos || SLING_ORIGIN;
+  placeBand(sling.bandL, sling.leftFork, pos);
+  placeBand(sling.bandR, sling.rightFork, pos);
+  sling.pouch.position.copy(pos);
+  const showPouch = !launched || (currentBird && !currentBird.flying);
+  sling.pouch.visible = showPouch;
+  sling.bandL.visible = showPouch;
+  sling.bandR.visible = showPouch;
+}
+
+/* ---------- Bird Factory ---------- */
+function createBirdMesh() {
+  const g = new THREE.Group();
+
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0xe53935, roughness: 0.5, metalness: 0.05,
+  });
+  const bellyMat = new THREE.MeshStandardMaterial({
+    color: 0xfff0d4, roughness: 0.65, metalness: 0,
+  });
+  const beakMat = new THREE.MeshStandardMaterial({
+    color: 0xffb300, roughness: 0.4, metalness: 0.1,
+  });
+  const browMat = new THREE.MeshStandardMaterial({
+    color: 0x1a0505, roughness: 0.8,
+  });
+  const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+  const pupilMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
+  const crestMat = new THREE.MeshStandardMaterial({ color: 0xb71c1c, roughness: 0.55 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 18), bodyMat);
+  body.castShadow = true;
+  body.scale.set(1.05, 1, 1.1);
+  g.add(body);
+
+  const belly = new THREE.Mesh(new THREE.SphereGeometry(0.38, 16, 12), bellyMat);
+  belly.position.set(0.14, -0.16, 0);
+  belly.scale.set(0.95, 0.9, 1.15);
+  g.add(belly);
+
+  // Big classic angry eyes (slightly toward +Z so side camera reads the face)
+  [[0.32, 0.16, 0.28], [0.32, 0.16, -0.18]].forEach(([x, y, z], i) => {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 12), eyeWhite);
+    eye.position.set(x, y, z);
+    g.add(eye);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), pupilMat);
+    pupil.position.set(x + 0.09, y + 0.02, z + (i === 0 ? 0.02 : -0.02));
+    g.add(pupil);
+  });
+
+  // Thick angry brows
+  const browL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.1), browMat);
+  browL.position.set(0.36, 0.34, 0.28);
+  browL.rotation.z = -0.45;
+  browL.rotation.y = 0.15;
+  g.add(browL);
+  const browR = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.1), browMat);
+  browR.position.set(0.36, 0.34, -0.18);
+  browR.rotation.z = -0.45;
+  browR.rotation.y = -0.15;
+  g.add(browR);
+
+  // Beak
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.34, 8), beakMat);
+  beak.rotation.z = -Math.PI / 2;
+  beak.position.set(0.62, 0.0, 0.05);
+  g.add(beak);
+  const beakBot = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.2, 8), beakMat);
+  beakBot.rotation.z = -Math.PI / 2;
+  beakBot.position.set(0.56, -0.12, 0.05);
+  g.add(beakBot);
+
+  // Crest feathers (classic Red)
+  for (let i = 0; i < 3; i++) {
+    const f = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.36, 5), crestMat);
+    f.position.set(-0.02 + i * 0.06, 0.58, 0.05 + (i - 1) * 0.1);
+    f.rotation.z = 0.35 - i * 0.18;
+    f.castShadow = true;
+    g.add(f);
+  }
+
+  // Tail feathers
+  for (let i = 0; i < 3; i++) {
+    const t = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.4, 4), crestMat);
+    t.position.set(-0.55, 0.05, (i - 1) * 0.12);
+    t.rotation.z = Math.PI / 2 + 0.25;
+    t.rotation.y = (i - 1) * 0.3;
+    g.add(t);
+  }
+
+  // Face the flight direction (+X), slight tilt toward camera
+  g.rotation.y = -0.15;
+  g.scale.setScalar(1.15);
+  return g;
+}
+
+function spawnBirdOnSling() {
+  if (birdsLeft <= 0) return null;
+
+  const mesh = createBirdMesh();
+  mesh.position.copy(SLING_ORIGIN);
+  mesh.rotation.set(0, -0.15, 0);
+  scene.add(mesh);
+
+  const body = new CANNON.Body({
+    mass: 1.5,
+    shape: new CANNON.Sphere(0.5),
+    material: materials.bird,
+    linearDamping: 0.05,
+    angularDamping: 0.1,
+  });
+  body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
+  body.type = CANNON.Body.KINEMATIC;
+  world.addBody(body);
+
+  const bird = {
+    mesh, body, type: 'bird', flying: false, settled: false, life: 8,
+  };
+  currentBird = bird;
+  entities.push(bird);
+  launched = false;
+  aiming = false;
+  pullOffset.set(0, 0, 0);
+  updateBirdIcons();
+  updateBands(SLING_ORIGIN);
+  return bird;
+}
+
+/* ---------- Pig Factory ---------- */
+function createPigMesh() {
+  const g = new THREE.Group();
+  const skin = new THREE.MeshStandardMaterial({
+    color: 0x8bc34a, roughness: 0.5, metalness: 0.05,
+  });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x33691e, roughness: 0.7 });
+  const snoutMat = new THREE.MeshStandardMaterial({ color: 0xaed581, roughness: 0.45 });
+  const eyeW = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+  const pupil = new THREE.MeshStandardMaterial({ color: 0x111111 });
+
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.52, 20, 16), skin);
+  body.castShadow = true;
+  body.scale.set(1, 0.92, 1.08);
+  g.add(body);
+
+  // Snout faces slightly toward camera (+Z) and toward bird (-ish +X for incoming)
+  const snout = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.26, 14), snoutMat);
+  snout.rotation.z = Math.PI / 2;
+  snout.position.set(0.4, 0.02, 0.22);
+  g.add(snout);
+  [[0.52, 0.06, 0.28], [0.52, 0.06, 0.14]].forEach(([x, y, z]) => {
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), dark);
+    n.position.set(x, y, z);
+    g.add(n);
+  });
+
+  // Eyes toward camera
+  [[0.22, 0.22, 0.38], [0.08, 0.22, 0.42]].forEach(([x, y, z]) => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), eyeW);
+    e.position.set(x, y, z);
+    g.add(e);
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), pupil);
+    p.position.set(x + 0.04, y, z + 0.06);
+    g.add(p);
+  });
+
+  // Ears
+  [[0.0, 0.48, 0.3], [-0.1, 0.48, 0.05]].forEach(([x, y, z]) => {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), skin);
+    ear.scale.set(0.7, 1.1, 0.45);
+    ear.position.set(x, y, z);
+    g.add(ear);
+    const inner = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 6), snoutMat);
+    inner.position.set(x + 0.03, y, z + 0.04);
+    g.add(inner);
+  });
+
+  // Little smile wrinkle
+  const smile = new THREE.Mesh(
+    new THREE.TorusGeometry(0.12, 0.025, 6, 10, Math.PI),
+    dark
+  );
+  smile.position.set(0.35, -0.12, 0.35);
+  smile.rotation.x = Math.PI / 2;
+  smile.rotation.z = -0.4;
+  g.add(smile);
+
+  g.scale.setScalar(1.05);
+  return g;
+}
+
+function addPig(x, y, z) {
+  const mesh = createPigMesh();
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+
+  const body = new CANNON.Body({
+    mass: 0.9,
+    shape: new CANNON.Sphere(0.45),
+    material: materials.pig,
+    linearDamping: 0.25,
+    angularDamping: 0.4,
+  });
+  body.position.set(x, y, z);
+  body.allowSleep = true;
+  body.sleepSpeedLimit = 0.15;
+  body.sleepTimeLimit = 0.5;
+  body.type = CANNON.Body.KINEMATIC; // frozen until first launch
+  world.addBody(body);
+
+  const ent = { mesh, body, type: 'pig', hp: 28, broken: false };
+  entities.push(ent);
+  pigsAlive++;
+  return ent;
+}
+
+/* ---------- Blocks ---------- */
+const BLOCK = {
+  wood: { mat: matWood, phys: materials.wood, density: 0.55, hp: 35, color: 0xc4843a },
+  glass: { mat: matGlass, phys: materials.glass, density: 0.3, hp: 12, color: 0x7ec8e8 },
+  stone: { mat: matStone, phys: materials.stone, density: 1.4, hp: 80, color: 0x8a8f98 },
+};
+
+function addBlock(type, x, y, z, w, h, d, rotY = 0) {
+  const def = BLOCK[type];
+  const geo = new THREE.BoxGeometry(w, h, d);
+  // Add wood grain strips for wood
+  let mesh;
+  if (type === 'wood') {
+    const g = new THREE.Group();
+    const main = new THREE.Mesh(geo, def.mat.clone());
+    main.castShadow = true;
+    main.receiveShadow = true;
+    g.add(main);
+    // grain lines
+    const grain = new THREE.Mesh(
+      new THREE.BoxGeometry(w * 0.98, 0.02, d * 0.98),
+      matWoodDark
+    );
+    grain.position.y = h * 0.15;
+    g.add(grain);
+    const grain2 = grain.clone();
+    grain2.position.y = -h * 0.15;
+    g.add(grain2);
+    mesh = g;
+  } else {
+    mesh = new THREE.Mesh(geo, def.mat.clone());
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+  }
+  mesh.position.set(x, y, z);
+  mesh.rotation.y = rotY;
+  scene.add(mesh);
+
+  const mass = Math.max(0.2, w * h * d * def.density);
+  const body = new CANNON.Body({
+    mass,
+    shape: new CANNON.Box(new CANNON.Vec3(w / 2, h / 2, d / 2)),
+    material: def.phys,
+    linearDamping: 0.2,
+    angularDamping: 0.35,
+  });
+  body.position.set(x, y, z);
+  body.quaternion.setFromEuler(0, rotY, 0);
+  body.allowSleep = true;
+  body.sleepSpeedLimit = 0.12;
+  body.sleepTimeLimit = 0.4;
+  body.type = CANNON.Body.KINEMATIC; // frozen until first launch
+  world.addBody(body);
+
+  const ent = {
+    mesh, body, type: 'block', blockType: type, hp: def.hp, maxHp: def.hp, broken: false,
+    size: { w, h, d },
+  };
+  entities.push(ent);
+  return ent;
+}
+
+/* ---------- Levels ---------- */
+const LEVELS = [
+  {
+    name: 'Poached Eggs — 1-1',
+    birds: 3,
+    build() {
+      // Stable classic tower — slight gaps avoided; resting on ground
+      // Pillars sit on y = half-height
+      addBlock('wood', 5.0, 0.6, 0, 0.5, 1.2, 0.5);
+      addBlock('wood', 7.2, 0.6, 0, 0.5, 1.2, 0.5);
+      // Beam resting on top of pillars (pillar top = 1.2)
+      addBlock('wood', 6.1, 1.375, 0, 2.6, 0.35, 0.55);
+      // Upper posts
+      addBlock('wood', 5.3, 2.05, 0, 0.4, 1.0, 0.4);
+      addBlock('wood', 6.9, 2.05, 0, 0.4, 1.0, 0.4);
+      // Roof
+      addBlock('wood', 6.1, 2.725, 0, 2.2, 0.35, 0.5);
+      // Pig on roof
+      addPig(6.1, 3.35, 0);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-2',
+    birds: 3,
+    build() {
+      addBlock('stone', 6.25, 0.35, 0, 1.2, 0.7, 0.7);
+      addBlock('wood', 4.4, 0.65, 0, 0.5, 1.3, 0.5);
+      addBlock('wood', 8.1, 0.65, 0, 0.5, 1.3, 0.5);
+      addBlock('wood', 6.25, 1.475, 0, 4.2, 0.35, 0.55);
+      addPig(5.2, 2.05, 0);
+      addBlock('glass', 5.2, 2.85, 0, 0.45, 0.9, 0.45);
+      addBlock('glass', 7.3, 2.15, 0, 0.45, 1.0, 0.45);
+      addBlock('wood', 6.25, 2.85, 0, 3.0, 0.35, 0.5);
+      addPig(7.3, 3.5, 0);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-3',
+    birds: 4,
+    build() {
+      const baseX = 7;
+      addBlock('stone', baseX - 2.8, 0.5, 0, 0.75, 1.0, 0.75);
+      addBlock('wood', baseX - 2.8, 1.4, 0, 0.5, 0.8, 0.5);
+      addBlock('wood', baseX - 2.8, 2.0, 0, 1.3, 0.35, 0.55);
+      addPig(baseX - 2.8, 2.65, 0);
+
+      addBlock('wood', baseX, 0.55, -0.55, 0.45, 1.1, 0.45);
+      addBlock('wood', baseX, 0.55, 0.55, 0.45, 1.1, 0.45);
+      addBlock('glass', baseX - 1.15, 0.55, 0, 0.4, 1.1, 0.4);
+      addBlock('glass', baseX + 1.15, 0.55, 0, 0.4, 1.1, 0.4);
+      addBlock('wood', baseX, 1.3, 0, 3.2, 0.4, 1.55);
+      addPig(baseX, 1.95, 0);
+      addBlock('wood', baseX - 1.15, 2.15, 0, 0.4, 1.3, 0.4);
+      addBlock('wood', baseX + 1.15, 2.15, 0, 0.4, 1.3, 0.4);
+      addBlock('stone', baseX, 3.0, 0, 2.8, 0.4, 0.75);
+      addPig(baseX, 3.65, 0);
+
+      addBlock('stone', baseX + 3.2, 0.5, 0, 0.75, 1.0, 0.75);
+      addBlock('wood', baseX + 3.2, 1.4, 0, 0.55, 0.8, 0.55);
+      addBlock('glass', baseX + 3.2, 2.05, 0, 1.1, 0.35, 0.55);
+    },
+  },
+  {
+    name: 'Poached Eggs — 1-4',
+    birds: 4,
+    build() {
+      const bx = 7.5;
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3 - row; col++) {
+          const x = bx + (col - (2 - row) / 2) * 1.3;
+          const y = 0.5 + row * 1.05;
+          const t = row === 2 ? 'glass' : (col === 1 && row === 0 ? 'stone' : 'wood');
+          addBlock(t, x, y, 0, 1.1, 0.95, 0.7);
+        }
+      }
+      addPig(bx, 3.7, 0);
+      addPig(bx - 1.3, 1.55, 0);
+      addPig(bx + 1.3, 1.55, 0);
+
+      addBlock('wood', bx - 3.8, 0.75, 0, 0.45, 1.5, 0.45);
+      addBlock('wood', bx - 3.8, 1.7, 0, 1.5, 0.35, 0.45);
+      addPig(bx - 3.8, 2.35, 0);
+    },
+  },
+];
+
+/* ---------- Trajectory Preview ---------- */
+function createTrajectory() {
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(40 * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.18, transparent: true, opacity: 0.7, depthWrite: false,
+  });
+  trajectoryLine = new THREE.Points(geo, mat);
+  scene.add(trajectoryLine);
+}
+
+function updateTrajectory(origin, velocity) {
+  if (!trajectoryLine) return;
+  const pos = trajectoryLine.geometry.attributes.position;
+  const g = -22;
+  let x = origin.x, y = origin.y, z = origin.z;
+  let vx = velocity.x, vy = velocity.y, vz = velocity.z;
+  const dt = 0.08;
+  for (let i = 0; i < 40; i++) {
+    pos.setXYZ(i, x, y, z);
+    x += vx * dt;
+    y += vy * dt;
+    z += vz * dt;
+    vy += g * dt;
+    if (y < 0) y = 0;
+  }
+  pos.needsUpdate = true;
+  trajectoryLine.visible = true;
+}
+
+/* ---------- Particles ---------- */
+function spawnBurst(pos, color, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.12, 0.12, 0.12),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.7 })
+    );
+    mesh.position.copy(pos);
+    scene.add(mesh);
+    particles.push({
+      mesh,
+      vel: new THREE.Vector3(
+        (Math.random() - 0.5) * 8,
+        Math.random() * 6 + 2,
+        (Math.random() - 0.5) * 8
+      ),
+      life: 0.6 + Math.random() * 0.5,
+      rot: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
+    });
+  }
+}
+
+function spawnSmoke(pos) {
+  for (let i = 0; i < 6; i++) {
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.2 + Math.random() * 0.2, 6, 6),
+      new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.5 })
+    );
+    mesh.position.copy(pos);
+    scene.add(mesh);
+    particles.push({
+      mesh,
+      vel: new THREE.Vector3((Math.random() - 0.5) * 2, Math.random() * 3 + 1, (Math.random() - 0.5) * 2),
+      life: 0.8,
+      smoke: true,
+      rot: new THREE.Vector3(),
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.life -= dt;
+    p.vel.y -= 12 * dt;
+    p.mesh.position.addScaledVector(p.vel, dt);
+    p.mesh.rotation.x += p.rot.x * dt * 5;
+    p.mesh.rotation.y += p.rot.y * dt * 5;
+    if (p.smoke) {
+      p.mesh.scale.multiplyScalar(1 + dt * 1.5);
+      p.mesh.material.opacity = Math.max(0, p.life);
+    }
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      particles.splice(i, 1);
+    }
+  }
+}
+
+/* ---------- Damage / Collision ---------- */
+const impactCooldown = new WeakMap();
+
+function setupCollisions() {
+  world.addEventListener('beginContact', (e) => {
+    const a = findEnt(e.bodyA);
+    const b = findEnt(e.bodyB);
+    if (!a && !b) return;
+
+    const rel = e.bodyA.velocity.vsub(e.bodyB.velocity);
+    const speed = rel.length();
+    if (speed < 2) return;
+
+    applyImpact(a, b, speed, e);
+    applyImpact(b, a, speed, e);
+  });
+}
+
+function findEnt(body) {
+  return entities.find(e => e.body === body && !e.broken);
+}
+
+function applyImpact(ent, other, speed, event) {
+  if (!ent || ent.broken) return;
+  if (ent.type === 'bird') return;
+  // Ignore settling jitter before the first shot
+  if (!levelReady || (!launched && levelAge < 1.5)) return;
+
+  const now = performance.now();
+  const last = impactCooldown.get(ent) || 0;
+  if (now - last < 80) return;
+  impactCooldown.set(ent, now);
+
+  let mult = 1;
+  if (other && other.type === 'bird') mult = 1.8;
+  if (ent.type === 'block' && ent.blockType === 'glass') mult *= 1.6;
+  if (ent.type === 'block' && ent.blockType === 'stone') mult *= 0.55;
+
+  const dmg = speed * mult * 1.4;
+  ent.hp -= dmg;
+
+  if (ent.type === 'pig' && speed > 4) {
+    camShake = Math.min(0.4, speed * 0.02);
+  }
+
+  if (ent.hp <= 0) {
+    destroyEntity(ent);
+  } else if (ent.type === 'block' && ent.blockType === 'wood' && ent.hp < ent.maxHp * 0.45) {
+    ent.mesh.traverse?.(c => {
+      if (c.isMesh && c.material && c.material.color) {
+        c.material.color.offsetHSL(0, 0, -0.05);
+      }
+    });
+  }
+}
+
+function destroyEntity(ent) {
+  if (ent.broken) return;
+  ent.broken = true;
+  const pos = new THREE.Vector3().copy(ent.mesh.position);
+
+  if (ent.type === 'pig') {
+    pigsAlive = Math.max(0, pigsAlive - 1);
+    addScore(5000, pos);
+    spawnBurst(pos, 0x7cb342, 16);
+    spawnSmoke(pos);
+    camShake = 0.35;
+  } else if (ent.type === 'block') {
+    const pts = ent.blockType === 'glass' ? 500 : ent.blockType === 'wood' ? 500 : 200;
+    addScore(pts, pos);
+    const col = BLOCK[ent.blockType].color;
+    spawnBurst(pos, col, ent.blockType === 'glass' ? 18 : 10);
+  }
+
+  scene.remove(ent.mesh);
+  world.removeBody(ent.body);
+}
+
+function addScore(pts, worldPos) {
+  score += pts;
+  scoreEl.textContent = score.toLocaleString();
+  if (worldPos) showFloatingScore(pts, worldPos);
+}
+
+function showFloatingScore(pts, worldPos) {
+  const v = worldPos.clone().project(camera);
+  const x = (v.x * 0.5 + 0.5) * innerWidth;
+  const y = (-v.y * 0.5 + 0.5) * innerHeight;
+  floatingScore.textContent = `+${pts}`;
+  floatingScore.style.left = `${x}px`;
+  floatingScore.style.top = `${y}px`;
+  floatingScore.style.opacity = '1';
+  floatingScore.style.transition = 'none';
+  requestAnimationFrame(() => {
+    floatingScore.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    floatingScore.style.opacity = '0';
+    floatingScore.style.transform = 'translate(-50%, -80px)';
+  });
+  setTimeout(() => {
+    floatingScore.style.transform = 'translate(-50%, 0)';
+  }, 900);
+}
+
+/* ---------- UI ---------- */
+function updateBirdIcons() {
+  birdsPanel.innerHTML = '';
+  const total = LEVELS[levelIndex].birds;
+  const remaining = birdsLeft + (currentBird && !launched ? 0 : 0);
+  // birdsLeft includes the one on sling until launched... we decrement on launch
+  for (let i = 0; i < total; i++) {
+    const icon = document.createElement('div');
+    icon.className = 'bird-icon';
+    const usedCount = total - birdsLeft - (currentBird && !launched ? 1 : 0);
+    if (i < usedCount) icon.classList.add('used');
+    else if (i === usedCount && currentBird && !launched) icon.classList.add('ready');
+    else if (i >= usedCount) icon.classList.add('ready');
+    birdsPanel.appendChild(icon);
+  }
+}
+
+function hideHint() {
+  if (!hintShown) return;
+  hintShown = false;
+  hintEl.classList.add('hidden');
+}
+
+/* ---------- Level Management ---------- */
+function clearLevel() {
+  for (const e of entities) {
+    scene.remove(e.mesh);
+    if (e.body) world.removeBody(e.body);
+  }
+  entities = [];
+  currentBird = null;
+  pigsAlive = 0;
+  particles.forEach(p => {
+    scene.remove(p.mesh);
+  });
+  particles = [];
+  if (trajectoryLine) trajectoryLine.visible = false;
+  waitingSettle = false;
+  levelComplete = false;
+  overlay.classList.remove('visible');
+}
+
+function loadLevel(idx) {
+  clearLevel();
+  levelIndex = idx % LEVELS.length;
+  const lvl = LEVELS[levelIndex];
+  levelTitle.textContent = lvl.name;
+  score = 0;
+  scoreEl.textContent = '0';
+  birdsLeft = lvl.birds;
+  levelReady = false;
+  levelAge = 0;
+  shotsFired = 0;
+  lvl.build();
+  spawnBirdOnSling();
+  camera.position.copy(cameraBase);
+  camera.lookAt(cameraLook);
+  gameActive = true;
+  launched = false;
+  aiming = false;
+  pullOffset.set(0, 0, 0);
+  keyPull.set(0, 0, 0);
+  updateBirdIcons();
+  // Brief settle, then freeze sleeping bodies
+  setTimeout(() => { levelReady = true; }, 400);
+}
+
+function checkLevelEnd() {
+  if (levelComplete || !gameActive || !levelReady) return;
+  // Structures must only clear after the player has taken a shot
+  if (shotsFired === 0) return;
+
+  if (pigsAlive <= 0) {
+    levelComplete = true;
+    waitingSettle = false;
+    // Bonus for leftover birds
+    const leftover = birdsLeft + (currentBird && !launched ? 1 : 0);
+    const bonus = leftover * 10000;
+    if (bonus > 0) {
+      score += bonus;
+      scoreEl.textContent = score.toLocaleString();
+    }
+    setTimeout(() => showResult(true, leftover), 800);
+    return;
+  }
+
+  if (birdsLeft <= 0 && (!currentBird || launched)) {
+    // Wait for settle then fail if pigs remain
+    waitingSettle = true;
+    settledTimer = 0;
+  }
+}
+
+function showResult(won, leftoverBirds = 0) {
+  gameActive = false;
+  resultModal.classList.toggle('fail', !won);
+  resultTitle.textContent = won ? 'Level Cleared!' : 'Level Failed!';
+  resultSub.textContent = won
+    ? `Score: ${score.toLocaleString()}`
+    : 'The pigs are still standing...';
+
+  starEls.forEach(s => s.classList.remove('lit'));
+  if (won) {
+    let stars = 1;
+    if (leftoverBirds >= 1 || score > 15000) stars = 2;
+    if (leftoverBirds >= 2 || score > 30000) stars = 3;
+    setTimeout(() => {
+      for (let i = 0; i < stars; i++) {
+        setTimeout(() => starEls[i].classList.add('lit'), i * 250);
+      }
+    }, 200);
+    nextBtn.style.display = '';
+    nextBtn.textContent = levelIndex >= LEVELS.length - 1 ? 'Play Again' : 'Next Level';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+  overlay.classList.add('visible');
+}
+
+/* ---------- Input ---------- */
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+function getPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+  return { clientX, clientY };
+}
+
+function pointerOnBird() {
+  if (!currentBird || launched) return false;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObject(currentBird.mesh, true);
+  const dist = raycaster.ray.distanceToPoint(SLING_ORIGIN);
+  // Generous hit target for mouse + touch
+  return hits.length > 0 || dist < 4.0;
+}
+
+function getPullPoint() {
+  raycaster.setFromCamera(pointer, camera);
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  const hit = new THREE.Vector3();
+  if (!raycaster.ray.intersectPlane(plane, hit)) {
+    return SLING_ORIGIN.clone().add(pullOffset);
+  }
+
+  const offset = hit.clone().sub(SLING_ORIGIN);
+  offset.x = Math.min(0.15, offset.x);
+  offset.y = Math.max(-1.4, Math.min(1.6, offset.y));
+  offset.z = Math.max(-1.0, Math.min(1.0, offset.z));
+
+  if (offset.length() > MAX_PULL) offset.setLength(MAX_PULL);
+  return SLING_ORIGIN.clone().add(offset);
+}
+
+function applyAimPose(pos) {
+  pullOffset.copy(pos).sub(SLING_ORIGIN);
+  currentBird.mesh.position.copy(pos);
+  currentBird.body.position.set(pos.x, pos.y, pos.z);
+  updateBands(pos);
+
+  const power = pullOffset.length() / MAX_PULL;
+  powerBar.style.height = `${power * 100}%`;
+
+  const vel = getLaunchVelocity();
+  if (vel.length() > 0.5) {
+    updateTrajectory(pos, vel);
+    const dir = vel.clone().normalize();
+    const look = pos.clone().add(dir);
+    currentBird.mesh.lookAt(look);
+    currentBird.mesh.rotateY(Math.PI / 2);
+  }
+}
+
+function onPointerDown(e) {
+  if (!gameActive || !currentBird || launched || levelComplete) return;
+  e.preventDefault();
+  const p = getPointerPos(e);
+  if (!pointerOnBird()) return;
+  aiming = true;
+  dragMoved = false;
+  aimStartX = p.clientX;
+  aimStartY = p.clientY;
+  canvas.classList.add('aiming');
+  hideHint();
+  powerWrap.classList.add('visible');
+  try { canvas.setPointerCapture?.(e.pointerId); } catch (_) {}
+}
+
+function onPointerMove(e) {
+  if (!aiming || !currentBird) return;
+  e.preventDefault();
+  const p = getPointerPos(e);
+  const dx = p.clientX - aimStartX;
+  const dy = p.clientY - aimStartY;
+  const screenDist = Math.hypot(dx, dy);
+
+  const pullScale = MAX_PULL / DRAG_PIXELS_FOR_MAX;
+  // Left drag → pull back (−X); up drag → lift (+Y)
+  const offset = new THREE.Vector3(
+    Math.min(0.1, -dx * pullScale),
+    Math.max(-1.5, Math.min(1.6, -dy * pullScale * 0.7)),
+    Math.max(-0.7, Math.min(0.7, dx * pullScale * 0.08))
+  );
+  if (offset.x > 0) offset.x *= 0.1;
+  if (offset.length() > MAX_PULL) offset.setLength(MAX_PULL);
+
+  if (screenDist > 8) dragMoved = true;
+  if (dragMoved) {
+    const pos = SLING_ORIGIN.clone().add(offset);
+    applyAimPose(pos);
+  }
+}
+
+function getLaunchVelocity() {
+  const pull = pullOffset.length();
+  if (pull < 0.1) return new THREE.Vector3();
+  const dir = pullOffset.clone().multiplyScalar(-1).normalize();
+  dir.y += 0.18;
+  dir.normalize();
+  const power = Math.min(pull / MAX_PULL, 1) * LAUNCH_POWER;
+  return dir.multiplyScalar(power * (0.65 + 0.35 * (pull / MAX_PULL)));
+}
+
+function onPointerUp(e) {
+  if (!aiming || !currentBird) return;
+  e.preventDefault();
+  aiming = false;
+  canvas.classList.remove('aiming');
+  powerWrap.classList.remove('visible');
+  if (trajectoryLine) trajectoryLine.visible = false;
+  try { canvas.releasePointerCapture?.(e.pointerId); } catch (_) {}
+
+  const pull = pullOffset.length();
+  if (!dragMoved || pull < 0.28) {
+    currentBird.mesh.position.copy(SLING_ORIGIN);
+    currentBird.mesh.rotation.set(0, -0.15, 0);
+    currentBird.body.position.set(SLING_ORIGIN.x, SLING_ORIGIN.y, SLING_ORIGIN.z);
+    updateBands(SLING_ORIGIN);
+    pullOffset.set(0, 0, 0);
+    dragMoved = false;
+    return;
+  }
+
+  launchBird();
+  dragMoved = false;
+}
+
+function launchBird() {
+  const vel = getLaunchVelocity();
+  launched = true;
+  currentBird.flying = true;
+  currentBird.body.type = CANNON.Body.DYNAMIC;
+  currentBird.body.velocity.set(vel.x, vel.y, vel.z);
+  currentBird.body.angularVelocity.set(0, 0, -8 - Math.random() * 4);
+  currentBird.body.wakeUp();
+
+  // Activate fortress physics for the shot
+  for (const e of entities) {
+    if (e.broken || e.type === 'bird') continue;
+    e.body.type = CANNON.Body.DYNAMIC;
+    e.body.velocity.set(0, 0, 0);
+    e.body.angularVelocity.set(0, 0, 0);
+    e.body.wakeUp();
+  }
+
+  birdsLeft--;
+  updateBirdIcons();
+  updateBands(SLING_ORIGIN);
+  sling.pouch.position.copy(SLING_ORIGIN);
+
+  waitingSettle = true;
+  settledTimer = 0;
+  camShake = 0.12;
+  shotsFired++;
+}
+
+canvas.addEventListener('pointerdown', onPointerDown);
+canvas.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+canvas.addEventListener('pointercancel', onPointerUp);
+canvas.addEventListener('mousedown', onPointerDown);
+canvas.addEventListener('mousemove', onPointerMove);
+window.addEventListener('mouseup', onPointerUp);
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+window.addEventListener('touchend', onPointerUp);
+
+// Keyboard aim (Arrow keys pull, Space / Enter launch) — helps accessibility & testing
+const keyPull = new THREE.Vector3();
+window.addEventListener('keydown', (e) => {
+  if (!gameActive || !currentBird || launched || levelComplete) return;
+  const step = 0.22;
+  let changed = false;
+  if (e.key === 'ArrowLeft') { keyPull.x = Math.max(-MAX_PULL, keyPull.x - step); changed = true; }
+  if (e.key === 'ArrowRight') { keyPull.x = Math.min(0.1, keyPull.x + step); changed = true; }
+  if (e.key === 'ArrowDown') { keyPull.y = Math.max(-1.5, keyPull.y - step); changed = true; }
+  if (e.key === 'ArrowUp') { keyPull.y = Math.min(1.6, keyPull.y + step); changed = true; }
+  if (changed) {
+    e.preventDefault();
+    dragMoved = true;
+    aiming = true;
+    powerWrap.classList.add('visible');
+    hideHint();
+    pullOffset.copy(keyPull);
+    if (pullOffset.length() > MAX_PULL) pullOffset.setLength(MAX_PULL);
+    applyAimPose(SLING_ORIGIN.clone().add(pullOffset));
+  }
+  if ((e.key === ' ' || e.key === 'Enter') && dragMoved && pullOffset.length() >= 0.28) {
+    e.preventDefault();
+    aiming = false;
+    powerWrap.classList.remove('visible');
+    if (trajectoryLine) trajectoryLine.visible = false;
+    launchBird();
+    keyPull.set(0, 0, 0);
+    dragMoved = false;
+  }
+});
+
+/* ---------- Buttons ---------- */
+playBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  startGame();
+});
+titleScreen.addEventListener('click', (e) => {
+  if (e.target === playBtn || playBtn.contains(e.target) || e.target === titleScreen || e.target.classList.contains('logo') || e.target.classList.contains('logo-sub') || e.target.closest('.logo')) {
+    startGame();
+  }
+});
+
+function startGame() {
+  if (titleScreen.classList.contains('hidden')) return;
+  titleScreen.classList.add('hidden');
+  loadLevel(0);
+}
+
+retryBtn.addEventListener('click', () => {
+  overlay.classList.remove('visible');
+  loadLevel(levelIndex);
+});
+
+nextBtn.addEventListener('click', () => {
+  overlay.classList.remove('visible');
+  if (levelIndex >= LEVELS.length - 1) loadLevel(0);
+  else loadLevel(levelIndex + 1);
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ---------- Sync & Settle ---------- */
+function syncMeshes() {
+  for (const e of entities) {
+    if (e.broken) continue;
+    if (e.type === 'bird' && !e.flying) continue;
+    e.mesh.position.copy(e.body.position);
+    e.mesh.quaternion.copy(e.body.quaternion);
+
+    // Kill pigs that fall below ground hard / off map
+    if (e.type === 'pig' && e.body.position.y < -2) {
+      destroyEntity(e);
+    }
+    if (e.type === 'block' && e.body.position.y < -3) {
+      destroyEntity(e);
+    }
+    // Bird fell off
+    if (e.type === 'bird' && e.flying && (e.body.position.y < -5 || e.body.position.x > 55)) {
+      e.life = 0;
+    }
+  }
+}
+
+function isWorldSettled() {
+  let maxSpeed = 0;
+  for (const e of entities) {
+    if (e.broken) continue;
+    if (e.type === 'bird' && !e.flying) continue;
+    const sp = e.body.velocity.length();
+    maxSpeed = Math.max(maxSpeed, sp);
+  }
+  return maxSpeed < 0.55;
+}
+
+function afterBirdSettled() {
+  // Remove spent bird
+  if (currentBird && currentBird.flying) {
+    const b = currentBird;
+    setTimeout(() => {
+      if (!b.broken) {
+        scene.remove(b.mesh);
+        world.removeBody(b.body);
+        b.broken = true;
+      }
+    }, 400);
+    currentBird = null;
+  }
+
+  if (pigsAlive <= 0) {
+    checkLevelEnd();
+    return;
+  }
+
+  if (birdsLeft > 0) {
+    setTimeout(() => {
+      if (!levelComplete) spawnBirdOnSling();
+    }, 500);
+    waitingSettle = false;
+  } else {
+    checkLevelEnd();
+    if (pigsAlive > 0) {
+      setTimeout(() => {
+        if (pigsAlive > 0 && !levelComplete) showResult(false);
+      }, 1000);
+    }
+  }
+}
+
+/* ---------- Camera ---------- */
+function updateCamera(dt) {
+  let target = cameraBase.clone();
+  let look = cameraLook.clone();
+
+  if (currentBird && currentBird.flying) {
+    const bp = currentBird.mesh.position;
+    target.x = THREE.MathUtils.clamp(bp.x * 0.25 + cameraBase.x, -1, 8);
+    target.y = THREE.MathUtils.clamp(bp.y * 0.25 + cameraBase.y, 4.5, 10);
+    look.x = THREE.MathUtils.clamp(bp.x * 0.55 + 1, 0, 12);
+    look.y = Math.max(1.5, bp.y * 0.25 + 1.8);
+  }
+
+  if (camShake > 0) {
+    target.x += (Math.random() - 0.5) * camShake * 2;
+    target.y += (Math.random() - 0.5) * camShake * 2;
+    camShake *= 0.9;
+    if (camShake < 0.01) camShake = 0;
+  }
+
+  camera.position.lerp(target, 1 - Math.pow(0.001, dt));
+  camera.lookAt(look);
+}
+
+/* ---------- Init & Loop ---------- */
+buildSky();
+buildGround();
+createTrajectory();
+setupCollisions();
+updateBands(SLING_ORIGIN);
+
+const clock = new THREE.Clock();
+let accumulator = 0;
+const FIXED_DT = 1 / 60;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (gameActive) {
+    accumulator += dt;
+    while (accumulator >= FIXED_DT) {
+      world.step(FIXED_DT);
+      accumulator -= FIXED_DT;
+    }
+
+    syncMeshes();
+    updateParticles(dt);
+    updateCamera(dt);
+
+    // Band when aiming / idle
+    if (currentBird && !launched) {
+      updateBands(currentBird.mesh.position);
+    }
+
+    // Damage pigs from high speed / crushing (only after a real shot)
+    if (launched || levelAge > 2) {
+      for (const e of entities) {
+        if (e.broken || e.type !== 'pig') continue;
+        const speed = e.body.velocity.length();
+        if (speed > 10) {
+          e.hp -= (speed - 10) * 0.5;
+          if (e.hp <= 0) destroyEntity(e);
+        }
+        const up = new CANNON.Vec3(0, 1, 0);
+        e.body.quaternion.vmult(up, up);
+        if (up.y < -0.3 && speed > 1.5) {
+          e.hp -= 8 * dt;
+          if (e.hp <= 0) destroyEntity(e);
+        }
+      }
+    }
+
+    levelAge += dt;
+
+    if (waitingSettle && launched) {
+      settledTimer += dt;
+      const birdSlow = !currentBird || !currentBird.flying ||
+        currentBird.body.velocity.length() < 0.8 ||
+        currentBird.body.position.y < 0.5 && currentBird.body.velocity.length() < 2;
+
+      if (settledTimer > 1.2 && birdSlow && isWorldSettled()) {
+        waitingSettle = false;
+        afterBirdSettled();
+      } else if (settledTimer > 5.5) {
+        waitingSettle = false;
+        afterBirdSettled();
+      }
+    }
+
+    checkLevelEnd();
+  } else {
+    updateParticles(dt);
+  }
+
+  // Idle camera sway on title
+  if (!gameActive && !titleScreen.classList.contains('hidden')) {
+    const t = clock.elapsedTime;
+    camera.position.set(-0.8 + Math.sin(t * 0.35) * 1.0, 4.6 + Math.sin(t * 0.45) * 0.3, 13.2);
+    camera.lookAt(0.8, 2.0, 0);
+  }
+
+  renderer.render(scene, camera);
+}
+
+animate();
+  </script>
+</body>
+</html>
