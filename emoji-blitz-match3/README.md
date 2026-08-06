@@ -30,7 +30,18 @@ RenderView         → event-driven animation ports
 GameController     → round FSM wiring it all
 ```
 
-## Quick start
+## Play (single file)
+
+Open [`index.html`](index.html) in a browser — one self-contained file with the full 60s Match-3 loop (board, specials, Blitz Meter, hero powers).
+
+```bash
+cd emoji-blitz-match3
+# optional local server:
+npx --yes serve -l 4173 .
+# then visit http://localhost:4173
+```
+
+## Core tests
 
 ```bash
 cd emoji-blitz-match3

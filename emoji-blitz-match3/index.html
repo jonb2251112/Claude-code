@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Emoji Rush Blitz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #0f2a3a;
+      --bg1: #1a4a5c;
+      --bg2: #2d6a6a;
+      --accent: #ff6b4a;
+      --accent-2: #ffd166;
+      --mint: #2ec4b6;
+      --ink: #0b1c24;
+      --panel: rgba(255, 248, 235, 0.94);
+      --panel-edge: rgba(11, 28, 36, 0.12);
+      --meter-bg: rgba(11, 28, 36, 0.18);
+      --blitz-a: #ff2e63;
+      --blitz-b: #08d9d6;
+      --cell: min(12.2vw, 54px);
+      --gap: 5px;
+      --radius: 16px;
+      --board-pad: 10px;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Nunito", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg0);
+      overflow-x: hidden;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100dvh;
+      background:
+        radial-gradient(120% 80% at 10% -10%, rgba(255, 209, 102, 0.35), transparent 55%),
+        radial-gradient(90% 70% at 100% 0%, rgba(46, 196, 182, 0.28), transparent 50%),
+        radial-gradient(80% 60% at 50% 100%, rgba(255, 107, 74, 0.22), transparent 55%),
+        linear-gradient(165deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+    }
+
+    body.blitz-mode {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 46, 99, 0.55), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(8, 217, 214, 0.5), transparent 42%),
+        radial-gradient(circle at 50% 90%, rgba(255, 209, 102, 0.4), transparent 45%),
+        linear-gradient(160deg, #1a0a2e, #0b3a4a 50%, #1b1b3a);
+      animation: blitzPulse 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes blitzPulse {
+      from { filter: saturate(1.1) brightness(1); }
+      to { filter: saturate(1.35) brightness(1.08); }
+    }
+
+    #app {
+      width: min(100%, 430px);
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding: max(12px, env(safe-area-inset-top)) 14px max(16px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brand-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .brand {
+      font-family: "Baloo 2", cursive;
+      font-weight: 800;
+      font-size: clamp(1.55rem, 6.5vw, 2rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #fff8eb;
+      text-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .brand span { color: var(--accent-2); }
+
+    .hud {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--panel-edge);
+      border-radius: 14px;
+      padding: 8px 10px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .stat label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+
+    .stat strong {
+      font-family: "Baloo 2", cursive;
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .stat.timer strong.warn { color: var(--accent); }
+
+    .board-wrap {
+      position: relative;
+      align-self: center;
+      background: linear-gradient(180deg, rgba(255, 248, 235, 0.97), rgba(255, 236, 210, 0.95));
+      border: 1px solid var(--panel-edge);
+      border-radius: calc(var(--radius) + 6px);
+      padding: var(--board-pad);
+      box-shadow: var(--shadow);
+    }
+
+    .board {
+      position: relative;
+      width: calc(var(--cell) * 7 + var(--gap) * 6);
+      height: calc(var(--cell) * 7 + var(--gap) * 6);
+      touch-action: none;
+    }
+
+    .tile {
+      position: absolute;
+      width: var(--cell);
+      height: var(--cell);
+      display: grid;
+      place-items: center;
+      font-size: calc(var(--cell) * 0.72);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff, #ffe8c8);
+      box-shadow:
+        inset 0 -3px 0 rgba(0, 0, 0, 0.08),
+        0 4px 0 rgba(11, 28, 36, 0.12);
+      transition: transform 0.08s ease, filter 0.12s ease;
+      will-change: transform, left, top;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .tile.special {
+      background: linear-gradient(160deg, #fff7d6, #ffd166 55%, #ff9f1c);
+      box-shadow:
+        inset 0 -3px 0 rgba(0, 0, 0, 0.1),
+        0 0 0 2px rgba(255, 107, 74, 0.35),
+        0 5px 0 rgba(11, 28, 36, 0.14);
+    }
+
+    .tile.selected {
+      transform: scale(1.08);
+      z-index: 3;
+      filter: brightness(1.08);
+      box-shadow:
+        inset 0 -3px 0 rgba(0, 0, 0, 0.08),
+        0 0 0 3px var(--mint),
+        0 8px 16px rgba(46, 196, 182, 0.35);
+    }
+
+    .tile.pop {
+      animation: popOut 0.18s ease forwards;
+    }
+
+    @keyframes popOut {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.2); opacity: 0; }
+    }
+
+    .meters {
+      display: grid;
+      gap: 8px;
+    }
+
+    .meter-block {
+      background: var(--panel);
+      border: 1px solid var(--panel-edge);
+      border-radius: 14px;
+      padding: 10px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    .meter-head .tag {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    body.blitz-mode .meter-head .tag { opacity: 1; }
+
+    .bar {
+      height: 14px;
+      border-radius: 999px;
+      background: var(--meter-bg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--mint), var(--accent-2));
+      transition: width 0.12s linear;
+    }
+
+    body.blitz-mode .bar > i {
+      background: linear-gradient(90deg, var(--blitz-a), var(--blitz-b), var(--accent-2));
+      background-size: 200% 100%;
+      animation: meterShine 0.7s linear infinite;
+    }
+
+    @keyframes meterShine {
+      from { background-position: 0% 0; }
+      to { background-position: 200% 0; }
+    }
+
+    .hero-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-btn {
+      appearance: none;
+      border: none;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      font-size: 2rem;
+      background: linear-gradient(180deg, #fff, #ffe0b8);
+      box-shadow:
+        inset 0 -4px 0 rgba(0, 0, 0, 0.08),
+        0 6px 0 rgba(11, 28, 36, 0.12);
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+
+    .hero-btn:disabled {
+      cursor: default;
+      filter: grayscale(0.25) brightness(0.95);
+    }
+
+    .hero-btn.ready {
+      transform: scale(1.05);
+      box-shadow:
+        inset 0 -4px 0 rgba(0, 0, 0, 0.08),
+        0 0 0 3px var(--accent),
+        0 8px 18px rgba(255, 107, 74, 0.35);
+      animation: heroReady 0.9s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroReady {
+      from { transform: scale(1.03); }
+      to { transform: scale(1.08); }
+    }
+
+    .hero-btn .ring {
+      position: absolute;
+      inset: -3px;
+      border-radius: 20px;
+      pointer-events: none;
+      background: conic-gradient(var(--accent) var(--p, 0%), transparent 0);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    }
+
+    .hero-meta { flex: 1; min-width: 0; }
+    .hero-meta h2 {
+      margin: 0 0 2px;
+      font-family: "Baloo 2", cursive;
+      font-size: 1.15rem;
+      line-height: 1.1;
+    }
+    .hero-meta p {
+      margin: 0;
+      font-size: 0.82rem;
+      opacity: 0.7;
+      font-weight: 700;
+    }
+
+    .hint {
+      text-align: center;
+      color: rgba(255, 248, 235, 0.78);
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-height: 1.2em;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 20, 28, 0.62);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .overlay.hidden { display: none; }
+
+    .card {
+      width: min(100%, 360px);
+      background: linear-gradient(180deg, #fff9ef, #ffe8c7);
+      border-radius: 22px;
+      padding: 22px 20px 18px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: cardIn 0.35s cubic-bezier(0.2, 1.2, 0.3, 1);
+    }
+
+    @keyframes cardIn {
+      from { transform: translateY(18px) scale(0.96); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+
+    .card h1 {
+      margin: 0 0 6px;
+      font-family: "Baloo 2", cursive;
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .card .sub {
+      margin: 0 0 16px;
+      font-weight: 700;
+      opacity: 0.72;
+      font-size: 0.95rem;
+    }
+
+    .heroes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .heroes button {
+      appearance: none;
+      border: 2px solid transparent;
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px 4px 8px;
+      font-size: 1.7rem;
+      cursor: pointer;
+      box-shadow: 0 3px 0 rgba(11, 28, 36, 0.1);
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .heroes button.active {
+      border-color: var(--mint);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 rgba(46, 196, 182, 0.25);
+    }
+
+    .heroes button small {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      margin-top: 2px;
+      color: var(--ink);
+      opacity: 0.7;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      width: 100%;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: "Baloo 2", cursive;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff8eb;
+      background: linear-gradient(180deg, #ff8a65, var(--accent));
+      box-shadow: 0 5px 0 #c94a30;
+      cursor: pointer;
+    }
+
+    .btn:active { transform: translateY(2px); box-shadow: 0 3px 0 #c94a30; }
+
+    .score-pop {
+      position: absolute;
+      pointer-events: none;
+      font-family: "Baloo 2", cursive;
+      font-weight: 800;
+      color: var(--accent);
+      text-shadow: 0 1px 0 #fff;
+      animation: scoreFloat 0.7s ease forwards;
+      z-index: 10;
+    }
+
+    @keyframes scoreFloat {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to { transform: translateY(-28px) scale(1.2); opacity: 0; }
+    }
+
+    .combo-banner {
+      position: absolute;
+      left: 50%;
+      top: 12%;
+      transform: translateX(-50%) scale(0.8);
+      opacity: 0;
+      pointer-events: none;
+      font-family: "Baloo 2", cursive;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff8eb;
+      text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+      z-index: 8;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .combo-banner.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="brand-bar">
+      <div class="brand">Emoji <span>Rush</span></div>
+      <div class="hint" id="hint">Match 3 · 60 seconds</div>
+    </div>
+
+    <div class="hud">
+      <div class="stat"><label>Score</label><strong id="score">0</strong></div>
+      <div class="stat timer"><label>Time</label><strong id="timer">60.0</strong></div>
+      <div class="stat"><label>Coins</label><strong id="coins">0</strong></div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="Game board"></div>
+      <div class="combo-banner" id="combo">COMBO!</div>
+    </div>
+
+    <div class="meters">
+      <div class="meter-block">
+        <div class="meter-head">
+          <span>Blitz Meter</span>
+          <span class="tag" id="blitzTag">BLITZ ×3</span>
+        </div>
+        <div class="bar"><i id="blitzBar"></i></div>
+      </div>
+      <div class="meter-block">
+        <div class="hero-row">
+          <button class="hero-btn" id="heroBtn" disabled aria-label="Use character power">
+            <span class="ring" id="heroRing"></span>
+            <span id="heroEmoji">🦊</span>
+          </button>
+          <div class="hero-meta">
+            <h2 id="heroName">Fox Fire</h2>
+            <p id="heroDesc">Tap when charged to clear an X pattern</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="startOverlay">
+    <div class="card">
+      <h1>Emoji Rush</h1>
+      <p class="sub">Pick your hero, then blitz the board for 60 seconds.</p>
+      <div class="heroes" id="heroPicker"></div>
+      <button class="btn" id="startBtn">Start Round</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="endOverlay">
+    <div class="card">
+      <h1>Time!</h1>
+      <p class="sub" id="endSub">Nice run.</p>
+      <button class="btn" id="againBtn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+(() => {
+  "use strict";
+
+  const ROWS = 7, COLS = 7;
+  const ROUND_SEC = 60;
+  const BLITZ_SEC = 5;
+  const POOL_SIZE = 5;
+  const BLITZ_POOL = 4;
+  const BLITZ_FILL = 1;
+  const BLITZ_DECAY = 2;
+  const BLITZ_MULT = 3;
+  const CHARGE_PER = 8;
+  const ANIM = { swap: 80, reject: 110, clear: 90, fall: 40, spawn: 120 };
+
+  const EMOJIS = [
+    { id: 0, glyph: "🦊", name: "Fox Fire", spell: "pattern_x", desc: "Clears both diagonals (X)" },
+    { id: 1, glyph: "🐸", name: "Frog Hop", spell: "column_crush", desc: "Crushes two random columns" },
+    { id: 2, glyph: "🐱", name: "Cat Nap", spell: "time_pause", desc: "Freezes the clock for 3s" },
+    { id: 3, glyph: "🐼", name: "Panda Star", spell: "guaranteed_stars", desc: "Spawns two Rainbow Stars" },
+    { id: 4, glyph: "🐯", name: "Tiger Bolt", spell: "pattern_x", desc: "Clears both diagonals (X)" },
+    { id: 5, glyph: "🦄", name: "Unicorn", spell: "guaranteed_stars", desc: "Spawns two Rainbow Stars" },
+    { id: 6, glyph: "🐵", name: "Monkey Biz", spell: "column_crush", desc: "Crushes two random columns" },
+  ];
+
+  const SPECIAL = {
+    cloud: { glyph: "🌩️", kind: "LightningCloud" },
+    sun: { glyph: "☀️", kind: "SunKing" },
+    star: { glyph: "🌈", kind: "RainbowStar" },
+  };
+
+  // ---------- RNG ----------
+  function createRng(seed) {
+    let t = seed >>> 0;
+    return () => {
+      t += 0x6d2b79f5;
+      let r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function cellKey(r, c) { return r * 8 + c; }
+  function ortho(a, b) { return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1; }
+
+  // ---------- DOM ----------
+  const boardEl = document.getElementById("board");
+  const scoreEl = document.getElementById("score");
+  const coinsEl = document.getElementById("coins");
+  const timerEl = document.getElementById("timer");
+  const blitzBar = document.getElementById("blitzBar");
+  const heroBtn = document.getElementById("heroBtn");
+  const heroRing = document.getElementById("heroRing");
+  const heroEmojiEl = document.getElementById("heroEmoji");
+  const heroNameEl = document.getElementById("heroName");
+  const heroDescEl = document.getElementById("heroDesc");
+  const hintEl = document.getElementById("hint");
+  const comboEl = document.getElementById("combo");
+  const startOverlay = document.getElementById("startOverlay");
+  const endOverlay = document.getElementById("endOverlay");
+  const endSub = document.getElementById("endSub");
+  const heroPicker = document.getElementById("heroPicker");
+
+  // ---------- Game state ----------
+  let rng = createRng(Date.now());
+  let selectedHero = EMOJIS[0];
+  let grid = []; // Tile|null
+  let nextUid = 1;
+  let sprites = new Map(); // uid -> HTMLElement
+  let state = "PreMatch";
+  let score = 0;
+  let blitz = 0;
+  let blitzActive = false;
+  let blitzLeft = 0;
+  let charCharge = 0;
+  let timeLeft = ROUND_SEC;
+  let timePaused = false;
+  let timePauseLeft = 0;
+  let idle = true;
+  let resolving = false;
+  let pool = [];
+  let basePool = [];
+  let selected = null;
+  let lastTs = 0;
+  let comboTimer = 0;
+
+  function tileGlyph(t) {
+    if (!t) return "";
+    if (t.kind === "LightningCloud") return SPECIAL.cloud.glyph;
+    if (t.kind === "SunKing") return SPECIAL.sun.glyph;
+    if (t.kind === "RainbowStar") return SPECIAL.star.glyph;
+    const e = EMOJIS.find((x) => x.id === t.emojiType);
+    return e ? e.glyph : "❓";
+  }
+
+  function allocUid() { return nextUid++; }
+
+  function makeNormal(type) {
+    return { uid: allocUid(), kind: "Normal", emojiType: type ?? pool[Math.floor(rng() * pool.length)] };
+  }
+
+  function makeSpecial(kind, cloudAxis) {
+    return { uid: allocUid(), kind, emojiType: null, cloudAxis };
+  }
+
+  function get(r, c) {
+    if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
+    return grid[r * COLS + c];
+  }
+  function set(r, c, t) { grid[r * COLS + c] = t; }
+  function swapCells(a, b) {
+    const ta = get(a.r, a.c), tb = get(b.r, b.c);
+    set(a.r, a.c, tb); set(b.r, b.c, ta);
+  }
+
+  function cellSize() {
+    const style = getComputedStyle(document.documentElement);
+    return parseFloat(style.getPropertyValue("--cell"));
+  }
+  function gapSize() {
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--gap"));
+  }
+  function posFor(r, c) {
+    const s = cellSize(), g = gapSize();
+    return { x: c * (s + g), y: r * (s + g) };
+  }
+
+  function ensureSprite(tile, r, c, fromAbove = 0) {
+    let el = sprites.get(tile.uid);
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "tile" + (tile.kind !== "Normal" ? " special" : "");
+      el.dataset.uid = String(tile.uid);
+      el.textContent = tileGlyph(tile);
+      boardEl.appendChild(el);
+      sprites.set(tile.uid, el);
+    } else {
+      el.className = "tile" + (tile.kind !== "Normal" ? " special" : "");
+      el.textContent = tileGlyph(tile);
+    }
+    const p = posFor(r, c);
+    el.style.left = p.x + "px";
+    el.style.top = (p.y - fromAbove * (cellSize() + gapSize())) + "px";
+    el.style.transition = "none";
+    if (fromAbove) {
+      requestAnimationFrame(() => {
+        el.style.transition = `top ${ANIM.spawn + fromAbove * 20}ms cubic-bezier(.2,.8,.2,1)`;
+        el.style.top = p.y + "px";
+      });
+    }
+    return el;
+  }
+
+  function syncAllSprites(animateFalls = false) {
+    const alive = new Set();
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const t = get(r, c);
+        if (!t) continue;
+        alive.add(t.uid);
+        const el = sprites.get(t.uid) || ensureSprite(t, r, c);
+        const p = posFor(r, c);
+        if (animateFalls) {
+          el.style.transition = `left ${ANIM.fall * 2}ms ease, top ${ANIM.fall * 2 + 40}ms cubic-bezier(.2,.9,.3,1)`;
+        } else {
+          el.style.transition = "none";
+        }
+        el.style.left = p.x + "px";
+        el.style.top = p.y + "px";
+        el.classList.toggle("selected", selected && selected.r === r && selected.c === c);
+      }
+    }
+    for (const [uid, el] of sprites) {
+      if (!alive.has(uid)) {
+        el.remove();
+        sprites.delete(uid);
+      }
+    }
+  }
+
+  function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  // ---------- Match engine ----------
+  function findMatches() {
+    const runs = [];
+    const member = new Set();
+
+    for (let r = 0; r < ROWS; r++) {
+      let start = 0;
+      while (start < COLS) {
+        const seed = get(r, start);
+        if (!seed || seed.kind !== "Normal") { start++; continue; }
+        let end = start + 1;
+        while (end < COLS) {
+          const t = get(r, end);
+          if (!t || t.kind !== "Normal" || t.emojiType !== seed.emojiType) break;
+          end++;
+        }
+        if (end - start >= 3) {
+          const cells = [];
+          for (let c = start; c < end; c++) {
+            cells.push({ r, c });
+            member.add(cellKey(r, c));
+          }
+          runs.push(cells);
+        }
+        start = end;
+      }
+    }
+
+    for (let c = 0; c < COLS; c++) {
+      let start = 0;
+      while (start < ROWS) {
+        const seed = get(start, c);
+        if (!seed || seed.kind !== "Normal") { start++; continue; }
+        let end = start + 1;
+        while (end < ROWS) {
+          const t = get(end, c);
+          if (!t || t.kind !== "Normal" || t.emojiType !== seed.emojiType) break;
+          end++;
+        }
+        if (end - start >= 3) {
+          const cells = [];
+          for (let r = start; r < end; r++) {
+            cells.push({ r, c });
+            member.add(cellKey(r, c));
+          }
+          runs.push(cells);
+        }
+        start = end;
+      }
+    }
+
+    if (!runs.length) return { groups: [], clearCells: [], specialSpawns: [] };
+
+    // union-find merge
+    const parent = new Map();
+    const find = (k) => {
+      let p = parent.get(k) ?? k;
+      while (p !== (parent.get(p) ?? p)) p = parent.get(p);
+      parent.set(k, p);
+      return p;
+    };
+    const union = (a, b) => {
+      const ra = find(a), rb = find(b);
+      if (ra !== rb) parent.set(ra, rb);
+    };
+    const cellMap = new Map();
+    for (const run of runs) {
+      let prev = null;
+      for (const cell of run) {
+        const k = cellKey(cell.r, cell.c);
+        cellMap.set(k, cell);
+        if (!parent.has(k)) parent.set(k, k);
+        if (prev != null) union(prev, k);
+        prev = k;
+      }
+    }
+    const buckets = new Map();
+    for (const [k, cell] of cellMap) {
+      const root = find(k);
+      if (!buckets.has(root)) buckets.set(root, []);
+      buckets.get(root).push(cell);
+    }
+
+    const groups = [];
+    const specialSpawns = [];
+    const clearKeys = new Set();
+    const reserved = new Set();
+
+    for (const cells of buckets.values()) {
+      const sample = get(cells[0].r, cells[0].c);
+      const classified = classify(cells);
+      groups.push({ cells, emojiType: sample.emojiType, ...classified });
+      if (classified.special) {
+        specialSpawns.push({
+          cell: classified.spawnAt,
+          kind: classified.special,
+          cloudAxis: classified.axis,
+        });
+        reserved.add(cellKey(classified.spawnAt.r, classified.spawnAt.c));
+      }
+      for (const cell of cells) {
+        const k = cellKey(cell.r, cell.c);
+        if (!reserved.has(k)) clearKeys.add(k);
+      }
+    }
+
+    const clearCells = [];
+    for (const k of clearKeys) {
+      if (reserved.has(k)) continue;
+      const c = k % 8;
+      const r = (k - c) / 8;
+      clearCells.push({ r, c });
+    }
+    return { groups, clearCells, specialSpawns };
+  }
+
+  function classify(cells) {
+    const rows = new Set(cells.map((c) => c.r));
+    const cols = new Set(cells.map((c) => c.c));
+    const spawnAt = cells[Math.floor(cells.length / 2)];
+
+    if (rows.size === 1) {
+      if (cells.length >= 5) return { shape: "five_line", axis: "row", spawnAt, special: "RainbowStar" };
+      if (cells.length === 4) return { shape: "four", axis: "row", spawnAt, special: "LightningCloud" };
+      return { shape: "three", axis: "row", spawnAt };
+    }
+    if (cols.size === 1) {
+      if (cells.length >= 5) return { shape: "five_line", axis: "col", spawnAt, special: "RainbowStar" };
+      if (cells.length === 4) return { shape: "four", axis: "col", spawnAt, special: "LightningCloud" };
+      return { shape: "three", axis: "col", spawnAt };
+    }
+
+    const keySet = new Set(cells.map((c) => cellKey(c.r, c.c)));
+    let junction = null;
+    for (const cell of cells) {
+      const hasH = keySet.has(cellKey(cell.r, cell.c - 1)) || keySet.has(cellKey(cell.r, cell.c + 1));
+      const hasV = keySet.has(cellKey(cell.r - 1, cell.c)) || keySet.has(cellKey(cell.r + 1, cell.c));
+      if (hasH && hasV) { junction = cell; break; }
+    }
+    if (junction && cells.length >= 5) {
+      return { shape: "five_lt", spawnAt: junction, special: "SunKing" };
+    }
+    return { shape: "multi", spawnAt };
+  }
+
+  // ---------- Specials ----------
+  function uniq(cells) {
+    const seen = new Set();
+    const out = [];
+    for (const cell of cells) {
+      if (cell.r < 0 || cell.c < 0 || cell.r >= ROWS || cell.c >= COLS) continue;
+      const k = cellKey(cell.r, cell.c);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(cell);
+    }
+    return out;
+  }
+  function rowCells(r) { return Array.from({ length: COLS }, (_, c) => ({ r, c })); }
+  function colCells(c) { return Array.from({ length: ROWS }, (_, r) => ({ r, c })); }
+  function blast3(center) {
+    const out = [];
+    for (let r = center.r - 1; r <= center.r + 1; r++)
+      for (let c = center.c - 1; c <= center.c + 1; c++)
+        out.push({ r, c });
+    return out;
+  }
+
+  function mostCommonNormal() {
+    const counts = new Map();
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const t = get(r, c);
+      if (t?.kind === "Normal" && t.emojiType != null) {
+        counts.set(t.emojiType, (counts.get(t.emojiType) || 0) + 1);
+      }
+    }
+    let best = null, n = -1;
+    for (const [k, v] of counts) if (v > n) { best = k; n = v; }
+    return best;
+  }
+
+  function isSpecial(t) { return t && t.kind !== "Normal"; }
+
+  function activateSpecial(specialCell, special, other) {
+    if (special.kind === "LightningCloud") {
+      const axis = special.cloudAxis || "row";
+      return { cells: uniq(axis === "row" ? rowCells(specialCell.r) : colCells(specialCell.c)), reason: "cloud" };
+    }
+    if (special.kind === "SunKing") {
+      return { cells: uniq(blast3(specialCell)), reason: "sun" };
+    }
+    if (special.kind === "RainbowStar") {
+      if (other.kind !== "Normal" || other.emojiType == null) {
+        return { cells: uniq([specialCell]), reason: "star" };
+      }
+      const cells = [specialCell];
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        const t = get(r, c);
+        if (t?.kind === "Normal" && t.emojiType === other.emojiType) cells.push({ r, c });
+      }
+      return { cells: uniq(cells), reason: "star" };
+    }
+    return { cells: [], reason: "match" };
+  }
+
+  function combine(a, ta, b, tb) {
+    if (ta.kind === "LightningCloud" && tb.kind === "LightningCloud") {
+      const midR = Math.round((a.r + b.r) / 2);
+      const midC = Math.round((a.c + b.c) / 2);
+      const cells = [];
+      for (const r of [midR - 1, midR, midR + 1]) cells.push(...rowCells(r));
+      for (const c of [midC - 1, midC, midC + 1]) cells.push(...colCells(c));
+      return { cells: uniq(cells), reason: "combine" };
+    }
+    const kinds = new Set([ta.kind, tb.kind]);
+    if (kinds.has("LightningCloud") && kinds.has("SunKing")) {
+      const midR = Math.round((a.r + b.r) / 2);
+      const midC = Math.round((a.c + b.c) / 2);
+      const cells = [];
+      for (let r = 0; r < ROWS; r++) for (let dc = -1; dc <= 1; dc++) cells.push({ r, c: midC + dc });
+      for (let c = 0; c < COLS; c++) for (let dr = -1; dr <= 1; dr++) cells.push({ r: midR + dr, c });
+      return { cells: uniq(cells), reason: "combine" };
+    }
+    if (ta.kind === "RainbowStar" && tb.kind === "RainbowStar") {
+      const cells = [];
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) cells.push({ r, c });
+      return { cells, reason: "combine" };
+    }
+    if (kinds.has("RainbowStar") && (kinds.has("LightningCloud") || kinds.has("SunKing"))) {
+      const into = kinds.has("LightningCloud") ? "LightningCloud" : "SunKing";
+      const common = mostCommonNormal();
+      const transforms = [];
+      const triggers = [];
+      let toggle = 0;
+      if (common != null) {
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const t = get(r, c);
+          if (t?.kind === "Normal" && t.emojiType === common) {
+            transforms.push({
+              cell: { r, c },
+              kind: into,
+              cloudAxis: into === "LightningCloud" ? (toggle++ % 2 ? "col" : "row") : undefined,
+            });
+            triggers.push({ r, c });
+          }
+        }
+      }
+      transforms.push({ cell: a, kind: into, cloudAxis: "row" });
+      transforms.push({ cell: b, kind: into, cloudAxis: "col" });
+      triggers.push(a, b);
+      return { cells: [], reason: "combine", transforms, triggerAfterTransform: uniq(triggers) };
+    }
+    const ca = activateSpecial(a, ta, tb);
+    const cb = activateSpecial(b, tb, ta);
+    return { cells: uniq([...ca.cells, ...cb.cells]), reason: "combine" };
+  }
+
+  function resolveSwapSpecial(a, b) {
+    const ta = get(a.r, a.c), tb = get(b.r, b.c);
+    if (!ta || !tb) return null;
+    const as = isSpecial(ta), bs = isSpecial(tb);
+    if (as && bs) return combine(a, ta, b, tb);
+    if (as) return activateSpecial(a, ta, tb);
+    if (bs) return activateSpecial(b, tb, ta);
+    return null;
+  }
+
+  function expandTriggers(triggers) {
+    const cells = [];
+    for (const cell of triggers) {
+      const t = get(cell.r, cell.c);
+      if (!t) continue;
+      if (t.kind === "LightningCloud") {
+        cells.push(...((t.cloudAxis || "row") === "row" ? rowCells(cell.r) : colCells(cell.c)));
+      } else if (t.kind === "SunKing") {
+        cells.push(...blast3(cell));
+      } else cells.push(cell);
+    }
+    return uniq(cells);
+  }
+
+  // ---------- Scoring / meters ----------
+  function baseScore(reason) {
+    return ({ cloud: 15, sun: 20, star: 25, combine: 30, character: 12, match: 10, cascade: 10 })[reason] || 10;
+  }
+
+  function award(count, reason, depth) {
+    const mult = blitzActive ? BLITZ_MULT : 1;
+    const depthMul = 1 + 0.25 * Math.max(0, depth);
+    const delta = Math.floor(baseScore(reason) * count * depthMul * mult);
+    score += delta;
+    scoreEl.textContent = String(score);
+    coinsEl.textContent = String(Math.floor(score / 50));
+    return delta;
+  }
+
+  function addBlitz(n) {
+    if (blitzActive) return;
+    blitz = Math.min(100, blitz + n * BLITZ_FILL);
+    blitzBar.style.width = blitz + "%";
+  }
+
+  function addCharge(n) {
+    if (n <= 0) return;
+    charCharge = Math.min(100, charCharge + n * CHARGE_PER);
+    heroRing.style.setProperty("--p", charCharge + "%");
+    const ready = charCharge >= 100 && (state === "Playing" || state === "Blitz");
+    heroBtn.disabled = !ready;
+    heroBtn.classList.toggle("ready", ready);
+  }
+
+  function popScore(cells, delta) {
+    if (!cells.length) return;
+    const mid = cells[Math.floor(cells.length / 2)];
+    const p = posFor(mid.r, mid.c);
+    const el = document.createElement("div");
+    el.className = "score-pop";
+    el.textContent = "+" + delta;
+    el.style.left = p.x + cellSize() * 0.15 + "px";
+    el.style.top = p.y + "px";
+    boardEl.appendChild(el);
+    setTimeout(() => el.remove(), 700);
+  }
+
+  function showCombo(depth) {
+    if (depth < 1) return;
+    comboEl.textContent = depth >= 3 ? "MEGA CASCADE!" : "COMBO x" + (depth + 1);
+    comboEl.classList.add("show");
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => comboEl.classList.remove("show"), 500);
+  }
+
+  // ---------- Clear / gravity ----------
+  async function clearCells(cells, reason, depth) {
+    if (!cells.length) return;
+    let heroClears = 0;
+    const uids = [];
+    for (const cell of cells) {
+      const t = get(cell.r, cell.c);
+      if (!t) continue;
+      if (t.kind === "Normal" && t.emojiType === selectedHero.id) heroClears++;
+      uids.push(t.uid);
+      const el = sprites.get(t.uid);
+      if (el) el.classList.add("pop");
+      set(cell.r, cell.c, null);
+    }
+    const delta = award(cells.length, reason, depth);
+    addBlitz(cells.length);
+    addCharge(heroClears);
+    popScore(cells, delta);
+    idle = false;
+    await sleep(ANIM.clear);
+    for (const uid of uids) {
+      const el = sprites.get(uid);
+      if (el) el.remove();
+      sprites.delete(uid);
+    }
+  }
+
+  async function gravityAndRefill() {
+    const spawns = [];
+    for (let c = 0; c < COLS; c++) {
+      const surviving = [];
+      for (let r = ROWS - 1; r >= 0; r--) {
+        const t = get(r, c);
+        if (t) surviving.push({ tile: t, fromR: r });
+      }
+      for (let r = 0; r < ROWS; r++) set(r, c, null);
+      let dest = ROWS - 1;
+      for (const { tile, fromR } of surviving) {
+        set(dest, c, tile);
+        dest--;
+      }
+      let depth = 1;
+      for (let r = dest; r >= 0; r--) {
+        const tile = makeNormal();
+        set(r, c, tile);
+        spawns.push({ tile, r, c, depth: depth++ });
+      }
+    }
+    syncAllSprites(true);
+    for (const s of spawns) ensureSprite(s.tile, s.r, s.c, s.depth);
+    await sleep(ANIM.spawn + 80);
+  }
+
+  async function applyPlan(plan, depth) {
+    if (plan.transforms?.length) {
+      for (const tr of plan.transforms) {
+        const old = get(tr.cell.r, tr.cell.c);
+        const tile = makeSpecial(tr.kind, tr.cloudAxis);
+        if (old) {
+          const el = sprites.get(old.uid);
+          if (el) {
+            sprites.delete(old.uid);
+            tile.uid = old.uid;
+            sprites.set(tile.uid, el);
+          }
+        }
+        set(tr.cell.r, tr.cell.c, tile);
+        ensureSprite(tile, tr.cell.r, tr.cell.c);
+      }
+      await sleep(120);
+    }
+    let cells = plan.cells;
+    if (plan.triggerAfterTransform?.length) {
+      cells = expandTriggers(plan.triggerAfterTransform);
+    }
+    await clearCells(cells, plan.reason, depth);
+    await gravityAndRefill();
+  }
+
+  async function applyMatch(match, depth) {
+    await clearCells(match.clearCells, depth > 0 ? "cascade" : "match", depth);
+    for (const spawn of match.specialSpawns) {
+      const tile = makeSpecial(spawn.kind, spawn.cloudAxis);
+      set(spawn.cell.r, spawn.cell.c, tile);
+      ensureSprite(tile, spawn.cell.r, spawn.cell.c);
+    }
+    await gravityAndRefill();
+  }
+
+  async function cascadeFrom(initial) {
+    resolving = true;
+    const prev = state;
+    state = "Resolving";
+    if (initial.type === "plan") await applyPlan(initial.plan, 0);
+    else await applyMatch(initial.match, 0);
+
+    let depth = 1;
+    while (depth <= 30) {
+      const match = findMatches();
+      if (!match.groups.length) break;
+      showCombo(depth);
+      await applyMatch(match, depth);
+      depth++;
+    }
+
+    resolving = false;
+    if (blitzActive) state = "Blitz";
+    else if (timeLeft <= 0) endRound();
+    else state = prev === "Blitz" ? "Blitz" : "Playing";
+
+    if (!blitzActive && blitz >= 100) enterBlitz();
+    updateHud();
+  }
+
+  // ---------- Board fill ----------
+  function normalAvoiding(r, c) {
+    const forbidden = new Set();
+    if (c >= 2) {
+      const a = get(r, c - 1), b = get(r, c - 2);
+      if (a?.kind === "Normal" && b?.kind === "Normal" && a.emojiType === b.emojiType) forbidden.add(a.emojiType);
+    }
+    if (r >= 2) {
+      const a = get(r - 1, c), b = get(r - 2, c);
+      if (a?.kind === "Normal" && b?.kind === "Normal" && a.emojiType === b.emojiType) forbidden.add(a.emojiType);
+    }
+    const opts = pool.filter((t) => !forbidden.has(t));
+    const pick = (opts.length ? opts : pool)[Math.floor(rng() * (opts.length ? opts.length : pool.length))];
+    return makeNormal(pick);
+  }
+
+  function fillBoard() {
+    grid = new Array(ROWS * COLS).fill(null);
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) set(r, c, normalAvoiding(r, c));
+    }
+    for (let i = 0; i < 20 && findMatches().groups.length; i++) {
+      for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) set(r, c, normalAvoiding(r, c));
+    }
+    boardEl.innerHTML = "";
+    sprites.clear();
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++) ensureSprite(get(r, c), r, c);
+  }
+
+  // ---------- Blitz ----------
+  function enterBlitz() {
+    blitzActive = true;
+    blitz = 100;
+    blitzLeft = BLITZ_SEC;
+    timePaused = true;
+    state = "Blitz";
+    document.body.classList.add("blitz-mode");
+    hintEl.textContent = "BLITZ! 3× score · leaner pool";
+    const candidates = basePool.filter((t) => t !== selectedHero.id);
+    const removed = candidates[Math.floor(rng() * candidates.length)];
+    pool = basePool.filter((t) => t !== removed);
+    if (pool.length > BLITZ_POOL) pool = pool.slice(0, BLITZ_POOL);
+    updateHud();
+  }
+
+  function exitBlitz() {
+    blitzActive = false;
+    blitz = 0;
+    blitzLeft = 0;
+    pool = [...basePool];
+    document.body.classList.remove("blitz-mode");
+    if (timePauseLeft <= 0) timePaused = false;
+    state = timeLeft <= 0 ? "RoundEnd" : "Playing";
+    hintEl.textContent = "Match 3 · swipe to swap";
+    updateHud();
+    if (state === "RoundEnd") endRound();
+  }
+
+  // ---------- Character power ----------
+  async function firePower() {
+    if (charCharge < 100 || resolving) return;
+    if (state !== "Playing" && state !== "Blitz") return;
+    charCharge = 0;
+    idle = false;
+    addCharge(0);
+    heroBtn.classList.remove("ready");
+    heroBtn.disabled = true;
+
+    const spell = selectedHero.spell;
+    let plan = null;
+
+    if (spell === "pattern_x") {
+      const cells = [];
+      for (let i = 0; i < ROWS; i++) {
+        cells.push({ r: i, c: i });
+        cells.push({ r: i, c: COLS - 1 - i });
+      }
+      plan = { cells: uniq(cells), reason: "character" };
+    } else if (spell === "column_crush") {
+      const cols = [0, 1, 2, 3, 4, 5, 6];
+      const chosen = [];
+      for (let i = 0; i < 2; i++) {
+        const idx = Math.floor(rng() * cols.length);
+        chosen.push(cols.splice(idx, 1)[0]);
+      }
+      const cells = [];
+      for (const c of chosen) for (let r = 0; r < ROWS; r++) cells.push({ r, c });
+      plan = { cells: uniq(cells), reason: "character" };
+    } else if (spell === "time_pause") {
+      if (!blitzActive) {
+        timePaused = true;
+        timePauseLeft = 3;
+        hintEl.textContent = "Time frozen!";
+      }
+      updateHud();
+      return;
+    } else if (spell === "guaranteed_stars") {
+      const normals = [];
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        if (get(r, c)?.kind === "Normal") normals.push({ r, c });
+      }
+      for (let i = 0; i < 2 && normals.length; i++) {
+        const idx = Math.floor(rng() * normals.length);
+        const cell = normals.splice(idx, 1)[0];
+        const tile = makeSpecial("RainbowStar");
+        const old = get(cell.r, cell.c);
+        if (old) {
+          const el = sprites.get(old.uid);
+          if (el) { sprites.delete(old.uid); el.remove(); }
+        }
+        set(cell.r, cell.c, tile);
+        ensureSprite(tile, cell.r, cell.c);
+      }
+      hintEl.textContent = "Stars appear!";
+      return;
+    }
+
+    if (plan) await cascadeFrom({ type: "plan", plan });
+  }
+
+  // ---------- Swap ----------
+  async function trySwap(a, b) {
+    if (resolving || (state !== "Playing" && state !== "Blitz")) return;
+    if (!ortho(a, b)) return;
+
+    idle = false;
+    selected = null;
+    syncAllSprites();
+
+    // animate swap
+    const ta = get(a.r, a.c), tb = get(b.r, b.c);
+    if (!ta || !tb) return;
+    const ea = sprites.get(ta.uid), eb = sprites.get(tb.uid);
+    const pa = posFor(a.r, a.c), pb = posFor(b.r, b.c);
+    if (ea && eb) {
+      ea.style.transition = `left ${ANIM.swap}ms ease, top ${ANIM.swap}ms ease`;
+      eb.style.transition = `left ${ANIM.swap}ms ease, top ${ANIM.swap}ms ease`;
+      ea.style.left = pb.x + "px"; ea.style.top = pb.y + "px";
+      eb.style.left = pa.x + "px"; eb.style.top = pa.y + "px";
+    }
+    await sleep(ANIM.swap);
+    swapCells(a, b);
+
+    const specialPlan = resolveSwapSpecial(a, b);
+    if (specialPlan) {
+      await cascadeFrom({ type: "plan", plan: specialPlan });
+      return;
+    }
+
+    const match = findMatches();
+    if (!match.groups.length) {
+      // reject
+      swapCells(a, b);
+      if (ea && eb) {
+        ea.style.transition = `left ${ANIM.reject}ms ease, top ${ANIM.reject}ms ease`;
+        eb.style.transition = `left ${ANIM.reject}ms ease, top ${ANIM.reject}ms ease`;
+        ea.style.left = pa.x + "px"; ea.style.top = pa.y + "px";
+        eb.style.left = pb.x + "px"; eb.style.top = pb.y + "px";
+      }
+      await sleep(ANIM.reject);
+      syncAllSprites();
+      return;
+    }
+
+    syncAllSprites();
+    await cascadeFrom({ type: "match", match });
+  }
+
+  // ---------- Input ----------
+  function hitCell(clientX, clientY) {
+    const rect = boardEl.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const s = cellSize(), g = gapSize();
+    const c = Math.floor(x / (s + g));
+    const r = Math.floor(y / (s + g));
+    if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return null;
+    return { r, c };
+  }
+
+  let downCell = null;
+  let gestureLocked = false;
+
+  boardEl.addEventListener("pointerdown", (e) => {
+    boardEl.setPointerCapture(e.pointerId);
+    downCell = hitCell(e.clientX, e.clientY);
+    gestureLocked = false;
+    if (downCell) {
+      if (selected && ortho(selected, downCell)) {
+        const a = selected, b = downCell;
+        selected = null;
+        trySwap(a, b);
+        downCell = null;
+        return;
+      }
+      selected = downCell;
+      syncAllSprites();
+    }
+  });
+
+  boardEl.addEventListener("pointermove", (e) => {
+    if (!downCell || gestureLocked || resolving) return;
+    const rect = boardEl.getBoundingClientRect();
+    const s = cellSize(), g = gapSize();
+    const cx = rect.left + downCell.c * (s + g) + s / 2;
+    const cy = rect.top + downCell.r * (s + g) + s / 2;
+    const dx = e.clientX - cx, dy = e.clientY - cy;
+    const thresh = s * 0.3;
+    if (Math.abs(dx) < thresh && Math.abs(dy) < thresh) return;
+    let target;
+    if (Math.abs(dx) > Math.abs(dy)) target = { r: downCell.r, c: downCell.c + (dx > 0 ? 1 : -1) };
+    else target = { r: downCell.r + (dy > 0 ? 1 : -1), c: downCell.c };
+    if (target.r < 0 || target.c < 0 || target.r >= ROWS || target.c >= COLS) return;
+    gestureLocked = true;
+    const a = downCell;
+    downCell = null;
+    selected = null;
+    trySwap(a, target);
+  });
+
+  boardEl.addEventListener("pointerup", () => {
+    downCell = null;
+    gestureLocked = false;
+  });
+
+  heroBtn.addEventListener("click", () => firePower());
+
+  // ---------- Round lifecycle ----------
+  function updateHud() {
+    scoreEl.textContent = String(score);
+    coinsEl.textContent = String(Math.floor(score / 50));
+    const t = blitzActive ? blitzLeft : timeLeft;
+    timerEl.textContent = t.toFixed(1);
+    timerEl.classList.toggle("warn", !blitzActive && timeLeft <= 10);
+    blitzBar.style.width = (blitzActive ? (blitzLeft / BLITZ_SEC) * 100 : blitz) + "%";
+    heroRing.style.setProperty("--p", charCharge + "%");
+    const ready = charCharge >= 100 && (state === "Playing" || state === "Blitz") && !resolving;
+    heroBtn.disabled = !ready;
+    heroBtn.classList.toggle("ready", ready);
+  }
+
+  function startRound() {
+    rng = createRng((Date.now() ^ (Math.random() * 1e9)) >>> 0);
+    // Build pool of 5 including hero
+    const others = EMOJIS.filter((e) => e.id !== selectedHero.id).sort(() => rng() - 0.5).slice(0, POOL_SIZE - 1);
+    basePool = [selectedHero.id, ...others.map((e) => e.id)];
+    pool = [...basePool];
+
+    score = 0; blitz = 0; blitzActive = false; blitzLeft = 0;
+    charCharge = 0; timeLeft = ROUND_SEC; timePaused = false; timePauseLeft = 0;
+    idle = true; selected = null; nextUid = 1;
+    document.body.classList.remove("blitz-mode");
+
+    heroEmojiEl.textContent = selectedHero.glyph;
+    heroNameEl.textContent = selectedHero.name;
+    heroDescEl.textContent = selectedHero.desc;
+    hintEl.textContent = "Match 3 · swipe to swap";
+
+    fillBoard();
+    startOverlay.classList.add("hidden");
+    endOverlay.classList.add("hidden");
+    state = "Playing";
+    updateHud();
+    lastTs = performance.now();
+    requestAnimationFrame(tick);
+  }
+
+  function endRound() {
+    state = "RoundEnd";
+    document.body.classList.remove("blitz-mode");
+    endSub.textContent = `Score ${score} · Coins ${Math.floor(score / 50)}`;
+    endOverlay.classList.remove("hidden");
+    heroBtn.disabled = true;
+    heroBtn.classList.remove("ready");
+  }
+
+  function tick(ts) {
+    if (state === "RoundEnd" || state === "PreMatch") return;
+    const dt = Math.min(0.05, (ts - lastTs) / 1000);
+    lastTs = ts;
+
+    if (state === "Playing") {
+      if (idle && !resolving && blitz > 0) {
+        blitz = Math.max(0, blitz - BLITZ_DECAY * dt);
+      }
+      idle = true;
+
+      if (!timePaused) {
+        timeLeft = Math.max(0, timeLeft - dt);
+        if (timeLeft <= 0 && !resolving) {
+          updateHud();
+          endRound();
+          return;
+        }
+      } else if (timePauseLeft > 0) {
+        timePauseLeft = Math.max(0, timePauseLeft - dt);
+        if (timePauseLeft <= 0 && !blitzActive) {
+          timePaused = false;
+          hintEl.textContent = "Match 3 · swipe to swap";
+        }
+      }
+
+      if (!blitzActive && blitz >= 100 && !resolving) enterBlitz();
+    } else if (state === "Blitz") {
+      blitzLeft -= dt;
+      if (blitzLeft <= 0) {
+        if (resolving) blitzLeft = 0.001;
+        else exitBlitz();
+      }
+    }
+
+    updateHud();
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- UI bootstrap ----------
+  function renderPicker() {
+    heroPicker.innerHTML = "";
+    EMOJIS.slice(0, 4).forEach((e, i) => {
+      const btn = document.createElement("button");
+      btn.innerHTML = `${e.glyph}<small>${e.name.split(" ")[0]}</small>`;
+      if (i === 0) btn.classList.add("active");
+      btn.addEventListener("click", () => {
+        selectedHero = e;
+        [...heroPicker.children].forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        heroEmojiEl.textContent = e.glyph;
+        heroNameEl.textContent = e.name;
+        heroDescEl.textContent = e.desc;
+      });
+      heroPicker.appendChild(btn);
+    });
+  }
+
+  document.getElementById("startBtn").addEventListener("click", startRound);
+  document.getElementById("againBtn").addEventListener("click", () => {
+    endOverlay.classList.add("hidden");
+    startOverlay.classList.remove("hidden");
+    state = "PreMatch";
+  });
+
+  renderPicker();
+  updateHud();
+})();
+  </script>
+</body>
+</html>
