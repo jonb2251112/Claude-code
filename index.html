@@ -614,8 +614,8 @@
         <div id="nes"></div>
         <div class="overlay" id="overlay">
           <h1>CAR<span>T</span></h1>
-          <p>Import a <strong style="color:var(--ink);font-weight:700">.nes</strong> ROM from your device and play instantly — built for phones with a full on-screen pad. Use ROMs you own or legally obtained homebrew.</p>
-          <button class="primary-btn" id="importBtn" type="button">Import ROM</button>
+          <p>Import a <strong style="color:var(--ink);font-weight:700">.nes</strong> or <strong style="color:var(--ink);font-weight:700">.zip</strong> from your device — ZIPs are unpacked in-browser. Built for phones with a full on-screen pad. Use ROMs you own or legally obtained homebrew.</p>
+          <button class="primary-btn" id="importBtn" type="button">Import ROM / ZIP</button>
           <button class="ghost-btn" id="importBtn2" type="button">Or drop a file here</button>
         </div>
       </div>
@@ -660,7 +660,7 @@
     </section>
   </div>
 
-  <input id="romInput" type="file" accept=".nes,.NES,application/octet-stream" />
+  <input id="romInput" type="file" accept=".nes,.NES,.zip,.ZIP,.unf,.fds,application/zip,application/octet-stream" />
 
   <script>
     (function () {
@@ -781,7 +781,7 @@
       }
 
       function loadRomFromUrl(url, name) {
-        overlay.querySelector("p") && (overlay.querySelector("p").textContent = "Loading ROM…");
+        setOverlayMessage("Loading…");
         fetch(url)
           .then(function (res) {
             if (!res.ok) throw new Error("HTTP " + res.status);
@@ -789,23 +789,165 @@
           })
           .then(function (buf) {
             var label = name || decodeURIComponent((url.split("/").pop() || "ROM").split("?")[0]);
-            loadRomArrayBuffer(buf, label);
+            return ingestBuffer(buf, label);
           })
           .catch(function (err) {
             console.error(err);
-            showError("Could not fetch that ROM. Import a local .nes file instead.");
+            showError("Could not fetch that file. Import a local .nes or .zip instead.");
           });
+      }
+
+      var ROM_NAME_RE = /\.(nes|nez|unf|unif|fds)$/i;
+
+      function setOverlayMessage(msg) {
+        var p = overlay.querySelector("p");
+        if (p) p.textContent = msg;
+      }
+
+      function isZipBuffer(u8) {
+        return (
+          u8 &&
+          u8.length >= 4 &&
+          u8[0] === 0x50 &&
+          u8[1] === 0x4b &&
+          (u8[2] === 0x03 || u8[2] === 0x05 || u8[2] === 0x07)
+        );
+      }
+
+      function inflateRaw(uint8) {
+        if (typeof DecompressionStream === "undefined") {
+          return Promise.reject(new Error("This browser cannot unpack ZIP files."));
+        }
+        var stream = new Blob([uint8]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        return new Response(stream).arrayBuffer().then(function (ab) {
+          return new Uint8Array(ab);
+        });
+      }
+
+      function parseZipEntries(arrayBuffer) {
+        var view = new DataView(arrayBuffer);
+        var u8 = new Uint8Array(arrayBuffer);
+        var entries = [];
+        var eocd = -1;
+        var min = Math.max(0, u8.length - 65557);
+        for (var i = u8.length - 22; i >= min; i--) {
+          if (view.getUint32(i, true) === 0x06054b50) {
+            eocd = i;
+            break;
+          }
+        }
+
+        if (eocd >= 0) {
+          var cdOffset = view.getUint32(eocd + 16, true);
+          var cdCount = view.getUint16(eocd + 10, true);
+          var off = cdOffset;
+          for (var n = 0; n < cdCount; n++) {
+            if (off + 46 > u8.length || view.getUint32(off, true) !== 0x02014b50) break;
+            var method = view.getUint16(off + 10, true);
+            var compSize = view.getUint32(off + 20, true);
+            var nameLen = view.getUint16(off + 28, true);
+            var extraLen = view.getUint16(off + 30, true);
+            var commentLen = view.getUint16(off + 32, true);
+            var localOff = view.getUint32(off + 42, true);
+            var name = new TextDecoder().decode(u8.subarray(off + 46, off + 46 + nameLen));
+            off += 46 + nameLen + extraLen + commentLen;
+            if (localOff + 30 > u8.length || view.getUint32(localOff, true) !== 0x04034b50) continue;
+            var localNameLen = view.getUint16(localOff + 26, true);
+            var localExtraLen = view.getUint16(localOff + 28, true);
+            var dataStart = localOff + 30 + localNameLen + localExtraLen;
+            if (dataStart + compSize > u8.length) continue;
+            entries.push({
+              name: name,
+              method: method,
+              data: u8.subarray(dataStart, dataStart + compSize)
+            });
+          }
+          return entries;
+        }
+
+        // Fallback: walk local file headers
+        off = 0;
+        while (off + 30 <= u8.length && view.getUint32(off, true) === 0x04034b50) {
+          method = view.getUint16(off + 8, true);
+          var flags = view.getUint16(off + 6, true);
+          compSize = view.getUint32(off + 18, true);
+          nameLen = view.getUint16(off + 26, true);
+          extraLen = view.getUint16(off + 28, true);
+          name = new TextDecoder().decode(u8.subarray(off + 30, off + 30 + nameLen));
+          dataStart = off + 30 + nameLen + extraLen;
+          if (flags & 0x8) break; // sizes in data descriptor — need EOCD path
+          if (dataStart + compSize > u8.length) break;
+          entries.push({
+            name: name,
+            method: method,
+            data: u8.subarray(dataStart, dataStart + compSize)
+          });
+          off = dataStart + compSize;
+        }
+        return entries;
+      }
+
+      function extractRomFromZip(arrayBuffer) {
+        var entries = parseZipEntries(arrayBuffer);
+        var candidates = entries.filter(function (e) {
+          if (!e.name || /\/$/.test(e.name)) return false;
+          var base = e.name.split("/").pop();
+          return ROM_NAME_RE.test(base || "");
+        });
+        if (!candidates.length) {
+          return Promise.reject(new Error("No .nes ROM found inside that ZIP."));
+        }
+
+        return Promise.all(
+          candidates.map(function (e) {
+            var base = e.name.split("/").pop();
+            var rawPromise =
+              e.method === 0
+                ? Promise.resolve(e.data)
+                : e.method === 8
+                  ? inflateRaw(e.data)
+                  : Promise.reject(new Error("Unsupported ZIP compression in " + base));
+            return rawPromise.then(function (raw) {
+              var copy = new Uint8Array(raw.byteLength);
+              copy.set(raw);
+              return { name: base, data: copy.buffer, size: copy.byteLength };
+            });
+          })
+        ).then(function (roms) {
+          roms.sort(function (a, b) {
+            return b.size - a.size;
+          });
+          return roms[0];
+        });
+      }
+
+      function ingestBuffer(buffer, name) {
+        var u8 = new Uint8Array(buffer);
+        var lower = (name || "").toLowerCase();
+        var looksZip = lower.endsWith(".zip") || isZipBuffer(u8);
+
+        if (looksZip) {
+          setOverlayMessage("Unpacking ZIP…");
+          overlay.classList.remove("hidden");
+          return extractRomFromZip(buffer)
+            .then(function (rom) {
+              loadRomArrayBuffer(rom.data, rom.name);
+            })
+            .catch(function (err) {
+              console.error(err);
+              showError(err && err.message ? err.message : "Could not unpack that ZIP.");
+            });
+        }
+
+        loadRomArrayBuffer(buffer, name);
+        return Promise.resolve();
       }
 
       function readFile(file) {
         if (!file) return;
-        var lower = (file.name || "").toLowerCase();
-        if (lower && !lower.endsWith(".nes") && !lower.endsWith(".unf") && !lower.endsWith(".fds")) {
-          // Still try — some ROMs have odd extensions
-        }
         var reader = new FileReader();
         reader.onload = function () {
-          loadRomArrayBuffer(reader.result, file.name);
+          ingestBuffer(reader.result, file.name);
         };
         reader.onerror = function () {
           showError("Failed to read that file.");
