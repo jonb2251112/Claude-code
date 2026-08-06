@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0a0c0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>CART — NES Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/jsnes@2.1.0/dist/jsnes.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0c0f;
+      --bg-elevated: #12161c;
+      --surface: #1a2029;
+      --ink: #f2f0ea;
+      --muted: #8b939e;
+      --accent: #e11d2e;
+      --accent-deep: #9f1320;
+      --accent-soft: rgba(225, 29, 46, 0.18);
+      --good: #3dcf7a;
+      --pad: #232a34;
+      --pad-lit: #e11d2e;
+      --line: rgba(242, 240, 234, 0.08);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-t: env(safe-area-inset-top, 0px);
+      --font-display: "Bebas Neue", sans-serif;
+      --font-body: "Manrope", sans-serif;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(225, 29, 46, 0.16), transparent 55%),
+        radial-gradient(90% 60% at 100% 100%, rgba(50, 90, 140, 0.12), transparent 50%),
+        linear-gradient(180deg, #0d1015 0%, var(--bg) 40%, #07090c 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.35) 2px,
+        rgba(255, 255, 255, 0.35) 3px
+      );
+      z-index: 50;
+    }
+
+    .app {
+      height: 100dvh;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      padding:
+        calc(10px + var(--safe-t))
+        12px
+        calc(10px + var(--safe-b))
+        12px;
+      gap: 10px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: rise 0.55s ease both;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 8vw, 2.6rem);
+      letter-spacing: 0.06em;
+      line-height: 0.9;
+      color: var(--ink);
+    }
+
+    .brand-mark span {
+      color: var(--accent);
+    }
+
+    .brand-sub {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .icon-btn.active {
+      background: var(--accent-soft);
+      border-color: rgba(225, 29, 46, 0.45);
+      color: #ff6b78;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .stage-wrap {
+      position: relative;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rise 0.65s ease both 0.06s;
+    }
+
+    .screen {
+      position: relative;
+      width: min(100%, calc((100dvh - 320px) * 256 / 240));
+      width: min(100%, calc((100vh - 320px) * 256 / 240));
+      max-width: 100%;
+      aspect-ratio: 256 / 240;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    #nes {
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    #nes canvas {
+      width: 100% !important;
+      height: 100% !important;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(225, 29, 46, 0.2), transparent 55%),
+        rgba(6, 8, 11, 0.88);
+      backdrop-filter: blur(2px);
+      z-index: 2;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .overlay h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 12vw, 3.4rem);
+      letter-spacing: 0.08em;
+      line-height: 0.92;
+    }
+
+    .overlay h1 span { color: var(--accent); }
+
+    .overlay p {
+      margin: 0;
+      max-width: 22rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .primary-btn, .ghost-btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      border-radius: 999px;
+      padding: 14px 22px;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(225, 29, 46, 0.35);
+    }
+
+    .primary-btn:active, .ghost-btn:active {
+      transform: scale(0.97);
+    }
+
+    .ghost-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      font-size: 0.8rem;
+    }
+
+    .status-chip {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      z-index: 3;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      max-width: calc(100% - 20px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-chip.show { display: inline-flex; }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--good);
+      flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(61, 207, 122, 0.18);
+    }
+
+    .status-dot.paused { background: #f0b429; box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.18); }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+      animation: rise 0.7s ease both 0.12s;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .pill-btn {
+      min-width: 78px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.12s ease, transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .pill-btn:active,
+    .pill-btn.is-down {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(0.96);
+    }
+
+    .gamepad {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: end;
+      gap: 8px;
+      padding: 6px 2px 0;
+    }
+
+    .dpad {
+      position: relative;
+      width: 148px;
+      height: 148px;
+      justify-self: start;
+    }
+
+    .dpad-cross {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 148px;
+      height: 148px;
+    }
+
+    .dpad-arm {
+      position: absolute;
+      background: var(--pad);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .dpad-arm.v {
+      left: 50%;
+      top: 0;
+      width: 48px;
+      height: 100%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+    }
+
+    .dpad-arm.h {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 48px;
+      transform: translateY(-50%);
+      border-radius: 12px;
+    }
+
+    .pad-btn {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.55);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .pad-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      pointer-events: none;
+    }
+
+    .pad-btn.is-down {
+      color: #fff;
+    }
+
+    .pad-btn.is-down::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 8px;
+      background: var(--accent);
+      opacity: 0.9;
+      z-index: -1;
+    }
+
+    .btn-up { top: 0; left: 50%; transform: translateX(-50%); }
+    .btn-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+    .btn-left { left: 0; top: 50%; transform: translateY(-50%); }
+    .btn-right { right: 0; top: 50%; transform: translateY(-50%); }
+
+    .face {
+      justify-self: end;
+      position: relative;
+      width: 148px;
+      height: 120px;
+    }
+
+    .face-btn {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(160deg, #2a323e, #1a2029);
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 18px rgba(0, 0, 0, 0.35);
+      transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .face-btn.b { left: 0; bottom: 8px; }
+    .face-btn.a { right: 0; top: 0; }
+
+    .face-btn.is-down {
+      transform: scale(0.92) translateY(2px);
+      background: linear-gradient(160deg, var(--accent), var(--accent-deep));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 4px 10px rgba(225, 29, 46, 0.35);
+    }
+
+    .center-cluster {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 18px;
+    }
+
+    .hint {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      opacity: 0.85;
+    }
+
+    .drop-active .screen {
+      outline: 2px dashed var(--accent);
+      outline-offset: 4px;
+    }
+
+    #romInput { display: none; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (min-width: 720px) {
+      .app {
+        max-width: 860px;
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .screen {
+        width: min(100%, 560px);
+      }
+
+      .dpad, .face {
+        transform: scale(1.08);
+        transform-origin: bottom center;
+      }
+    }
+
+    @media (max-height: 700px) {
+      .brand-sub { display: none; }
+      .dpad { width: 132px; height: 132px; }
+      .dpad-cross { width: 132px; height: 132px; }
+      .face { width: 132px; height: 108px; }
+      .face-btn { width: 58px; height: 58px; }
+      .pad-btn, .dpad-arm.v { width: 44px; }
+      .pad-btn, .dpad-arm.h { height: 44px; }
+      .hint { display: none; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .app {
+        grid-template-columns: 1fr minmax(0, 1.2fr) 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+        max-width: none;
+        gap: 8px;
+      }
+
+      .topbar {
+        grid-column: 1 / -1;
+      }
+
+      .stage-wrap {
+        grid-column: 2;
+        grid-row: 2;
+      }
+
+      .controls {
+        display: contents;
+      }
+
+      .meta-row {
+        grid-column: 1 / -1;
+        order: 3;
+      }
+
+      .gamepad {
+        display: contents;
+      }
+
+      .dpad {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: center;
+        justify-self: center;
+      }
+
+      .face {
+        grid-column: 3;
+        grid-row: 2;
+        align-self: center;
+        justify-self: center;
+      }
+
+      .center-cluster {
+        display: none;
+      }
+
+      .screen {
+        width: min(100%, calc(100dvh - 90px) * 256 / 240);
+        width: min(100%, calc(100vh - 90px) * 256 / 240);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">CAR<span>T</span></div>
+        <div class="brand-sub">NES browser player</div>
+      </div>
+      <div class="toolbar">
+        <button class="icon-btn" id="muteBtn" type="button" aria-label="Mute" title="Mute">
+          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a9 9 0 0 1 0 14"></path></svg>
+        </button>
+        <button class="icon-btn" id="pauseBtn" type="button" aria-label="Pause" title="Pause" disabled>
+          <svg viewBox="0 0 24 24" id="pauseIcon"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect></svg>
+        </button>
+        <button class="icon-btn" id="resetBtn" type="button" aria-label="Reset" title="Reset" disabled>
+          <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        </button>
+        <button class="icon-btn" id="fsBtn" type="button" aria-label="Fullscreen" title="Fullscreen">
+          <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage-wrap">
+      <div class="screen" id="screen">
+        <div class="status-chip" id="romChip">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="romName">No ROM</span>
+        </div>
+        <div id="nes"></div>
+        <div class="overlay" id="overlay">
+          <h1>CAR<span>T</span></h1>
+          <p>Import a <strong style="color:var(--ink);font-weight:700">.nes</strong> ROM from your device and play instantly — built for phones with a full on-screen pad. Use ROMs you own or legally obtained homebrew.</p>
+          <button class="primary-btn" id="importBtn" type="button">Import ROM</button>
+          <button class="ghost-btn" id="importBtn2" type="button">Or drop a file here</button>
+        </div>
+      </div>
+    </main>
+
+    <section class="controls" aria-label="On-screen gamepad">
+      <div class="meta-row">
+        <button class="pill-btn" type="button" data-btn="SELECT">Select</button>
+        <button class="primary-btn" id="importFab" type="button" style="padding:10px 18px;font-size:0.82rem;border-radius:999px;">Import</button>
+        <button class="pill-btn" type="button" data-btn="START">Start</button>
+      </div>
+
+      <div class="gamepad">
+        <div class="dpad" aria-label="D-pad">
+          <div class="dpad-cross">
+            <div class="dpad-arm v"></div>
+            <div class="dpad-arm h"></div>
+            <button class="pad-btn btn-up" type="button" data-btn="UP" aria-label="Up">
+              <svg viewBox="0 0 24 24"><path d="M12 5l7 10H5z"/></svg>
+            </button>
+            <button class="pad-btn btn-down" type="button" data-btn="DOWN" aria-label="Down">
+              <svg viewBox="0 0 24 24"><path d="M12 19l-7-10h14z"/></svg>
+            </button>
+            <button class="pad-btn btn-left" type="button" data-btn="LEFT" aria-label="Left">
+              <svg viewBox="0 0 24 24"><path d="M5 12l10-7v14z"/></svg>
+            </button>
+            <button class="pad-btn btn-right" type="button" data-btn="RIGHT" aria-label="Right">
+              <svg viewBox="0 0 24 24"><path d="M19 12L9 5v14z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="center-cluster">
+          <p class="hint">Hold B to run · A to jump</p>
+        </div>
+
+        <div class="face" aria-label="Action buttons">
+          <button class="face-btn b" type="button" data-btn="B" aria-label="B">B</button>
+          <button class="face-btn a" type="button" data-btn="A" aria-label="A">A</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <input id="romInput" type="file" accept=".nes,.NES,application/octet-stream" />
+
+  <script>
+    (function () {
+      if (typeof jsnes === "undefined") {
+        document.getElementById("overlay").innerHTML =
+          "<h1>CART</h1><p>Could not load the emulator library. Check your connection and reload.</p>";
+        return;
+      }
+
+      var BUTTON = {
+        A: jsnes.Controller.BUTTON_A,
+        B: jsnes.Controller.BUTTON_B,
+        SELECT: jsnes.Controller.BUTTON_SELECT,
+        START: jsnes.Controller.BUTTON_START,
+        UP: jsnes.Controller.BUTTON_UP,
+        DOWN: jsnes.Controller.BUTTON_DOWN,
+        LEFT: jsnes.Controller.BUTTON_LEFT,
+        RIGHT: jsnes.Controller.BUTTON_RIGHT
+      };
+
+      var nesEl = document.getElementById("nes");
+      var overlay = document.getElementById("overlay");
+      var romInput = document.getElementById("romInput");
+      var romChip = document.getElementById("romChip");
+      var romName = document.getElementById("romName");
+      var statusDot = document.getElementById("statusDot");
+      var pauseBtn = document.getElementById("pauseBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var muteBtn = document.getElementById("muteBtn");
+      var fsBtn = document.getElementById("fsBtn");
+      var app = document.getElementById("app");
+      var screen = document.getElementById("screen");
+
+      var browser = null;
+      var running = false;
+      var paused = false;
+      var muted = false;
+      var currentRomName = "";
+      var audioUnlocked = false;
+
+      function createBrowser() {
+        if (browser) {
+          try { browser.destroy(); } catch (e) {}
+          nesEl.innerHTML = "";
+        }
+        browser = new jsnes.Browser({
+          container: nesEl,
+          onError: function (err) {
+            console.error(err);
+            showError("Emulation error. Try another ROM.");
+          }
+        });
+        fitCanvas();
+      }
+
+      function fitCanvas() {
+        if (browser && typeof browser.fitInParent === "function") {
+          browser.fitInParent();
+        }
+        var canvas = nesEl.querySelector("canvas");
+        if (canvas) {
+          canvas.style.width = "100%";
+          canvas.style.height = "100%";
+          canvas.style.imageRendering = "pixelated";
+        }
+      }
+
+      function showError(msg) {
+        overlay.classList.remove("hidden");
+        overlay.innerHTML =
+          "<h1>CAR<span>T</span></h1><p>" + msg + "</p>" +
+          '<button class="primary-btn" id="importBtnRetry" type="button">Import ROM</button>';
+        document.getElementById("importBtnRetry").addEventListener("click", openPicker);
+      }
+
+      function unlockAudio() {
+        if (audioUnlocked) return;
+        try {
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          var ctx = new Ctx();
+          if (ctx.state === "suspended") ctx.resume();
+          var buffer = ctx.createBuffer(1, 1, 22050);
+          var source = ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(ctx.destination);
+          source.start(0);
+          audioUnlocked = true;
+          setTimeout(function () { ctx.close(); }, 200);
+        } catch (e) {}
+      }
+
+      function loadRomArrayBuffer(buffer, name) {
+        unlockAudio();
+        createBrowser();
+        try {
+          browser.loadROM(buffer);
+        } catch (err) {
+          console.error(err);
+          showError("Could not load that file. Make sure it is a valid NES ROM (.nes).");
+          return;
+        }
+
+        currentRomName = name || "Loaded ROM";
+        romName.textContent = currentRomName;
+        romChip.classList.add("show");
+        overlay.classList.add("hidden");
+        running = true;
+        paused = false;
+        statusDot.classList.remove("paused");
+        pauseBtn.disabled = false;
+        resetBtn.disabled = false;
+        updatePauseIcon();
+        applyMuteState();
+        fitCanvas();
+        requestAnimationFrame(fitCanvas);
+        requestWakeLock();
+      }
+
+      function loadRomFromUrl(url, name) {
+        overlay.querySelector("p") && (overlay.querySelector("p").textContent = "Loading ROM…");
+        fetch(url)
+          .then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.arrayBuffer();
+          })
+          .then(function (buf) {
+            var label = name || decodeURIComponent((url.split("/").pop() || "ROM").split("?")[0]);
+            loadRomArrayBuffer(buf, label);
+          })
+          .catch(function (err) {
+            console.error(err);
+            showError("Could not fetch that ROM. Import a local .nes file instead.");
+          });
+      }
+
+      function readFile(file) {
+        if (!file) return;
+        var lower = (file.name || "").toLowerCase();
+        if (lower && !lower.endsWith(".nes") && !lower.endsWith(".unf") && !lower.endsWith(".fds")) {
+          // Still try — some ROMs have odd extensions
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          loadRomArrayBuffer(reader.result, file.name);
+        };
+        reader.onerror = function () {
+          showError("Failed to read that file.");
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function openPicker() {
+        unlockAudio();
+        romInput.click();
+      }
+
+      romInput.addEventListener("change", function () {
+        if (romInput.files && romInput.files[0]) {
+          readFile(romInput.files[0]);
+          romInput.value = "";
+        }
+      });
+
+      ["importBtn", "importBtn2", "importFab"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener("click", openPicker);
+      });
+
+      // Drag & drop
+      ["dragenter", "dragover"].forEach(function (evt) {
+        window.addEventListener(evt, function (e) {
+          e.preventDefault();
+          app.classList.add("drop-active");
+        });
+      });
+      ["dragleave", "drop"].forEach(function (evt) {
+        window.addEventListener(evt, function (e) {
+          e.preventDefault();
+          if (evt === "drop") {
+            app.classList.remove("drop-active");
+            var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) readFile(file);
+          } else if (!e.relatedTarget) {
+            app.classList.remove("drop-active");
+          }
+        });
+      });
+
+      function buttonDown(name) {
+        if (!browser || !browser.nes || !running || paused) return;
+        browser.nes.buttonDown(1, BUTTON[name]);
+        if (navigator.vibrate) navigator.vibrate(8);
+      }
+
+      function buttonUp(name) {
+        if (!browser || !browser.nes) return;
+        browser.nes.buttonUp(1, BUTTON[name]);
+      }
+
+      function bindPadButton(el) {
+        var name = el.getAttribute("data-btn");
+        if (!name || !BUTTON.hasOwnProperty(name)) return;
+
+        var down = false;
+
+        function press(e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          unlockAudio();
+          if (down) return;
+          down = true;
+          el.classList.add("is-down");
+          buttonDown(name);
+        }
+
+        function release(e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          if (!down) return;
+          down = false;
+          el.classList.remove("is-down");
+          buttonUp(name);
+        }
+
+        el.addEventListener("pointerdown", press);
+        el.addEventListener("pointerup", release);
+        el.addEventListener("pointercancel", release);
+        el.addEventListener("pointerleave", function (e) {
+          if (e.pointerType === "mouse") release(e);
+        });
+        el.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+      }
+
+      document.querySelectorAll("[data-btn]").forEach(bindPadButton);
+
+      // Prevent page scroll while using gamepad
+      document.querySelector(".controls").addEventListener("touchmove", function (e) {
+        e.preventDefault();
+      }, { passive: false });
+
+      function updatePauseIcon() {
+        var icon = document.getElementById("pauseIcon");
+        if (!icon) return;
+        if (paused) {
+          icon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"></polygon>';
+          pauseBtn.setAttribute("aria-label", "Play");
+          pauseBtn.title = "Play";
+        } else {
+          icon.innerHTML =
+            '<rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect>' +
+            '<rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"></rect>';
+          pauseBtn.setAttribute("aria-label", "Pause");
+          pauseBtn.title = "Pause";
+        }
+      }
+
+      pauseBtn.addEventListener("click", function () {
+        if (!browser || !running) return;
+        unlockAudio();
+        if (paused) {
+          browser.start();
+          paused = false;
+          statusDot.classList.remove("paused");
+        } else {
+          browser.stop();
+          paused = true;
+          statusDot.classList.add("paused");
+        }
+        updatePauseIcon();
+      });
+
+      resetBtn.addEventListener("click", function () {
+        if (!browser || !browser.nes || !running) return;
+        unlockAudio();
+        browser.nes.reset();
+        if (paused) {
+          browser.start();
+          paused = false;
+          statusDot.classList.remove("paused");
+          updatePauseIcon();
+        }
+      });
+
+      function applyMuteState() {
+        if (!browser || !browser.nes) return;
+        browser.nes.opts.emulateSound = !muted;
+        try {
+          var speakers = browser._speakers;
+          if (speakers && speakers.audioCtx) {
+            if (muted) speakers.audioCtx.suspend();
+            else speakers.audioCtx.resume();
+          }
+        } catch (e) {}
+      }
+
+      muteBtn.addEventListener("click", function () {
+        muted = !muted;
+        muteBtn.classList.toggle("active", muted);
+        applyMuteState();
+        var svg = muteBtn.querySelector("svg");
+        if (muted) {
+          svg.innerHTML =
+            '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>' +
+            '<line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
+        } else {
+          svg.innerHTML =
+            '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>' +
+            '<path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a9 9 0 0 1 0 14"></path>';
+        }
+      });
+
+      fsBtn.addEventListener("click", function () {
+        var target = document.documentElement;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          var req = target.requestFullscreen || target.webkitRequestFullscreen;
+          if (req) req.call(target);
+        } else {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen;
+          if (exit) exit.call(document);
+        }
+      });
+
+      window.addEventListener("resize", fitCanvas);
+      window.addEventListener("orientationchange", function () {
+        setTimeout(fitCanvas, 200);
+      });
+
+      // Wake lock where available (keeps screen on while playing)
+      var wakeLock = null;
+      async function requestWakeLock() {
+        try {
+          if ("wakeLock" in navigator) {
+            wakeLock = await navigator.wakeLock.request("screen");
+          }
+        } catch (e) {}
+      }
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible" && running && !paused) requestWakeLock();
+      });
+      romInput.addEventListener("change", function () { requestWakeLock(); });
+
+      // Initial empty browser so canvas sizing is ready after first import
+      createBrowser();
+
+      // Optional: ?rom=relative-or-absolute-url for same-origin demo loads
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var romParam = params.get("rom");
+        if (romParam) {
+          loadRomFromUrl(romParam);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>
