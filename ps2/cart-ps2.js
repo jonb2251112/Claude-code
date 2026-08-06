@@ -139,15 +139,55 @@ export const PS2_KEY = {
 export function sendPs2Key(code, isDown) {
   const canvas = document.getElementById("outputCanvas");
   if (!canvas) return;
+  try {
+    canvas.focus({ preventScroll: true });
+  } catch (_) {
+    try {
+      canvas.focus();
+    } catch (_) {}
+  }
   const type = isDown ? "keydown" : "keyup";
-  canvas.dispatchEvent(
-    new KeyboardEvent(type, {
-      code,
-      key: code,
-      bubbles: true,
-      cancelable: true,
-    })
-  );
+  // Map common KeyboardEvent.code values to legacy keyCode for Emscripten bindings.
+  const KEYCODE = {
+    ArrowUp: 38,
+    ArrowDown: 40,
+    ArrowLeft: 37,
+    ArrowRight: 39,
+    Enter: 13,
+    Backspace: 8,
+    KeyA: 65,
+    KeyZ: 90,
+    KeyS: 83,
+    KeyX: 88,
+    Key1: 49,
+    Key2: 50,
+    Key3: 51,
+    Key8: 56,
+    Key9: 57,
+    Key0: 48,
+    KeyF: 70,
+    KeyH: 72,
+    KeyT: 84,
+    KeyG: 71,
+    KeyJ: 74,
+    KeyL: 76,
+    KeyI: 73,
+    KeyK: 75,
+  };
+  const opts = {
+    code,
+    key: code.startsWith("Key") ? code.slice(3).toLowerCase() : code,
+    keyCode: KEYCODE[code] || 0,
+    which: KEYCODE[code] || 0,
+    bubbles: true,
+    cancelable: true,
+    view: window,
+  };
+  const ev = new KeyboardEvent(type, opts);
+  // Some engines ignore untrusted events on the canvas target only — fan out.
+  canvas.dispatchEvent(ev);
+  document.dispatchEvent(new KeyboardEvent(type, opts));
+  window.dispatchEvent(new KeyboardEvent(type, opts));
 }
 
 export function getFps() {

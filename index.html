@@ -1597,6 +1597,10 @@
         setSystem("ps2");
       });
 
+      window.addEventListener("cart-ps2-ready", function () {
+        if (system === "ps2") refreshPs2Warn();
+      });
+
       // Prevent page scroll while using gamepad
       document.querySelector(".controls").addEventListener("touchmove", function (e) {
         e.preventDefault();
