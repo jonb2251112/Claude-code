@@ -194,13 +194,17 @@ body.blitz{
 .menu-currencies{display:flex;gap:7px;flex-wrap:wrap}
 .menu-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;flex:1;min-height:0}
 .menu-hero .mascot{
-  width:min(38vw,148px);height:min(38vw,148px);border-radius:28%;
+  width:min(38vw,148px);height:min(38vw,148px);border-radius:32%;
   display:grid;place-items:center;font-size:min(22vw,86px);
   background:
-    radial-gradient(circle at 35% 28%,rgba(255,255,255,.55),transparent 42%),
-    linear-gradient(160deg,#ffe07a,#ff9a3c 55%,#63c74d);
-  box-shadow:0 12px 0 rgba(18,52,80,.16), 0 20px 30px rgba(18,52,80,.18);
+    radial-gradient(circle at 32% 24%,rgba(255,255,255,.7),transparent 40%),
+    linear-gradient(160deg,#fff,#ffe7b8 55%,#ffd28a);
+  box-shadow:
+    inset 0 3px 0 rgba(255,255,255,.85),
+    0 12px 0 rgba(18,52,80,.14),
+    0 20px 30px rgba(18,52,80,.16);
   animation:bob 2.2s ease-in-out infinite;
+  overflow:hidden;
 }
 .menu-hero .logo{font-size:clamp(2.2rem,9.5vw,3rem);margin-top:2px}
 .menu-hero .tagline{color:var(--ink-soft);font-weight:700;font-size:clamp(12px,3.2vw,14px);max-width:300px;line-height:1.25}
@@ -313,18 +317,50 @@ body.blitz{
 .board{position:relative;width:calc(var(--cell)*7 + var(--gap)*6);height:calc(var(--cell)*7 + var(--gap)*6);touch-action:none}
 .tile{
   position:absolute;width:var(--cell);height:var(--cell);display:grid;place-items:center;
-  font-size:calc(var(--cell)*.72);border-radius:14px;
-  background:linear-gradient(180deg,#fff,#fff0d2);
-  box-shadow:inset 0 -3px 0 rgba(18,52,80,.08),0 4px 0 rgba(18,52,80,.14);
+  border-radius:50%;
+  background:
+    radial-gradient(120% 100% at 28% 16%,rgba(255,255,255,.98),transparent 40%),
+    linear-gradient(180deg,#ffffff 0%,#fff6e6 55%,#ffe0b0 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255,255,255,.95),
+    inset 0 -5px 0 rgba(18,52,80,.1),
+    0 2px 0 rgba(255,255,255,.5),
+    0 6px 0 rgba(18,52,80,.16),
+    0 10px 16px rgba(18,52,80,.14);
   will-change:left,top,transform;z-index:1;cursor:pointer;
+  overflow:visible;
+}
+.tile .de-face{
+  width:108%;height:108%;
+  display:block;pointer-events:none;
+  filter:drop-shadow(0 3px 1.5px rgba(18,52,80,.22));
+  transform:translateY(0%);
 }
 .tile.special{
-  background:linear-gradient(160deg,#fff7d6,#ffd166 55%,#ff9a1a);
-  box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),0 0 0 3px rgba(255,107,74,.35),0 5px 0 rgba(18,52,80,.14);
+  background:
+    radial-gradient(120% 100% at 28% 15%,rgba(255,255,255,.98),transparent 40%),
+    linear-gradient(160deg,#fff8d6,#ffd166 55%,#ff9a1a);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.85),
+    inset 0 -4px 0 rgba(0,0,0,.08),
+    0 0 0 3px rgba(255,107,74,.38),
+    0 6px 0 rgba(18,52,80,.14);
 }
-.tile.selected{transform:scale(1.08);z-index:3;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08),0 0 0 3px var(--mint),0 8px 16px rgba(62,207,142,.35)}
+.tile.selected{
+  transform:scale(1.1);z-index:3;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.95),
+    0 0 0 3px var(--mint),
+    0 10px 18px rgba(62,207,142,.4);
+}
 .tile.pop{animation:popOut .18s ease forwards}
-@keyframes popOut{to{transform:scale(.15);opacity:0}}
+@keyframes popOut{to{transform:scale(.12) rotate(12deg);opacity:0}}
+.de-face{width:1em;height:1em;vertical-align:middle}
+.menu-hero .mascot .de-face{width:78%;height:78%}
+.char-card .face .de-face,.preview-card .face .de-face,.char-detail .big .de-face{width:1.05em;height:1.05em}
+.select-grid button .de-face{width:1.55rem;height:1.55rem;display:block;margin:0 auto}
+.hero-btn .de-face{width:78%;height:78%}
+.cd-face-wrap,.sel-face-wrap,.mascot{display:grid;place-items:center}
 .fx-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:12px;z-index:20}
 .spark{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;animation:spark .55s ease forwards}
 @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
@@ -783,7 +819,202 @@ const CHARACTERS = [
     desc:"Howling Gale — clears the outer two rings.", blurb:"Alpha of the storm.", doubleRing:true },
 ];
 
+
 const SPECIAL_GLYPH = { LightningCloud:"🌩️", SunKing:"☀️", RainbowStar:"🌈" };
+
+/* Disney Emoji Blitz–style glossy SVG faces (original, not licensed assets) */
+const FACE_PAL = {
+  0:{bg:["#ff9a3c","#ff6a1a"], ear:"#e85d12", eye:"#16324f", blush:"#ff8a7a"},
+  1:{bg:["#7dff7a","#2fbf4a"], ear:"#1f9a38", eye:"#16324f", blush:"#ff9ab0"},
+  2:{bg:["#ffb347","#f08a24"], ear:"#e07818", eye:"#16324f", blush:"#ff8aa8"},
+  3:{bg:["#f5f5f5","#d9d9d9"], ear:"#222", eye:"#16324f", blush:"#ff9ab8", accent:"#222"},
+  4:{bg:["#ffb020","#f08c00"], ear:"#16324f", eye:"#16324f", blush:"#ff8a70", stripe:"#16324f"},
+  5:{bg:["#fff0ff","#f7c6ff"], ear:"#e8a0ff", eye:"#5b2d8e", blush:"#ff9ad0", horn:"#c084fc"},
+  6:{bg:["#d4a574","#b07840"], ear:"#8a5a2b", eye:"#16324f", blush:"#ff8a9a", muzzle:"#f3d2b0"},
+  7:{bg:["#5fe08a","#1f9a4a"], ear:"#0f6b30", eye:"#16324f", blush:"#ff8a8a", crest:"#ef4d4d"},
+  8:{bg:["#2b2f3a","#11151c"], ear:"#11151c", eye:"#16324f", blush:"#ff8a9a", belly:"#f5f7fa", beak:"#ffb020"},
+  9:{bg:["#8b5a2b","#5c3a18"], ear:"#3d2610", eye:"#ffd166", blush:"#ff8a70", beak:"#ffb020"},
+  10:{bg:["#ffb347","#e08900"], ear:"#c96e00", eye:"#16324f", blush:"#ff8a70", mane:"#ef4d4d"},
+  11:{bg:["#ff7ab8","#e04f92"], ear:"#c93d78", eye:"#16324f", blush:"#ffd0e6"},
+  12:{bg:["#fff4f0","#ffd0c4"], ear:"#ffb0a0", eye:"#16324f", blush:"#ff9ab8"},
+  13:{bg:["#9aa4b2","#6b7585"], ear:"#4a5564", eye:"#c9f0ff", blush:"#ff8a9a"},
+};
+const SPECIAL_PAL = {
+  LightningCloud:{bg:["#9ad8ff","#4aa7e8"], icon:"⚡"},
+  SunKing:{bg:["#ffe07a","#ff9a1a"], icon:"☀"},
+  RainbowStar:{bg:["#ff9ad8","#7ad0ff"], icon:"★"},
+};
+
+let _deUid = 0;
+function deSvg(inner, view=64){
+  return `<svg class="de-face" viewBox="0 0 ${view} ${view}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
+}
+function deShine(){
+  return `<ellipse cx="24" cy="18" rx="14" ry="8" fill="rgba(255,255,255,.55)"/>
+  <ellipse cx="20" cy="16" rx="6" ry="3.2" fill="rgba(255,255,255,.85)"/>`;
+}
+function deEyes(x1=22,x2=42,y=30,r=4.2,hl=true,color="#16324f"){
+  let s = `<circle cx="${x1}" cy="${y}" r="${r}" fill="${color}"/><circle cx="${x2}" cy="${y}" r="${r}" fill="${color}"/>`;
+  if(hl) s += `<circle cx="${x1-1.2}" cy="${y-1.4}" r="1.4" fill="#fff"/><circle cx="${x2-1.2}" cy="${y-1.4}" r="1.4" fill="#fff"/>`;
+  return s;
+}
+function deBlush(color="#ff8aa8"){
+  return `<ellipse cx="16" cy="38" rx="5" ry="3" fill="${color}" opacity=".55"/><ellipse cx="48" cy="38" rx="5" ry="3" fill="${color}" opacity=".55"/>`;
+}
+function deBubble(c1,c2){
+  const id = "de" + (++_deUid);
+  return `<defs><radialGradient id="${id}g" cx="32%" cy="28%"><stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/></radialGradient>
+  <filter id="${id}f"><feDropShadow dx="0" dy="1.2" stdDeviation="1.1" flood-opacity=".25"/></filter></defs>
+  <circle cx="32" cy="32" r="30" fill="url(#${id}g)" filter="url(#${id}f)"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(22,50,79,.18)" stroke-width="2.4"/>
+  <circle cx="32" cy="32" r="28.5" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2"/>`;
+}
+
+function disneyFace(id){
+  const p = FACE_PAL[id] || FACE_PAL[0];
+  const [a,b] = p.bg;
+  let face = deBubble(a,b) + deShine();
+  // per-character features
+  if(id===0){ // fox — ears poke out like Emoji Blitz stickers
+    face += `<path d="M6 30 L16 2 L30 22 Z" fill="${p.ear}" stroke="#c24e10" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M58 30 L48 2 L34 22 Z" fill="${p.ear}" stroke="#c24e10" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M12 28 L18 8 L27 22 Z" fill="#ffc08a"/><path d="M52 28 L46 8 L37 22 Z" fill="#ffc08a"/>
+    <ellipse cx="32" cy="41" rx="15" ry="12" fill="#ffe6c8"/>
+    ${deEyes(22,42,30,5)}<ellipse cx="32" cy="37" rx="2.4" ry="1.8" fill="#16324f"/>
+    <path d="M24 45 Q32 54 40 45" fill="#16324f"/><path d="M26 45 Q32 51 38 45" fill="#ff8a6a"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===1){ // frog
+    face += `<circle cx="18" cy="20" r="8" fill="${a}"/><circle cx="46" cy="20" r="8" fill="${a}"/>
+    <circle cx="18" cy="20" r="4.5" fill="#fff"/><circle cx="46" cy="20" r="4.5" fill="#fff"/>
+    <circle cx="18" cy="20" r="2.4" fill="#16324f"/><circle cx="46" cy="20" r="2.4" fill="#16324f"/>
+    <ellipse cx="32" cy="40" rx="16" ry="10" fill="#b6ff9a"/>
+    <path d="M20 42 Q32 52 44 42" fill="#16324f"/><path d="M22 42 Q32 48 42 42" fill="#7dff7a"/>
+    ${deBlush(p.blush)}` + deShine();
+  } else if(id===2){ // cat
+    face += `<path d="M8 28 L16 0 L30 20 Z" fill="${p.ear}" stroke="#c96e00" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M56 28 L48 0 L34 20 Z" fill="${p.ear}" stroke="#c96e00" stroke-width="1.1" stroke-linejoin="round"/>
+    <path d="M14 26 L18 8 L27 20 Z" fill="#ffd7a8"/><path d="M50 26 L46 8 L37 20 Z" fill="#ffd7a8"/>
+    ${deEyes(22,42,30,5)}
+    <path d="M22 30 L8 27 M22 34 L8 36 M42 30 L56 27 M42 34 L56 36" stroke="#16324f" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="32" cy="38" rx="2.2" ry="1.7" fill="#ff7aa2"/>
+    <path d="M26 44 Q32 52 38 44" fill="#16324f"/><path d="M28 44 Q32 49 36 44" fill="#ffb070"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===3){ // panda
+    face += `<ellipse cx="16" cy="20" rx="10" ry="12" fill="#222"/><ellipse cx="48" cy="20" rx="10" ry="12" fill="#222"/>
+    <ellipse cx="22" cy="30" rx="8" ry="7" fill="#222"/><ellipse cx="42" cy="30" rx="8" ry="7" fill="#222"/>
+    ${deEyes(22,42,30,3.6,true,"#fff")}<circle cx="22" cy="30" r="2" fill="#16324f"/><circle cx="42" cy="30" r="2" fill="#16324f"/>
+    <ellipse cx="32" cy="40" rx="5" ry="4" fill="#222"/>
+    <path d="M26 46 Q32 50 38 46" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===4){ // tiger
+    face += `<path d="M12 28 L18 8 L28 24 Z" fill="${p.ear}"/><path d="M52 28 L46 8 L36 24 Z" fill="${p.ear}"/>
+    <path d="M24 12 L26 22 M32 10 L32 20 M40 12 L38 22" stroke="#16324f" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="32" cy="40" rx="13" ry="10" fill="#ffe6c0"/>
+    ${deEyes(23,41,30)}<ellipse cx="32" cy="37" rx="2.2" ry="1.5" fill="#16324f"/>
+    <path d="M26 44 Q32 49 38 44" stroke="#16324f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===5){ // unicorn
+    face += `<path d="M32 4 L36 22 L28 22 Z" fill="url(#g)" stroke="#c084fc" stroke-width="1"/>
+    <path d="M32 4 L34.5 18 L29.5 18 Z" fill="#e9d5ff"/>
+    <path d="M12 30 L18 10 L28 24 Z" fill="${p.ear}"/><path d="M52 30 L46 10 L36 24 Z" fill="${p.ear}"/>
+    <path d="M48 18 Q58 28 52 40" stroke="#e8a0ff" stroke-width="5" fill="none" stroke-linecap="round"/>
+    ${deEyes(23,41,31,4.4,true,"#5b2d8e")}
+    <ellipse cx="32" cy="38" rx="2" ry="1.5" fill="#ff7ab8"/>
+    <path d="M27 44 Q32 48 37 44" stroke="#5b2d8e" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===6){ // monkey
+    face += `<circle cx="14" cy="24" r="9" fill="${p.ear}"/><circle cx="50" cy="24" r="9" fill="${p.ear}"/>
+    <circle cx="14" cy="24" r="5" fill="${p.muzzle}"/><circle cx="50" cy="24" r="5" fill="${p.muzzle}"/>
+    <ellipse cx="32" cy="40" rx="16" ry="13" fill="${p.muzzle}"/>
+    ${deEyes(23,41,30)}
+    <ellipse cx="26" cy="40" rx="3" ry="2.2" fill="#16324f"/><ellipse cx="38" cy="40" rx="3" ry="2.2" fill="#16324f"/>
+    <path d="M26 48 Q32 52 38 48" stroke="#16324f" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===7){ // dragon
+    face += `<path d="M20 10 L24 22 L16 20 Z" fill="${p.crest}"/><path d="M32 6 L36 20 L28 20 Z" fill="${p.crest}"/><path d="M44 10 L48 22 L40 20 Z" fill="${p.crest}"/>
+    <path d="M8 34 L18 18 L24 30 Z" fill="${p.ear}"/><path d="M56 34 L46 18 L40 30 Z" fill="${p.ear}"/>
+    ${deEyes(23,41,30,4.6)}
+    <ellipse cx="32" cy="40" rx="8" ry="5" fill="#16324f"/>
+    <path d="M26 40 L22 48 L28 44 Z" fill="#ff6b4a"/><path d="M38 40 L42 48 L36 44 Z" fill="#ff6b4a"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===8){ // penguin
+    face += `<ellipse cx="32" cy="38" rx="18" ry="20" fill="${p.belly}"/>
+    <circle cx="20" cy="12" r="5" fill="${a}"/><circle cx="44" cy="12" r="5" fill="${a}"/>
+    ${deEyes(23,41,28,4)}
+    <path d="M28 36 L32 42 L36 36 Z" fill="${p.beak}"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===9){ // owl
+    face += `<path d="M14 22 L20 6 L30 18 Z" fill="${p.ear}"/><path d="M50 22 L44 6 L34 18 Z" fill="${p.ear}"/>
+    <circle cx="22" cy="30" r="10" fill="#fff3d6"/><circle cx="42" cy="30" r="10" fill="#fff3d6"/>
+    <circle cx="22" cy="30" r="5" fill="${p.eye}"/><circle cx="42" cy="30" r="5" fill="${p.eye}"/>
+    <circle cx="22" cy="30" r="2" fill="#16324f"/><circle cx="42" cy="30" r="2" fill="#16324f"/>
+    <path d="M30 38 L32 44 L34 38 Z" fill="${p.beak}"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===10){ // lion
+    face = `<defs><radialGradient id="lg${_deUid+1}" cx="32%" cy="28%"><stop offset="0%" stop-color="${a}"/><stop offset="100%" stop-color="${b}"/></radialGradient></defs>
+    <circle cx="32" cy="32" r="31" fill="${p.mane}"/>
+    <circle cx="12" cy="18" r="8" fill="${p.mane}"/><circle cx="52" cy="18" r="8" fill="${p.mane}"/>
+    <circle cx="8" cy="36" r="8" fill="${p.mane}"/><circle cx="56" cy="36" r="8" fill="${p.mane}"/>
+    <circle cx="18" cy="52" r="8" fill="${p.mane}"/><circle cx="46" cy="52" r="8" fill="${p.mane}"/>
+    <circle cx="32" cy="8" r="7" fill="${p.mane}"/>
+    ${deBubble(a,b)}${deShine()}
+    ${deEyes(23,41,30)}
+    <ellipse cx="32" cy="38" rx="4" ry="3" fill="#c96e00"/>
+    <path d="M26 44 Q32 50 38 44" stroke="#16324f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===11){ // octo
+    face += `${deEyes(23,41,28,5)}
+    <path d="M14 44 Q18 58 24 46 M24 46 Q28 60 32 46 M32 46 Q36 60 40 46 M40 46 Q46 58 50 44" stroke="${b}" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M26 40 Q32 46 38 40" stroke="#16324f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  } else if(id===12){ // bunny
+    face += `<ellipse cx="20" cy="8" rx="8" ry="20" fill="${p.ear}" stroke="#e89a8a" stroke-width="1"/><ellipse cx="44" cy="8" rx="8" ry="20" fill="${p.ear}" stroke="#e89a8a" stroke-width="1"/>
+    <ellipse cx="20" cy="8" rx="3.5" ry="12" fill="#ff9ab8"/><ellipse cx="44" cy="8" rx="3.5" ry="12" fill="#ff9ab8"/>
+    ${deEyes(22,42,34,5)}
+    <ellipse cx="32" cy="41" rx="2.4" ry="1.8" fill="#ff7aa2"/>
+    <path d="M26 47 Q32 54 38 47" fill="#16324f"/><path d="M28 47 Q32 51 36 47" fill="#ff9ab8"/>
+    ${deBlush(p.blush)}`;
+  } else { // wolf 13
+    face += `<path d="M10 30 L18 8 L28 24 Z" fill="${p.ear}"/><path d="M54 30 L46 8 L36 24 Z" fill="${p.ear}"/>
+    <ellipse cx="32" cy="40" rx="14" ry="11" fill="#d9dee6"/>
+    ${deEyes(23,41,30,4.4,true,p.eye)}
+    <ellipse cx="32" cy="37" rx="2.4" ry="1.7" fill="#16324f"/>
+    <path d="M24 44 Q32 52 40 44" stroke="#16324f" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    ${deBlush(p.blush)}`;
+  }
+  return deSvg(face);
+}
+
+function disneySpecial(kind){
+  const p = SPECIAL_PAL[kind] || SPECIAL_PAL.RainbowStar;
+  const [a,b] = p.bg;
+  let inner = deBubble(a,b) + deShine();
+  if(kind==="LightningCloud"){
+    inner += `<ellipse cx="32" cy="34" rx="20" ry="12" fill="rgba(255,255,255,.55)"/>
+    <path d="M30 18 L22 36 L30 36 L26 50 L44 28 L34 28 L40 18 Z" fill="#fff36a" stroke="#fff" stroke-width="1.5"/>`;
+  } else if(kind==="SunKing"){
+    inner += `<g stroke="#fff3b0" stroke-width="3" stroke-linecap="round">
+      <path d="M32 6 V12 M32 52 V58 M6 32 H12 M52 32 H58 M12 12 L16 16 M48 48 L52 52 M52 12 L48 16 M12 52 L16 48"/></g>
+    <circle cx="32" cy="32" r="14" fill="#fff3b0"/><circle cx="32" cy="32" r="10" fill="#ffd166"/>
+    ${deEyes(26,38,30,2.8,true,"#c96e00")}
+    <path d="M26 38 Q32 43 38 38" stroke="#c96e00" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  } else {
+    inner += `<path d="M32 12 L36 26 L52 26 L40 36 L44 52 L32 42 L20 52 L24 36 L12 26 L28 26 Z" fill="#fff" stroke="#ffe07a" stroke-width="1.5"/>
+    <path d="M32 18 L34.5 27 L44 27 L36.5 33 L39 43 L32 37 L25 43 L27.5 33 L20 27 L29.5 27 Z" fill="#ffe07a"/>`;
+  }
+  return deSvg(inner);
+}
+
+function faceHTML(idOrKind){
+  if(typeof idOrKind === "string") return disneySpecial(idOrKind);
+  return disneyFace(idOrKind|0);
+}
+function tileVisual(tile){
+  if(!tile) return "";
+  if(tile.kind && tile.kind !== "Normal") return faceHTML(tile.kind);
+  return faceHTML(tile.emojiType ?? 0);
+}
+
 
 const BOOSTERS = [
   { id:"score2", name:"Score ×2", ico:"✖️", desc:"Double score for 1 game", cost:80, currency:"coins" },
@@ -1229,7 +1460,7 @@ function refreshMenu(){
   $("statClears").textContent = save.clears;
   $("statBlitz").textContent = save.blitzes;
   const sel = CHARACTERS.find(c=>c.id===save.selected) || CHARACTERS[0];
-  $("menuMascot").textContent = sel.glyph;
+  $("menuMascot").innerHTML = faceHTML(sel.id);
   $("menuTitle").textContent = save.equippedTitle || "ROOKIE";
   $("menuLevel").textContent = "Lv " + save.level;
   const need = XP_PER_LEVEL(save.level);
@@ -1289,7 +1520,7 @@ function openDetail(id){
   const c = CHARACTERS.find(x=>x.id===id);
   const unlocked = save.unlocked.includes(id);
   $("charDetail").classList.add("show");
-  $("cdFace").textContent = unlocked?c.glyph:"🔒";
+  $("cdFace").innerHTML = unlocked?faceHTML(c.id):"🔒";
   $("cdName").textContent = c.name;
   $("cdDesc").textContent = c.desc;
   const act = $("cdAction");
@@ -1322,7 +1553,7 @@ function renderSelectGrid(){
   grid.innerHTML = "";
   let current = CHARACTERS.find(c=>c.id===save.selected) || CHARACTERS[0];
   const paint = () => {
-    $("selFace").textContent = current.glyph;
+    $("selFace").innerHTML = faceHTML(current.id);
     $("selName").textContent = current.name;
     $("selDesc").textContent = current.desc;
   };
@@ -1331,7 +1562,7 @@ function renderSelectGrid(){
     const unlocked = save.unlocked.includes(c.id);
     const btn = document.createElement("button");
     btn.disabled = !unlocked;
-    btn.innerHTML = `${unlocked?c.glyph:"🔒"}<small>${c.name.split(" ")[0]}</small>`;
+    btn.innerHTML = `${unlocked?faceHTML(c.id):"🔒"}<small>${c.name.split(" ")[0]}</small>`;
     if(c.id===current.id) btn.classList.add("active");
     btn.onclick = () => {
       current = c; save.selected = c.id; writeSave();
@@ -1636,12 +1867,12 @@ function ensureSprite(tile,r,c,fromAbove=0){
   if(!el){
     el=document.createElement("div");
     el.className="tile"+(tile.kind!=="Normal"?" special":"");
-    el.textContent=glyph(tile);
+    el.innerHTML=tileVisual(tile);
     boardEl.appendChild(el);
     sprites.set(tile.uid,el);
   }else{
     el.className="tile"+(tile.kind!=="Normal"?" special":"");
-    el.textContent=glyph(tile);
+    el.innerHTML=tileVisual(tile);
   }
   const p=pos(r,c);
   el.style.left=p.x+"px";
@@ -2131,7 +2362,7 @@ function beginRound(character){
     toast("Booster: " + (BOOSTERS.find(b=>b.id===activeBooster)?.name||""));
   }
 
-  $("heroGlyph").textContent=hero.glyph;
+  $("heroGlyph").innerHTML=faceHTML(hero.id);
   $("heroName").textContent=hero.name;
   $("heroDesc").textContent=hero.desc;
   fillBoard();
