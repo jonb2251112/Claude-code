@@ -34,16 +34,24 @@
   --safe-l:env(safe-area-inset-left,0px);
   --safe-r:env(safe-area-inset-right,0px);
   --pad:12px;
-  --touch:44px;
+  --touch:48px;
   --vh:100dvh;
   --ui-scale:1;
+  /* Mobile-game chrome */
+  --nav-h:72px;
+  --pill:rgba(255,253,246,.94);
+  --pill-edge:rgba(18,52,80,.18);
+  --sheet-r:28px;
+  --cta:#2dd4a8;
+  --cta-dk:#0f9f7a;
+  --blur:saturate(1.2) blur(14px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{
   margin:0;padding:0;width:100%;height:100%;
   height:100dvh;max-height:100dvh;
   overflow:hidden;background:#4fc0f5;color:var(--ink);
-  font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-family:"Trebuchet MS","Avenir Next","Segoe UI",sans-serif;
   font-weight:800;
   overscroll-behavior:none;touch-action:none;
   user-select:none;-webkit-user-select:none;
@@ -489,9 +497,23 @@ kbd{
   color:#fff;opacity:.92;text-shadow:0 2px 0 rgba(18,52,80,.35);
 }
 #startstats b{color:var(--gold);font-size:1.25em;}
-#hud.menu #topleft{opacity:0;}
+#hud.menu #topleft{opacity:0;visibility:hidden;pointer-events:none;}
 #topleft{transition:opacity .25s;}
-#hud.away{opacity:0;pointer-events:none;transition:opacity .2s;}
+/* Home/sheets own the chrome — hide play HUD so it never peeks over currency pills. */
+#hud.menu #topright,
+#hud.menu #alert,
+#hud.menu #badges,
+#hud.menu #toasts,
+#hud.menu #powers,
+#hud.menu #eventban,
+#hud.menu #rivalban,
+#hud.menu #wagerchip,
+#hud.menu #dopafuse,
+#hud.menu #combo,
+#hud.menu #dpad{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+#hud.away{opacity:0;pointer-events:none;visibility:hidden;transition:opacity .2s;}
 #tapcue{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;
   animation:blink 1.6s infinite;text-shadow:0 2px 0 rgba(18,52,80,.3);}
 @keyframes blink{50%{opacity:.3;}}
@@ -3214,6 +3236,482 @@ body.season-halloween-world #streak.overdrive{
   .screen.sheet:not(.hidden),#reveal::before,#hatch::before,
   #storycut .sc-chick,#storycut .sc-truck,#storycut .sc-log,#storycut .sc-sun,#storycut .sc-road::after,#btn-story.hot,#btn-story2.hot,#storychip .ico{animation:none!important;transition:none!important;}
 }
+
+/* ==========================================================================
+   MOBILE GAME UI 2.0 — hub · bottom nav · currency pills · sheets · HUD
+   Inspired by casual mobile hubs (thumb-zone CTA, top currencies, tab bar)
+   while keeping Crossy Hop's chunky toy personality.
+   ========================================================================== */
+#start.hub{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;
+  padding:
+    calc(var(--safe-t) + 8px)
+    max(12px, var(--safe-r))
+    calc(var(--nav-h) + var(--safe-b) + 96px)
+    max(12px, var(--safe-l)) !important;
+  gap:0 !important;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,.22), transparent 55%),
+    radial-gradient(110% 55% at 50% 8%, rgba(12,38,62,.10), rgba(12,38,62,.42));
+}
+#hub-top{
+  position:sticky;top:0;z-index:8;width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:2px 0 8px;pointer-events:none;
+}
+#hub-top > *{pointer-events:auto;}
+#currencypills{
+  display:flex;gap:10px;align-items:center;justify-content:space-between;
+  width:min(94vw,420px);
+}
+#currencypills .pill{
+  display:flex;align-items:center;gap:7px;
+  min-height:38px;padding:7px 14px 7px 11px;
+  border-radius:999px;
+  background:var(--pill);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  box-shadow:0 3px 0 var(--pill-edge), 0 8px 18px rgba(18,52,80,.16);
+  color:var(--ink);font-weight:900;font-variant-numeric:tabular-nums;
+  flex:0 1 auto;
+}
+#currencypills .pill .k{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+}
+#currencypills .pill b{font-size:16px;line-height:1;}
+#currencypills .coinpill{
+  min-width:88px;
+  background:linear-gradient(180deg,#fffef8,#fff6d6);
+  box-shadow:0 3px 0 #e2a112, 0 8px 18px rgba(18,52,80,.16);
+}
+#currencypills .coinpill .coin{
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#ffe07a,#ffc224 55%,#e2a112);
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), 0 1px 0 rgba(255,255,255,.4);
+  display:inline-block;
+}
+#currencypills .bestpill{padding-left:14px;}
+#currencypills .lvlpill{margin-left:0;}
+#currencypills .coinpill.punch{animation:pillpunch .42s cubic-bezier(.2,1.5,.3,1);}
+@keyframes pillpunch{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
+#hub-top #xpbar.slim.hubxp{
+  display:block !important;
+  width:min(94vw,420px);height:6px;margin:0;
+  background:rgba(255,253,246,.35);
+  box-shadow:inset 0 1px 2px rgba(18,52,80,.2), 0 1px 0 rgba(255,255,255,.35);
+  border-radius:99px;overflow:hidden;
+}
+#hub-top #xpbar.slim.hubxp i{
+  background:linear-gradient(90deg,#ffe07a,#ffc224 55%,#f59e0b);
+  box-shadow:0 0 8px rgba(255,201,60,.45);
+}
+#hub-main{
+  flex:1 1 auto;width:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(6px,1.4vh,12px);min-height:0;padding:4px 0 8px;
+}
+#hub-main #title{margin:0;font-size:clamp(42px,12vmin,84px);}
+#hub-main #tagline{margin:0;}
+#hub-main #looprail{width:min(92vw,400px);}
+#hub-main #looprail > .featured{
+  border-radius:22px;padding:12px 14px;
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+}
+#hub-bottom{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 max(10px, var(--safe-r)) calc(var(--safe-b) + 6px) max(10px, var(--safe-l));
+  pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(10,28,48,.55) 38%, rgba(10,28,48,.78));
+}
+#hub-bottom > *{pointer-events:auto;}
+#start #playdock, #over #playdock, #hub-bottom #playdock, #over-dock #retrydock{
+  width:min(92vw,400px);margin:0 0 8px;padding:0 !important;
+  background:none !important;position:relative !important;
+}
+#btn-play.play-cta, #btn-retry.play-cta{
+  position:relative;overflow:hidden;
+  width:100% !important;min-height:60px !important;
+  border-radius:22px !important;
+  font-size:clamp(20px,5.6vw,26px) !important;letter-spacing:.18em;
+  color:#04342a;
+  background:linear-gradient(180deg,#7dffe0 0%,#2dd4a8 48%,#14b890 100%);
+  box-shadow:0 7px 0 var(--cta-dk), 0 16px 28px rgba(13,148,136,.4);
+  animation:ctapulse 2.2s ease-in-out infinite;
+}
+#btn-play.play-cta .cta-glow, #btn-retry.play-cta .cta-glow{
+  position:absolute;inset:-40% -20%;
+  background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%);
+  animation:ctasheen 2.8s linear infinite;pointer-events:none;
+}
+@keyframes ctapulse{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.02)}}
+@keyframes ctasheen{to{transform:translateX(35%)}}
+#start #playdock .playhint{
+  display:block!important;margin-top:4px;opacity:.78;font-size:10px;letter-spacing:.16em;
+}
+#bottomnav, #bottomnav2, nav.bottomnav{
+  width:min(96vw,420px);height:var(--nav-h);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:4px;align-items:stretch;
+  padding:8px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  border-radius:24px 24px 20px 20px;
+  background:rgba(255,253,246,.94);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  box-shadow:0 -2px 0 rgba(255,255,255,.55), 0 10px 28px rgba(0,0,0,.28), 0 4px 0 rgba(18,52,80,.18);
+}
+.navbtn{
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:52px;border-radius:16px;padding:6px 4px;
+  color:var(--ink-soft);font-family:inherit;font-weight:900;
+  transition:transform .12s cubic-bezier(.2,1.4,.3,1), background .15s ease, color .15s ease;
+}
+.navbtn .ico{
+  display:flex;align-items:center;justify-content:center;
+  width:34px;height:22px;border-radius:10px;
+  font-size:9px;letter-spacing:.08em;
+  background:rgba(18,52,80,.08);color:var(--ink);
+}
+.navbtn .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;}
+.navbtn:active{transform:scale(.94);}
+.navbtn.hot .ico, .navbtn.active .ico{
+  background:linear-gradient(180deg,#ffe07a,#ffc224);color:#3c2500;
+  box-shadow:0 2px 0 var(--gold-dk);
+}
+.navbtn.active{background:rgba(18,52,80,.07);color:var(--ink);}
+.navbtn.active .ico{
+  background:linear-gradient(180deg,#7dffe0,#2dd4a8);color:#04342a;
+  box-shadow:0 2px 0 var(--cta-dk);
+}
+.navbtn.hot, .navbtn.active{color:var(--ink);}
+.navbtn.hot .lbl::after{
+  content:"";display:block;width:6px;height:6px;margin:2px auto 0;border-radius:50%;
+  background:var(--danger);box-shadow:0 0 0 3px rgba(239,77,77,.22);
+}
+.navbtn.nav-secondary{display:none!important;}
+.navbtn.morebtn{position:relative;}
+.navbtn.morebtn.has-news .ico,
+.navbtn.morebtn.has-rewards .ico{
+  background:linear-gradient(180deg,#ffd36a,#fb923c);color:#3c2500;
+}
+.navbtn.morebtn.has-news::before,
+.navbtn.morebtn.has-rewards::before{
+  content:"";position:absolute;top:8px;right:18%;width:9px;height:9px;
+  border-radius:50%;background:#ef4d4d;box-shadow:0 0 0 3px rgba(239,77,77,.25);
+}
+.navbtn.morebtn.has-rewards:not(.has-news)::before{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25);}
+#bottomnav .morebtn, #bottomnav2 .morebtn{
+  width:auto!important;min-height:52px!important;font-size:inherit!important;
+  background:transparent!important;letter-spacing:inherit;box-shadow:none!important;
+}
+#start #hotbar, #over #hotbar2{display:none!important;}
+#start #banners{width:min(92vw,400px);}
+#start #banners > :not(.hidden){
+  width:100%;border-radius:16px;padding:10px 14px;
+  background:rgba(255,253,246,.92);color:var(--ink);
+  box-shadow:0 4px 0 rgba(18,52,80,.18);
+  font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+}
+.screen.sheet{
+  justify-content:flex-end!important;
+  padding-top:calc(var(--safe-t) + 28px)!important;
+  background:rgba(8,24,40,.45)!important;
+}
+.screen.sheet .grab{
+  width:44px;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.55);
+  margin:8px auto 2px;flex:0 0 auto;
+  box-shadow:0 1px 0 rgba(0,0,0,.15);
+}
+.screen.sheet .grab + .head{padding-top:4px;}
+.screen.sheet .head{
+  width:min(100%,520px);
+  background:rgba(255,253,246,.97);
+  border-radius:var(--sheet-r) var(--sheet-r) 0 0;
+  padding:10px 16px 8px;
+  box-shadow:0 -8px 28px rgba(0,0,0,.18);
+  color:var(--ink);
+}
+.screen.sheet .head h2{color:var(--ink)!important;text-shadow:none!important;font-size:clamp(22px,6vmin,28px);}
+.screen.sheet .head .count, .screen.sheet .head .subhead{color:var(--ink-soft)!important;opacity:1;}
+.screen.sheet .close-btn{
+  background:rgba(18,52,80,.08);color:var(--ink);
+  box-shadow:0 3px 0 rgba(18,52,80,.16);
+}
+.screen.sheet > .body, #journey.sheet > .body{
+  width:min(100%,520px)!important;max-width:none!important;
+  background:rgba(255,253,246,.97);
+  padding-bottom:calc(18px + var(--safe-b))!important;
+  box-shadow:0 16px 40px rgba(0,0,0,.2);
+}
+#journey #j-hero{
+  width:min(100%,520px);background:rgba(255,253,246,.97);
+  padding:8px 12px 6px!important;margin:0;border-radius:0;
+}
+@keyframes sheetup{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.screen.sheet:not(.hidden) .head,
+.screen.sheet:not(.hidden) > .body,
+.screen.sheet:not(.hidden) #j-hero{
+  animation:sheetup .34s cubic-bezier(.2,1.15,.3,1) both;
+}
+#hud #score{
+  font-size:clamp(34px,10vw,48px);letter-spacing:.02em;
+  text-shadow:0 3px 0 rgba(18,52,80,.35), 0 10px 20px rgba(18,52,80,.3);
+}
+#hud #best{font-size:11px;letter-spacing:.16em;opacity:.85;}
+#hud #coinchip{border-radius:999px;padding:7px 12px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);}
+#hud #btnrow .icon-btn{width:42px;height:42px;border-radius:14px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);}
+#streak{border-radius:999px!important;padding:6px 12px!important;}
+#combo{bottom:calc(var(--safe-b) + 120px);}
+#over{
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 100px)!important;
+  gap:10px;justify-content:flex-start;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+#over > .card{
+  border-radius:24px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  box-shadow:0 8px 0 rgba(18,52,80,.18), 0 20px 36px rgba(0,0,0,.22);
+}
+#over-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:22;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 max(10px,var(--safe-r)) 6px max(10px,var(--safe-l));
+  background:linear-gradient(180deg, transparent, rgba(10,28,48,.6) 40%, rgba(10,28,48,.82));
+  pointer-events:none;
+}
+#over-dock > *{pointer-events:auto;width:min(92vw,400px);}
+#over-dock #retrydock{width:min(92vw,400px);margin-bottom:8px;}
+#over-dock #bottomnav2{width:min(96vw,420px);}
+#more .morenote{color:var(--ink-soft)!important;text-shadow:none!important;opacity:.9;}
+#more .moretiles{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;
+}
+#more .moretile{
+  appearance:none;border:0;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  min-height:84px;padding:12px 8px;border-radius:18px;
+  background:rgba(18,52,80,.06);color:var(--ink);font-weight:900;
+  box-shadow:0 3px 0 rgba(18,52,80,.12);
+  transition:transform .12s cubic-bezier(.2,1.4,.3,1);
+}
+#more .moretile:active{transform:scale(.96);}
+#more .moretile .ico{
+  display:flex;align-items:center;justify-content:center;
+  width:40px;height:28px;border-radius:12px;
+  font-size:9px;letter-spacing:.1em;
+  background:linear-gradient(180deg,#fffef8,#eef3f8);color:var(--ink);
+  box-shadow:0 2px 0 rgba(18,52,80,.14);
+}
+#more .moretile .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+#quests #questday{
+  width:min(100%,520px);margin:0;padding:8px 16px 4px;
+  background:rgba(255,253,246,.97);
+  color:var(--ink-soft);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  text-shadow:none;
+}
+#pause{
+  background:rgba(8,24,40,.55)!important;
+  backdrop-filter:saturate(1.1) blur(10px);-webkit-backdrop-filter:saturate(1.1) blur(10px);
+  gap:12px;
+}
+#pause #pausecard{
+  border-radius:28px;padding:22px 20px;background:rgba(255,253,246,.96);
+  box-shadow:0 10px 0 rgba(18,52,80,.18), 0 24px 40px rgba(0,0,0,.28);
+  width:min(92vw,360px);
+}
+#pause #pausecard .t{
+  font-size:clamp(28px,8vw,36px);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink);text-shadow:none;
+}
+#pause #btn-resume{
+  width:min(92vw,360px);min-height:56px;border-radius:20px;
+  background:linear-gradient(180deg,#7dffe0 0%,#2dd4a8 48%,#14b890 100%);
+  color:#04342a;letter-spacing:.16em;
+  box-shadow:0 6px 0 var(--cta-dk), 0 14px 24px rgba(13,148,136,.35);
+}
+#pause #btn-quit{width:min(92vw,360px);min-height:48px;border-radius:18px;}
+body.brand-halloween #start.hub,
+body.brand-summer #start.hub{
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 96px)!important;
+}
+@media (prefers-reduced-motion:reduce){
+  #btn-play.play-cta,#btn-retry.play-cta,
+  #btn-play.play-cta .cta-glow,#btn-retry.play-cta .cta-glow,
+  #currencypills .coinpill.punch,
+  .screen.sheet:not(.hidden) .head,
+  .screen.sheet:not(.hidden) > .body,
+  .screen.sheet:not(.hidden) #j-hero{animation:none!important;}
+}
+@media (orientation:landscape) and (max-height:480px){
+  #start.hub{
+    flex-direction:column!important;
+    padding-bottom:calc(var(--nav-h) + var(--safe-b) + 72px)!important;
+  }
+  #hub-main #looprail{display:none!important;}
+  #btn-play.play-cta,#btn-retry.play-cta{min-height:48px!important;font-size:16px!important;}
+}
+
+
+/* ==========================================================================
+   MOBILE GAME UI 2.0 — FINAL OVERRIDE
+   Wins over older phone/landscape rules that undid hub padding / CTA / HUD.
+   ========================================================================== */
+#hud.menu #topright,
+#hud.menu #topleft,
+#hud.menu #combo,
+#hud.menu #dpad,
+#hud.menu #rivalban,
+#hud.menu #dopafuse,
+#hud.menu #eventban,
+#hud.menu #wagerchip{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+body.mode-start #hud #topright,
+body.mode-start #hud #topleft,
+body.mode-start #hud #combo,
+body.mode-start #hud #dpad,
+body.mode-start #hud #rivalban,
+body.mode-start #hud #dopafuse,
+body.mode-over #hud #topright,
+body.mode-over #hud #topleft,
+body.mode-over #hud #combo,
+body.mode-over #hud #dpad,
+body.mode-over #hud #rivalban,
+body.mode-over #hud #dopafuse,
+body.mode-over #hud #eventban,
+body.mode-over #hud #wagerchip,
+body.mode-over #hud #alert,
+body.mode-over #hud #btnrow,
+body.mode-paused #hud #topright,
+body.mode-paused #hud #topleft,
+body.mode-paused #hud #combo,
+body.mode-paused #hud #dpad,
+body.mode-paused #hud #rivalban,
+body.mode-paused #hud #dopafuse,
+body.mode-paused #hud #eventban,
+body.mode-paused #hud #wagerchip,
+body.mode-paused #hud #alert{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+/* confetti / flycoins / flash stay visible under overlays */
+#start.hub #tapcue{display:none!important;}
+#over #tapcue2{display:none!important;}
+#start.hub #hub-bottom{
+  padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;
+}
+#btn-play.play-cta, #btn-retry.play-cta{
+  min-height:60px!important;
+  border-radius:22px!important;
+}
+#over{
+  padding-top:calc(var(--safe-t) + 24px)!important;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 110px)!important;
+}
+#over > .card{
+  width:min(92vw,400px);
+  border-radius:26px!important;
+  padding:16px 18px 14px!important;
+  background:rgba(255,253,246,.96)!important;
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+}
+#overtitle{
+  font-size:clamp(36px,11vmin,64px)!important;
+  margin-top:0;
+  text-shadow:0 4px 0 rgba(18,52,80,.35), 0 12px 28px rgba(0,0,0,.28)!important;
+}
+#overwhy{
+  max-width:min(90vw,380px);
+  text-align:center;
+  line-height:1.35;
+}
+#over-dock #btn-retry.play-cta{letter-spacing:.2em;}
+#btn-comeback{
+  width:min(92vw,400px)!important;
+  min-height:52px!important;
+  border-radius:18px!important;
+  margin:4px 0 8px!important;
+}
+#newbest{
+  border-radius:999px!important;
+  letter-spacing:.2em!important;
+}
+#hud:not(.menu):not(.away) #btnrow .icon-btn{
+  width:44px;height:44px;border-radius:15px;
+}
+#hud:not(.menu):not(.away) #coinchip{
+  border-radius:999px;padding:8px 13px;
+  background:rgba(255,253,246,.94);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+}
+/* Featured reward rail — one clear offer card */
+#hub-main #looprail > .featured,
+#hub-main #looprail > button.featured,
+#hourlycrate, #mysterydeal{
+  border-radius:20px!important;
+}
+#currencypills{
+  justify-content:center!important;
+  gap:10px!important;
+}
+#hub-top #xpbar.slim.hubxp{width:min(94vw,420px)!important;}
+@media (max-width:420px){
+  #currencypills{gap:8px!important;}
+  #currencypills .pill{padding:6px 11px;min-height:34px;}
+  #currencypills .pill b{font-size:14px;}
+  .navbtn .lbl{font-size:9px;}
+  .navbtn .ico{width:32px;height:20px;font-size:8px;}
+}
+
+/* Play HUD — compact meter column (mobile corners pattern) */
+body.mode-play #topright{
+  gap:6px!important;
+  align-items:flex-end!important;
+}
+body.mode-play #btnrow{gap:6px!important;}
+body.mode-play #soulmeter,
+body.mode-play #candymeter,
+body.mode-play #splashmeter,
+body.mode-play #heatmeter{
+  min-height:28px;padding:5px 10px!important;border-radius:999px!important;
+  backdrop-filter:saturate(1.1) blur(8px);-webkit-backdrop-filter:saturate(1.1) blur(8px);
+}
+body.mode-play #score{
+  font-size:clamp(40px,12vw,56px)!important;
+  letter-spacing:.02em;
+}
+/* Featured home offer — single clear rail card */
+#hub-main #looprail{
+  width:min(92vw,400px)!important;
+}
+#hub-main #looprail > button,
+#hourlycrate, #mysterydeal{
+  width:100%;
+  box-shadow:0 5px 0 rgba(18,52,80,.16), 0 14px 28px rgba(0,0,0,.18)!important;
+}
+/* Bottom nav active state clearer */
+.navbtn.active{
+  background:rgba(18,52,80,.08)!important;
+  transform:translateY(-1px);
+}
+/* Hub brand presence */
+#hub-main #title{
+  filter:drop-shadow(0 10px 18px rgba(8,24,40,.28));
+}
+#hub-main #seasonbadge:not(.hidden){
+  border-radius:999px!important;
+  padding:6px 14px!important;
+  letter-spacing:.16em;
+  box-shadow:0 3px 0 rgba(18,52,80,.2);
+}
+/* Seasonal CTA still inherits giant play-cta size */
+body.brand-summer #btn-play.play-cta,
+body.brand-summer #btn-retry.play-cta{
+  background:linear-gradient(180deg,#5eead4 0%,#22d3ee 45%,#0891b2 100%)!important;
+  color:#042f2e!important;
+  box-shadow:0 7px 0 #0e7490, 0 16px 28px rgba(8,145,178,.4)!important;
+}
+body.brand-halloween #btn-play.play-cta,
+body.brand-halloween #btn-retry.play-cta{
+  min-height:60px!important;
+}
 </style>
 </head>
 <body>
@@ -3281,7 +3779,16 @@ body.season-halloween-world #streak.overdrive{
   </div>
 
   <!-- ===================== START ===================== -->
-  <div id="start" class="screen">
+  <div id="start" class="screen hub">
+    <div id="hub-top">
+      <div id="currencypills" aria-label="Currencies">
+        <div class="pill coinpill"><i class="coin" aria-hidden="true"></i><b id="s-coins">0</b></div>
+        <div class="pill bestpill"><span class="k">best</span><b id="s-best">0</b></div>
+        <div class="pill lvlpill"><span class="k">lv</span><b id="s-level">1</b></div>
+      </div>
+      <div id="xpbar" class="slim hubxp" aria-label="XP progress"><i></i></div>
+    </div>
+    <div id="hub-main">
     <h1 id="title" class="brand" aria-label="Crossy Hop">
       <span class="logo-orn l" aria-hidden="true"></span>
       <span class="stack">
@@ -3292,13 +3799,12 @@ body.season-halloween-world #streak.overdrive{
     </h1>
     <div id="tagline">one more hop</div>
     <div id="seasonbadge" class="hidden" aria-live="polite">SEASON</div>
-    <div id="slimmeta">
-      <span>best <b id="s-best">0</b></span>
-      <span>coins <b id="s-coins">0</b></span>
-      <span class="extra">lv <b id="s-level">1</b></span>
+    <div id="slimmeta" class="sr-only" aria-hidden="true">
+      <span>best <b id="s-best-mirror">0</b></span>
+      <span>coins <b id="s-coins-mirror">0</b></span>
+      <span class="extra">lv <b id="s-level-mirror">1</b></span>
       <span class="extra soft"><span id="s-rank">Hatchling</span></span>
     </div>
-    <div id="xpbar" class="slim"><i></i></div>
     <!-- kept for JS writers; visually folded into slimmeta -->
     <div id="startstats" class="sr-only" aria-hidden="true">awards <b id="s-awards">0</b></div>
     <div id="metarow" class="sr-only" aria-hidden="true"><span id="s-title">Rookie</span> · spins <b id="s-spins">0</b></div>
@@ -3375,18 +3881,32 @@ body.season-halloween-world #streak.overdrive{
       <div id="sniperfeed" aria-live="polite"><span>sniper</span><span id="sniper-n">beakboss stole a jackpot tease</span></div>
       <div id="chipbank" class="show">comeback chips <b id="chipbank-n">0</b>/3</div>
     </div>
+    </div><!-- /hub-main -->
     <button type="button" id="btn-more-drops" class="linkish hidden">More rewards</button>
-    <div id="playdock">
-      <button id="btn-play" class="btn">Play</button>
-      <div class="playhint">swipe or tap to hop · dodge · ride logs</div>
+    <div id="hub-bottom">
+      <div id="playdock">
+        <button id="btn-play" class="btn play-cta"><span class="cta-glow" aria-hidden="true"></span>Play</button>
+        <div class="playhint">tap · swipe · hop</div>
+      </div>
+      <nav id="bottomnav" aria-label="Main">
+        <button type="button" id="btn-quests" class="navbtn" data-panel="quests">
+          <span class="ico" aria-hidden="true">DAY</span><span class="lbl">Today</span>
+        </button>
+        <button type="button" id="btn-journey" class="navbtn" data-panel="journey">
+          <span class="ico" aria-hidden="true">PASS</span><span class="lbl">Journey</span>
+        </button>
+        <button type="button" id="btn-story" class="navbtn" data-panel="story">
+          <span class="ico" aria-hidden="true">ARC</span><span class="lbl">Story</span>
+        </button>
+        <button type="button" id="btn-more" class="navbtn morebtn" data-panel="more">
+          <span class="ico" aria-hidden="true">MORE</span><span class="lbl">More</span>
+        </button>
+        <button type="button" id="btn-news" class="navbtn nav-secondary" data-panel="news">
+          <span class="ico" aria-hidden="true">NEW</span><span class="lbl">News</span>
+        </button>
+      </nav>
+      <div id="hotbar" class="sr-only" aria-hidden="true"></div>
     </div>
-    <div id="hotbar">
-      <button id="btn-quests" class="btn ghost">Today</button>
-      <button id="btn-journey" class="btn ghost">Journey</button>
-      <button id="btn-story" class="btn ghost">Story</button>
-      <button id="btn-news" class="btn ghost nav-secondary">News</button>
-    </div>
-    <button type="button" id="btn-more" class="btn ghost morebtn">More</button>
     <div id="gametip" class="sr-only">One more hop is always justified.</div>
     <div id="tapcue" class="quiet">or tap anywhere</div>
   </div>
@@ -3431,22 +3951,36 @@ body.season-halloween-world #streak.overdrive{
       <div id="revivehint">keep your score · hop from safety</div>
     </div>
     <button type="button" id="btn-comeback">Comeback revive<span class="sub" id="comeback-sub">3 chips · free soft revive</span></button>
-    <div id="retrydock">
-      <button id="btn-retry" class="btn">Retry</button>
+    <div id="over-dock">
+      <div id="retrydock">
+        <button id="btn-retry" class="btn play-cta"><span class="cta-glow" aria-hidden="true"></span>Retry</button>
+      </div>
+      <nav id="bottomnav2" class="bottomnav" aria-label="Main">
+        <button type="button" id="btn-quests2" class="navbtn" data-panel="quests">
+          <span class="ico" aria-hidden="true">DAY</span><span class="lbl">Today</span>
+        </button>
+        <button type="button" id="btn-journey2" class="navbtn" data-panel="journey">
+          <span class="ico" aria-hidden="true">PASS</span><span class="lbl">Journey</span>
+        </button>
+        <button type="button" id="btn-story2" class="navbtn" data-panel="story">
+          <span class="ico" aria-hidden="true">ARC</span><span class="lbl">Story</span>
+        </button>
+        <button type="button" id="btn-more2" class="navbtn morebtn" data-panel="more">
+          <span class="ico" aria-hidden="true">MORE</span><span class="lbl">More</span>
+        </button>
+        <button type="button" id="btn-news2" class="navbtn nav-secondary" data-panel="news">
+          <span class="ico" aria-hidden="true">NEW</span><span class="lbl">News</span>
+        </button>
+      </nav>
+      <div id="hotbar2" class="sr-only" aria-hidden="true"></div>
     </div>
-    <div id="hotbar2">
-      <button id="btn-quests2" class="btn ghost">Today</button>
-      <button id="btn-journey2" class="btn ghost">Journey</button>
-      <button id="btn-story2" class="btn ghost">Story</button>
-      <button id="btn-news2" class="btn ghost nav-secondary">News</button>
-    </div>
-    <button type="button" id="btn-more2" class="btn ghost morebtn">More</button>
     <div id="tapcue2" class="quiet">or tap anywhere to hop again</div>
   </div>
 
 
   <!-- ===================== NEWS (season switch features) ===================== -->
   <div id="news" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>News</h2>
       <span class="count" id="news-count">season update</span>
@@ -3467,6 +4001,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== MORE (secondary menus + parked rewards) ===================== -->
   <div id="more" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>More</h2>
       <span class="count">everything else</span>
@@ -3483,20 +4018,17 @@ body.season-halloween-world #streak.overdrive{
         </button>
         <button id="btn-spin" class="btn ghost" type="button">Lucky Spin</button>
       </div>
-      <div class="subhead">Collection</div>
-      <div class="moregrid">
-        <button id="btn-chars" class="btn ghost">Characters</button>
-        <button id="btn-pets" class="btn ghost">Pets</button>
-        <button id="btn-awards" class="btn ghost">Awards</button>
-        <button id="btn-weekly" class="btn ghost">Weekly</button>
-        <button id="btn-titles" class="btn ghost">Titles</button>
-      </div>
-      <div class="subhead">Shop</div>
-      <div class="moregrid">
-        <button id="btn-shop" class="btn ghost">Shop</button>
-        <button id="btn-bank" class="btn ghost">Bank</button>
-        <button id="btn-encyc" class="btn ghost">Stats</button>
-        <button id="btn-admin" class="btn ghost">Admin</button>
+      <div class="subhead">Play extras</div>
+      <div class="moretiles" role="navigation" aria-label="More menus">
+        <button type="button" id="btn-chars" class="moretile"><span class="ico">CHAR</span><span class="lbl">Chars</span></button>
+        <button type="button" id="btn-pets" class="moretile"><span class="ico">PETS</span><span class="lbl">Pets</span></button>
+        <button type="button" id="btn-awards" class="moretile"><span class="ico">STAR</span><span class="lbl">Awards</span></button>
+        <button type="button" id="btn-weekly" class="moretile"><span class="ico">WEEK</span><span class="lbl">Weekly</span></button>
+        <button type="button" id="btn-titles" class="moretile"><span class="ico">TAG</span><span class="lbl">Titles</span></button>
+        <button type="button" id="btn-shop" class="moretile"><span class="ico">SHOP</span><span class="lbl">Shop</span></button>
+        <button type="button" id="btn-bank" class="moretile"><span class="ico">BANK</span><span class="lbl">Bank</span></button>
+        <button type="button" id="btn-encyc" class="moretile"><span class="ico">STAT</span><span class="lbl">Stats</span></button>
+        <button type="button" id="btn-admin" class="moretile"><span class="ico">DEV</span><span class="lbl">Admin</span></button>
       </div>
       <p class="morenote">Home shows one reward at a time. Everything else lives here.</p>
       <button id="btn-awards2" class="sr-only" tabindex="-1" aria-hidden="true">Awards</button>
@@ -3506,6 +4038,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== CHARACTERS ===================== -->
   <div id="chars" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Characters</h2>
       <span class="count" id="c-count">1 / 20</span>
@@ -3520,6 +4053,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== AWARDS ===================== -->
   <div id="awards" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Awards</h2>
       <span class="count" id="a-count">0 / 29</span>
@@ -3530,6 +4064,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== DAILY CHALLENGES ===================== -->
   <div id="quests" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Today</h2>
       <span class="count" id="q-count">0 / 3</span>
@@ -3577,6 +4112,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== JOURNEY (VIP BATTLE PASS) ===================== -->
   <div id="journey" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2 id="j-title">Journey Pass</h2>
       <span class="count" id="j-count">0 / 40</span>
@@ -3727,6 +4263,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== STORY MODE ===================== -->
   <div id="story" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Story</h2>
       <span class="count" id="story-count">1 / 5</span>
@@ -3796,6 +4333,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== LUCKY SPIN ===================== -->
   <div id="spin" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Lucky Spin</h2>
       <span class="count">soft currency</span>
@@ -3820,6 +4358,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== PETS ===================== -->
   <div id="pets" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Pets</h2>
       <span class="count" id="p-count">0 / 7</span>
@@ -3830,6 +4369,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== TITLES ===================== -->
   <div id="titles" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Titles</h2>
       <span class="count">wear one</span>
@@ -3840,6 +4380,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== WEEKLY ===================== -->
   <div id="weekly" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Weekly</h2>
       <span class="count">resets weekly</span>
@@ -3850,6 +4391,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== SHOP ===================== -->
   <div id="shop" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Shop</h2>
       <span class="count">trails</span>
@@ -3860,6 +4402,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== BANK ===================== -->
   <div id="bank" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Bank</h2>
       <span class="count">arm for next run</span>
@@ -3875,6 +4418,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== ENCYCLOPEDIA ===================== -->
   <div id="encyc" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Stats</h2>
       <span class="count">lifetime</span>
@@ -3885,6 +4429,7 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== ADMIN (season / theme testing) ===================== -->
   <div id="admin" class="screen sheet hidden">
+    <div class="grab" aria-hidden="true"></div>
     <div class="head">
       <h2>Admin</h2>
       <span class="count">dev tools</span>
@@ -3936,7 +4481,7 @@ body.season-halloween-world #streak.overdrive{
   <div id="pause" class="screen hidden">
     <div class="card" id="pausecard">
       <div class="t">Paused</div>
-      <div class="hint"><div class="row">Take your time. The traffic can wait.</div></div>
+      <div class="hint"><div class="row">Traffic waits. Thumb when ready.</div></div>
     </div>
     <button id="btn-resume" class="btn">Resume</button>
     <button id="btn-quit" class="btn ghost">End run</button>
@@ -120961,19 +121506,34 @@ function hudScore(punch){
     scoreEl.classList.add('punch');
   }
 }
-const hudBest  = ()=>{ bestEl.textContent = 'BEST ' + stats.best; $('s-best').textContent = stats.best; };
+const hudBest  = ()=>{
+  bestEl.textContent = 'BEST ' + stats.best;
+  $('s-best').textContent = stats.best;
+  const m = $('s-best-mirror'); if(m) m.textContent = stats.best;
+};
 const hudCoins = (punch)=>{
   coinEl.textContent = stats.coins;
   $('s-coins').textContent = stats.coins;
+  const cm = $('s-coins-mirror'); if(cm) cm.textContent = stats.coins;
   if(punch){
     const chip = $('coinchip');
-    chip.classList.remove('punch');
-    void chip.offsetWidth;
-    chip.classList.add('punch');
-    const c = chip.querySelector('.coin');
-    c.classList.remove('spin');
-    void c.offsetWidth;
-    c.classList.add('spin');
+    if(chip){
+      chip.classList.remove('punch');
+      void chip.offsetWidth;
+      chip.classList.add('punch');
+      const c = chip.querySelector('.coin');
+      if(c){
+        c.classList.remove('spin');
+        void c.offsetWidth;
+        c.classList.add('spin');
+      }
+    }
+    const pill = document.querySelector('#currencypills .coinpill');
+    if(pill){
+      pill.classList.remove('punch');
+      void pill.offsetWidth;
+      pill.classList.add('punch');
+    }
   }
   if(state.panel === 'chars') renderChars();
 };
@@ -121234,10 +121794,29 @@ function renderQuests(){
     : 'fresh every day · finish them for coins';
 }
 
+function syncBottomNav(name){
+  const map = {
+    quests:['btn-quests','btn-quests2'],
+    journey:['btn-journey','btn-journey2'],
+    story:['btn-story','btn-story2'],
+    more:['btn-more','btn-more2'],
+    news:['btn-news','btn-news2','btn-more','btn-more2'],
+  };
+  const all = ['btn-quests','btn-quests2','btn-journey','btn-journey2','btn-story','btn-story2','btn-more','btn-more2','btn-news','btn-news2'];
+  for(const id of all){
+    const el = $(id);
+    if(el) el.classList.remove('active');
+  }
+  for(const id of (map[name] || [])){
+    const el = $(id);
+    if(el) el.classList.add('active');
+  }
+}
 function openPanel(name){
   const prev = state.panel;
   if(prev === 'more' && name !== 'more') parkLooprailInMore(false);
   state.panel = name;
+  try{ syncBottomNav(name); }catch(e){}
   if(name === 'chars') renderChars();
   else if(name === 'quests') renderQuests();
   else if(name === 'awards') renderAwards();
@@ -121249,6 +121828,7 @@ function closePanel(){
   const leaving = state.panel;
   const back = state.mode === 'over' ? 'over' : state.mode === 'menu' ? 'start' : null;
   state.panel = null;
+  try{ syncBottomNav(''); }catch(e){}
   if(leaving === 'more') parkLooprailInMore(false);
   show(back);
   applyChrome();
@@ -121562,14 +122142,23 @@ let padOn = IS_TOUCH, chromeKey = null;
 /** Show or hide the touch pad and the in-run score, keyed to the mode. */
 function applyChrome(){
   const menu = state.mode === 'menu';
-  const key = padOn + '|' + menu + '|' + state.panel;
+  const key = padOn + '|' + menu + '|' + state.panel + '|' + state.mode;
   if(key === chromeKey) return;
   chromeKey = key;
   $('dpad').classList.toggle('hide', !padOn || menu || !!state.panel);
   $('btn-pad').classList.toggle('off', !padOn);
   $('hud').classList.toggle('menu', menu);
-  // A sheet owns the whole screen; the HUD buttons would collide with its header.
+  // Sheets park the whole HUD; over/paused hide chrome via body.mode-* CSS so fx can still play.
   $('hud').classList.toggle('away', !!state.panel);
+  // Body mode classes drive final CSS overrides (hide hub HUD, play chrome, etc.).
+  const body = document.body;
+  const modes = ['mode-start','mode-play','mode-over','mode-paused','mode-dying'];
+  for(const c of modes) body.classList.remove(c);
+  if(menu) body.classList.add('mode-start');
+  else if(state.mode === 'play') body.classList.add('mode-play');
+  else if(state.mode === 'over') body.classList.add('mode-over');
+  else if(state.mode === 'paused') body.classList.add('mode-paused');
+  else if(state.mode === 'dying') body.classList.add('mode-dying');
 }
 function toggleSound(){
   Sfx.resume();
@@ -121607,7 +122196,18 @@ for(const [id, panel] of [
   ['btn-more','more'], ['btn-more2','more'],
 ]){
   const el = $(id);
-  if(el) el.addEventListener('click', e=>{ e.stopPropagation(); Sfx.click(); openPanel(panel); });
+  if(el) el.addEventListener('click', e=>{
+    e.stopPropagation(); Sfx.click();
+    if(state.panel === panel) closePanel();
+    else openPanel(panel);
+  });
+}
+/* Tap dimmed sheet backdrop to dismiss */
+for(const sheet of document.querySelectorAll('.screen.sheet')){
+  sheet.addEventListener('click', e=>{
+    if(e.target !== sheet) return;
+    e.stopPropagation(); Sfx.click(); closePanel();
+  });
 }
 const btnDoSpin = $('btn-dospin');
 if(btnDoSpin) btnDoSpin.addEventListener('click', e=>{
@@ -123165,14 +123765,19 @@ function tickJourneyFeed(){
   }
 }
 
+function setNavLabel(el, text){
+  if(!el) return;
+  const lbl = el.querySelector('.lbl');
+  if(lbl) lbl.textContent = text;
+  else el.textContent = text;
+}
 function pulseJourneyMenu(){
   const n = countClaimable();
   for(const id of ['btn-journey', 'btn-journey2']){
     const el = $(id);
     if(el){
       el.classList.toggle('hot', n > 0);
-      if(n > 0) el.textContent = 'Journey · ' + n;
-      else el.textContent = 'Journey';
+      setNavLabel(el, n > 0 ? ('Pass · ' + n) : 'Journey');
     }
   }
 }
@@ -124571,6 +125176,7 @@ function checkMetaAwards(silent){
 /* --- UI: meta HUD + sheets ------------------------------------------------ */
 function hudMeta(){
   const lv = $("s-level"); if(lv) lv.textContent = stats.level|0;
+  const lvm = $("s-level-mirror"); if(lvm) lvm.textContent = stats.level|0;
   const xp = $("s-xp");
   if(xp){
     const need = xpToNext(stats.level|1);
@@ -125788,9 +126394,9 @@ function pulseStoryMenu(){
     const el = $(id);
     if(!el) continue;
     el.classList.toggle('hot', !!hot);
-    if(ready) el.textContent = 'Story · claim';
-    else if(unread || intro) el.textContent = 'Story · new';
-    else el.textContent = 'Story';
+    if(ready) setNavLabel(el, 'Story · go');
+    else if(unread || intro) setNavLabel(el, 'Story · new');
+    else setNavLabel(el, 'Story');
   }
 }
 
@@ -125969,7 +126575,7 @@ function refreshNewsUi(){
     const el = $(id);
     if(!el) continue;
     el.classList.toggle('hot', unread);
-    el.textContent = unread ? 'News · new' : 'News';
+    setNavLabel(el, unread ? 'News · new' : 'News');
   }
   const moreNews = $('btn-news-more');
   if(moreNews){
@@ -125981,8 +126587,8 @@ function refreshNewsUi(){
     const el = $(id);
     if(!el) continue;
     el.classList.toggle('has-news', unread);
-    if(unread) el.textContent = 'More · new';
-    else if(!el.classList.contains('has-rewards')) el.textContent = 'More';
+    if(unread) setNavLabel(el, 'More · new');
+    else if(!el.classList.contains('has-rewards')) setNavLabel(el, 'More');
   }
   const chip = $('newschip');
   if(chip){
@@ -126065,8 +126671,8 @@ function refreshFeaturedDrop(){
     const el = $(id);
     if(!el) continue;
     el.classList.toggle('has-rewards', extras > 0);
-    if(el.classList.contains('has-news')) el.textContent = 'More · new';
-    else el.textContent = extras > 0 ? ('More · ' + extras) : 'More';
+    if(el.classList.contains('has-news')) setNavLabel(el, 'More · new');
+    else setNavLabel(el, extras > 0 ? ('More · ' + extras) : 'More');
   }
 }
 function parkLooprailInMore(open){
