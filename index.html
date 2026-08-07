@@ -7627,6 +7627,16 @@ let idle = true;
 
 /** Mutex: true while swap/cascade resolution in flight */
 let resolving = false;
+/** Nesting depth so trySwap + cascadeFrom do not unlock early (race fix) */
+let resolveDepth = 0;
+function pushResolve() {
+  resolveDepth++;
+  resolving = true;
+}
+function popResolve() {
+  resolveDepth = Math.max(0, resolveDepth - 1);
+  resolving = resolveDepth > 0;
+}
 
 /** Selected cell for tap-tap swap */
 let selected = null;
@@ -7825,8 +7835,13 @@ function getEmojiLevel(typeId) {
  * Higher collection level = higher score (EB-style progression).
  */
 function scoreValueForEmoji(typeId) {
-  const lv = getEmojiLevel(typeId);
-  return SCORE_BASE_MATCH + (lv - 1) * SCORE_PER_LEVEL;
+  try {
+    const lv = getEmojiLevel(typeId);
+    const n = (lv | 0) > 0 ? (lv | 0) : 1;
+    return SCORE_BASE_MATCH + (n - 1) * SCORE_PER_LEVEL;
+  } catch (_) {
+    return SCORE_BASE_MATCH;
+  }
 }
 
 /**
@@ -7877,9 +7892,13 @@ function allocUid() {
  * @param {number} [typeId] — index into active pool; random if omitted
  */
 function makeNormal(typeId) {
-  const type = typeId != null
-    ? typeId
-    : (pool.length ? pool[Math.floor(rng() * pool.length)] : 0);
+  let type = typeId;
+  if (type == null) {
+    const src = (pool && pool.length) ? pool : (basePool && basePool.length) ? basePool : [0];
+    const roll = (typeof rng === "function" ? rng() : Math.random());
+    type = src[Math.floor(roll * src.length) % src.length];
+  }
+  if (type == null || type !== type) type = 0;
   return {
     uid: allocUid(),
     kind: SPECIAL_KINDS.NORMAL,
@@ -8006,7 +8025,7 @@ function ensureSprite(tile, r, c, fromAboveRows) {
     el.className = "tile" + (isSpec ? " special" : "");
     el.dataset.kind = tile.kind;
   }
-  el.innerHTML = tileVisual(tile);
+  try { el.innerHTML = tileVisual(tile) || ""; } catch (e) { el.innerHTML = ""; console.error("tileVisual", e); }
   const p = pos(r, c);
   const drop = fromAboveRows || 0;
   el.style.left = p.x + "px";
@@ -8581,8 +8600,10 @@ async function clearCells(cells, reason, depth) {
   let heroClears = 0;
   const uids = [];
 
+  const heroId = hero && hero.id;
   for (const { cell, tile } of snapshots) {
-    if (tile.kind === SPECIAL_KINDS.NORMAL && tile.emojiType === hero.id) heroClears++;
+    if (!tile || cell.r < 0 || cell.c < 0 || cell.r >= ROWS || cell.c >= COLS) continue;
+    if (tile.kind === SPECIAL_KINDS.NORMAL && heroId != null && tile.emojiType === heroId) heroClears++;
     uids.push(tile.uid);
     const el = sprites.get(tile.uid);
     if (el) el.classList.add("pop");
@@ -8590,16 +8611,16 @@ async function clearCells(cells, reason, depth) {
   }
 
   roundClears += snapshots.length;
-  roundStats.clears += snapshots.length;
-  save.clears = (save.clears || 0) + snapshots.length;
+  if (roundStats) roundStats.clears += snapshots.length;
+  if (save) save.clears = (save.clears || 0) + snapshots.length;
 
   const delta = computeClearScore(snapshots, reason, depth);
   addScore(delta);
   addBlitzMeter(snapshots.length);
 
-  const bonus = hero.chargeBonus || 0;
-  setHeroCharge(charge + heroClears * (ENGINE_CHARGE + bonus));
-  roundStats.heroClears += heroClears;
+  const bonus = (hero && hero.chargeBonus) || 0;
+  try { setHeroCharge(charge + heroClears * (ENGINE_CHARGE + bonus)); } catch (_) {}
+  if (roundStats) roundStats.heroClears += heroClears;
 
   popScoreFx(snapshots.map((s) => s.cell), delta);
   burstFx(snapshots.map((s) => s.cell));
@@ -8679,18 +8700,24 @@ async function applyMatch(match, depth) {
 
   for (const spawn of spawns) {
     if (!spawn || !spawn.cell) continue;
-    const old = get(spawn.cell.r, spawn.cell.c);
-    if (old) {
-      sprites.get(old.uid)?.remove();
-      sprites.delete(old.uid);
+    const sr = spawn.cell.r | 0, sc = spawn.cell.c | 0;
+    if (sr < 0 || sc < 0 || sr >= ROWS || sc >= COLS) continue;
+    const kind = spawn.kind || SPECIAL_KINDS.CLOUD;
+    try {
+      const old = get(sr, sc);
+      if (old) {
+        sprites.get(old.uid)?.remove();
+        sprites.delete(old.uid);
+      }
+      let axis = spawn.cloudAxis;
+      if (kind === SPECIAL_KINDS.CLOUD && lastSwapAxis) axis = lastSwapAxis;
+      const tile = makeSpecial(kind, axis);
+      set(sr, sc, tile);
+      ensureSprite(tile, sr, sc);
+      sfx("special");
+    } catch (e) {
+      console.error("applyMatch spawn", e);
     }
-    /* Prefer swap axis for cloud orientation when available */
-    let axis = spawn.cloudAxis;
-    if (spawn.kind === SPECIAL_KINDS.CLOUD && lastSwapAxis) axis = lastSwapAxis;
-    const tile = makeSpecial(spawn.kind, axis);
-    set(spawn.cell.r, spawn.cell.c, tile);
-    ensureSprite(tile, spawn.cell.r, spawn.cell.c);
-    sfx("special");
   }
 
   if (spawns.length) await sleep(ENGINE_ANIM.special);
@@ -8702,7 +8729,7 @@ async function applyMatch(match, depth) {
  * @param {{type:"match",match?:object}|{type:"plan",plan?:object}|null} initial
  */
 async function cascadeFrom(initial) {
-  resolving = true;
+  pushResolve();
   const prev = state;
   state = "Resolving";
 
@@ -8723,23 +8750,27 @@ async function cascadeFrom(initial) {
       await applyMatch(match, depth);
       depth++;
     }
+
+    /* Keep the resolve lock through Blitz/HUD updates to prevent overlapping swaps */
+    if (blitzOn) {
+      state = "Blitz";
+    } else if (timeLeft <= 0) {
+      state = "RoundEnd";
+      offerReviveOrFinish();
+    } else {
+      state = prev === "Blitz" ? "Blitz" : "Playing";
+      if (!blitzOn && blitz >= 100) {
+        try { enterBlitz(); } catch (e) { console.error("enterBlitz", e); }
+      }
+    }
+    try { updateHud(); } catch (e) { console.error("updateHud", e); }
   } catch (err) {
     console.error("cascadeFrom", err);
     try { syncSprites(false); } catch (_) { /* ignore */ }
+    if (state === "Resolving") state = blitzOn ? "Blitz" : "Playing";
   } finally {
-    resolving = false;
+    popResolve();
   }
-
-  if (blitzOn) state = "Blitz";
-  else if (timeLeft <= 0) {
-    offerReviveOrFinish();
-    return;
-  } else {
-    state = prev === "Blitz" ? "Blitz" : "Playing";
-  }
-
-  if (!blitzOn && blitz >= 100) enterBlitz();
-  updateHud();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -8810,10 +8841,15 @@ function enterBlitz() {
   sfx("blitz");
   toast("BLITZ MODE! ×" + ENGINE_MULT + " score!");
 
-  const candidates = basePool.filter((t) => t !== hero.id);
-  const removed = candidates[Math.floor(rng() * candidates.length)];
-  pool = basePool.filter((t) => t !== removed).slice(0, BLITZ_POOL);
-  updateHud();
+  const heroId = hero ? hero.id : null;
+  const candidates = (basePool || []).filter((t) => t !== heroId);
+  if (candidates.length) {
+    const removed = candidates[Math.floor(rng() * candidates.length)];
+    pool = basePool.filter((t) => t !== removed).slice(0, BLITZ_POOL);
+  } else {
+    pool = (basePool || []).slice(0, BLITZ_POOL);
+  }
+  try { updateHud(); } catch (e) { console.error("enterBlitz hud", e); }
 }
 
 function exitBlitz() {
@@ -8864,30 +8900,23 @@ async function firePower() {
  * Sets resolving lock immediately to prevent gesture races.
  */
 async function trySwap(a, b) {
-  if (resolving || paused) return;
-  if (state !== "Playing" && state !== "Blitz") return;
-  if (!isOrtho(a, b)) return;
-
-  resolving = true;
+  if (resolving || paused || (state !== "Playing" && state !== "Blitz") || !isOrtho(a, b)) return;
+  pushResolve();
   idle = false;
   selected = null;
   syncSprites();
-
-  /* Infer cloud axis from swipe direction: horizontal swap → row clear */
-  lastSwapAxis = (a.r === b.r) ? "row" : "col";
-
   try {
     const ta = get(a.r, a.c);
     const tb = get(b.r, b.c);
-    if (!ta || !tb) {
-      resolving = false;
-      return;
-    }
+    if (!ta || !tb) return;
 
     const ea = sprites.get(ta.uid);
     const eb = sprites.get(tb.uid);
     const pa = pos(a.r, a.c);
     const pb = pos(b.r, b.c);
+
+    if (a.r === b.r) lastSwapAxis = "row";
+    else lastSwapAxis = "col";
 
     if (ea && eb) {
       const tr = `left ${ENGINE_ANIM.swap}ms ease, top ${ENGINE_ANIM.swap}ms ease`;
@@ -8905,14 +8934,14 @@ async function trySwap(a, b) {
 
     const plan = resolveSpecial(a, b);
     if (plan) {
-      roundStats.specialsTriggered++;
+      if (roundStats) roundStats.specialsTriggered++;
+      /* Nest under our lock — cascadeFrom push/pop keeps resolving true the whole time */
       await cascadeFrom({ type: "plan", plan });
       return;
     }
 
     const match = findMatches();
-    if (!match.groups.length) {
-      /* Invalid swap — animate reject */
+    if (!match || !match.groups || !match.groups.length) {
       swapCells(a, b);
       sfx("reject");
       if (ea && eb) {
@@ -8926,7 +8955,6 @@ async function trySwap(a, b) {
       }
       await sleep(ENGINE_ANIM.reject);
       syncSprites();
-      resolving = false;
       return;
     }
 
@@ -8934,9 +8962,11 @@ async function trySwap(a, b) {
     await cascadeFrom({ type: "match", match });
   } catch (err) {
     console.error("trySwap", err);
-    resolving = false;
     try { syncSprites(false); } catch (_) { /* ignore */ }
     if (state === "Resolving") state = "Playing";
+  } finally {
+    /* Drop trySwap's resolve frame (cascadeFrom already popped its own) */
+    while (resolveDepth > 0) popResolve();
   }
 }
 
