@@ -744,6 +744,201 @@ body.blitz .eb-blitz .bar>i,body.blitz .board-top-track>i{animation:shine .65s l
 .hero-meta p{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.88);margin-top:2px;text-shadow:0 1px 2px rgba(40,20,80,.35)}
 .hud,.game-top,.stat,.meters,.meter-panel,.meter-head,.hero-row{display:none!important}
 
+/* ========== MEGA UPDATE: ability cast VFX + item tray + mobile ========== */
+:root{
+  --touch:max(48px, 11vw);
+  --cell:min(11.8vw, calc((100vw - 36px) / 7.35), 52px);
+}
+#screen-game{
+  overscroll-behavior:none;
+  touch-action:manipulation;
+  height:100%;
+  max-height:100dvh;
+}
+#screen-game .board-wrap{
+  width:min(100%, calc(var(--cell)*7 + var(--gap)*6 + 28px));
+}
+.item-tray{
+  display:flex;gap:6px;justify-content:center;align-items:center;
+  padding:4px 2px;margin-top:2px;flex-wrap:nowrap;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.item-tray::-webkit-scrollbar{display:none}
+.item-btn{
+  appearance:none;border:0;flex:0 0 auto;min-width:52px;min-height:52px;
+  border-radius:16px;padding:6px 8px;cursor:pointer;font-family:inherit;
+  background:linear-gradient(180deg,#fff,#e8f4ff);
+  box-shadow:0 4px 0 rgba(18,52,80,.18);color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  transition:transform .12s ease;
+}
+.item-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(18,52,80,.18)}
+.item-btn:disabled{opacity:.4;filter:grayscale(.4);cursor:default}
+.item-btn .ico{font-size:1.25rem;line-height:1}
+.item-btn .n{font-size:10px;font-weight:900;font-variant-numeric:tabular-nums}
+.item-btn.active{
+  outline:3px solid #ff5fa8;background:linear-gradient(180deg,#ffe8f4,#ffd0e8);
+  animation:itemPulse .8s ease-in-out infinite;
+}
+@keyframes itemPulse{50%{transform:scale(1.05)}}
+.item-hint{
+  text-align:center;font-size:11px;font-weight:800;color:#fff;
+  text-shadow:0 2px 0 rgba(40,20,80,.35);min-height:16px;opacity:.9;
+}
+body.item-aim .board{cursor:crosshair}
+body.item-aim .board::after{
+  content:"TAP A TILE";position:absolute;left:50%;top:8px;transform:translateX(-50%);
+  z-index:30;font-size:11px;font-weight:900;letter-spacing:.08em;
+  background:rgba(255,95,168,.92);color:#fff;padding:4px 10px;border-radius:999px;
+  pointer-events:none;
+}
+
+/* Ability cast cinematic overlay */
+.ability-cast{
+  position:absolute;inset:0;z-index:50;display:none;place-items:center;
+  pointer-events:none;overflow:hidden;border-radius:inherit;
+}
+.ability-cast.show{display:grid}
+.ability-cast .veil{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.35),rgba(10,24,48,.55));
+  animation:castVeil .55s ease both;
+}
+@keyframes castVeil{from{opacity:0}to{opacity:1}}
+.ability-cast .cast-hero{
+  position:relative;z-index:2;width:110px;height:110px;border-radius:50%;
+  display:grid;place-items:center;font-size:3.4rem;
+  background:radial-gradient(120% 100% at 30% 20%,#fff,transparent 45%),linear-gradient(180deg,#fff,#ffe8c8);
+  box-shadow:0 0 0 5px rgba(255,255,255,.9),0 12px 28px rgba(0,0,0,.35);
+  animation:castHeroIn .55s cubic-bezier(.2,1.3,.3,1) both;
+}
+@keyframes castHeroIn{
+  from{transform:scale(.4) translateY(40px);opacity:0}
+  60%{transform:scale(1.12) translateY(-6px);opacity:1}
+  to{transform:scale(1) translateY(0);opacity:1}
+}
+.ability-cast .cast-name{
+  position:relative;z-index:2;margin-top:10px;padding:8px 16px;border-radius:16px;
+  background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;
+  font-size:clamp(1rem,4.5vw,1.25rem);font-weight:900;
+  box-shadow:0 5px 0 #c97800;animation:castNameIn .5s .12s both;
+  text-align:center;max-width:90%;
+}
+@keyframes castNameIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.ability-cast .cast-sub{
+  position:relative;z-index:2;margin-top:6px;font-size:12px;font-weight:800;color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,.35);animation:castNameIn .45s .2s both;
+}
+.ability-cast .beams{position:absolute;inset:0;z-index:1;pointer-events:none}
+.ability-cast .beam{
+  position:absolute;background:linear-gradient(90deg,transparent,#fff,#ffe07a,transparent);
+  height:6px;left:10%;right:10%;top:50%;border-radius:999px;opacity:0;
+  box-shadow:0 0 16px #ffe07a;
+}
+.ability-cast.spell-pattern_x .beam.a{animation:beamX1 .55s .25s ease both;transform:rotate(45deg)}
+.ability-cast.spell-pattern_x .beam.b{animation:beamX1 .55s .3s ease both;transform:rotate(-45deg)}
+.ability-cast.spell-column_crush .beam.a,
+.ability-cast.spell-column_crush .beam.b,
+.ability-cast.spell-column_crush .beam.c{
+  width:10px;left:auto;right:auto;top:8%;bottom:8%;height:auto;
+  background:linear-gradient(180deg,transparent,#7dffb0,#ffe07a,transparent);
+  animation:beamCol .5s .2s ease both;
+}
+.ability-cast.spell-column_crush .beam.a{left:28%}
+.ability-cast.spell-column_crush .beam.b{left:50%}
+.ability-cast.spell-column_crush .beam.c{left:72%}
+.ability-cast.spell-row_sweep .beam.a,
+.ability-cast.spell-row_sweep .beam.b,
+.ability-cast.spell-row_sweep .beam.c{
+  animation:beamRow .5s .2s ease both;
+}
+.ability-cast.spell-row_sweep .beam.a{top:30%}
+.ability-cast.spell-row_sweep .beam.b{top:50%}
+.ability-cast.spell-row_sweep .beam.c{top:70%}
+.ability-cast.spell-time_pause .veil{background:radial-gradient(circle,rgba(180,230,255,.55),rgba(40,80,140,.6))}
+.ability-cast.spell-time_pause .cast-hero{animation:castHeroIn .55s both, freezePulse 1s .4s ease-in-out infinite}
+.ability-cast.spell-guaranteed_stars .cast-hero{filter:drop-shadow(0 0 18px #ffe07a)}
+.ability-cast.spell-sun_storm .veil{background:radial-gradient(circle,rgba(255,210,74,.5),rgba(200,80,20,.45))}
+.ability-cast.spell-color_bomb .veil{background:radial-gradient(circle,rgba(255,95,168,.4),rgba(80,20,120,.5))}
+.ability-cast.spell-board_pulse .veil{background:radial-gradient(circle,rgba(125,255,176,.35),rgba(20,80,60,.5))}
+.ability-cast.spell-meteor_rain .veil{background:radial-gradient(circle,rgba(255,100,60,.45),rgba(40,10,30,.55))}
+.ability-cast.spell-heart_beat .veil{background:radial-gradient(circle,rgba(255,120,160,.5),rgba(120,20,60,.45))}
+@keyframes beamX1{0%{opacity:0;width:0}40%{opacity:1}100%{opacity:.2;width:120%}}
+@keyframes beamCol{0%{opacity:0;transform:scaleY(0)}50%{opacity:1;transform:scaleY(1)}100%{opacity:.3}}
+@keyframes beamRow{0%{opacity:0;transform:scaleX(0)}50%{opacity:1;transform:scaleX(1)}100%{opacity:.3}}
+@keyframes freezePulse{50%{filter:hue-rotate(160deg) brightness(1.15)}}
+
+.fx-slash,.fx-meteor,.fx-ring,.fx-freeze,.fx-starfall{
+  position:absolute;pointer-events:none;z-index:25;
+}
+.fx-slash{
+  height:8px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,#fff,#ffe07a,#ff5fa8,transparent);
+  box-shadow:0 0 12px #ffe07a;animation:slashGo .45s ease forwards;
+}
+@keyframes slashGo{from{opacity:0;transform:scaleX(.2)}to{opacity:1;transform:scaleX(1)}}
+.fx-meteor{
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#ff9f1c 40%,#ef4d4d);
+  box-shadow:0 0 16px #ff6a3c;animation:meteorFall .55s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes meteorFall{from{transform:translate(-40px,-80px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.fx-ring{
+  border:4px solid #7dffb0;border-radius:50%;
+  animation:ringExpand .55s ease forwards;
+}
+@keyframes ringExpand{from{transform:scale(.2);opacity:1}to{transform:scale(2.4);opacity:0}}
+.fx-freeze{
+  inset:0;background:linear-gradient(180deg,rgba(180,230,255,.35),rgba(120,180,255,.15));
+  animation:freezeFlash .8s ease forwards;
+}
+@keyframes freezeFlash{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.fx-starfall{
+  font-size:22px;animation:starFall .7s ease forwards;
+}
+@keyframes starFall{from{transform:translateY(-40px) rotate(-20deg);opacity:0}to{transform:translateY(0) rotate(20deg);opacity:1}}
+
+.board.ability-hit{animation:boardHit .35s ease}
+@keyframes boardHit{0%,100%{transform:none}40%{transform:scale(1.02)}}
+.tile.ability-target{
+  outline:3px solid #ffe07a;z-index:4;
+  animation:targetPulse .5s ease-in-out infinite;
+}
+@keyframes targetPulse{50%{filter:brightness(1.25)}}
+
+.hero-btn.casting{
+  animation:castHeroBtn .6s ease !important;
+  box-shadow:0 0 0 6px #ffe07a,0 0 28px rgba(255,210,74,.7)!important;
+}
+@keyframes castHeroBtn{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+@media (max-width:380px){
+  :root{--cell:min(12.2vw, calc((100vw - 28px)/7.2))}
+  .item-btn{min-width:46px;min-height:46px;padding:4px 6px}
+  .hero-btn{width:64px;height:64px;font-size:1.75rem}
+  .eb-footer{min-height:84px;gap:6px}
+}
+@media (max-height:700px){
+  .board-wrap{padding:10px 8px 12px;margin-top:2px}
+  .eb-timer{width:48px;height:48px;top:-12px}
+  .ability-cast .cast-hero{width:88px;height:88px;font-size:2.6rem}
+  .item-tray{padding:2px}
+}
+@media (max-height:620px){
+  .hero-meta p{display:none}
+  .eb-wallet .eb-pill.gem{display:none}
+}
+@media (orientation:landscape) and (max-height:480px){
+  #screen-game{flex-direction:row;flex-wrap:wrap;align-content:flex-start}
+  #screen-game .eb-top{width:100%}
+  #screen-game .board-wrap{margin:0 auto}
+  #screen-game .eb-footer{width:100%;min-height:64px}
+  :root{--cell:min(9vh, 40px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .ability-cast .cast-hero,.ability-cast .beam,.item-btn.active,.tile.ability-target{animation:none!important}
+}
+
 .modal{position:absolute;inset:0;background:rgba(22,50,79,.55);backdrop-filter:blur(7px);display:none;place-items:center;padding:18px;z-index:40}
 .modal.show{display:grid}
 .sheet{width:min(100%,360px);padding:22px 16px 16px;text-align:center;animation:sheetIn .32s cubic-bezier(.2,1.2,.3,1);background:var(--paper);border-radius:22px;box-shadow:0 12px 0 rgba(18,52,80,.16),0 24px 40px rgba(18,52,80,.28)}
@@ -3719,7 +3914,18 @@ body.blitz .eb-blitz .bar>i,body.blitz .board-top-track>i{animation:shine .65s l
       </div>
       <div class="fx-layer" id="fx"></div>
       <div class="combo" id="combo">COMBO!</div>
+      <div class="ability-cast" id="abilityCast" aria-hidden="true">
+        <div class="veil"></div>
+        <div class="beams" aria-hidden="true">
+          <span class="beam a"></span><span class="beam b"></span><span class="beam c"></span>
+        </div>
+        <div class="cast-hero" id="castHeroGlyph">🦊</div>
+        <div class="cast-name" id="castName">POWER!</div>
+        <div class="cast-sub" id="castSub">Ability</div>
+      </div>
     </div>
+    <div class="item-hint" id="itemHint"></div>
+    <div class="item-tray" id="itemTray" aria-label="Battle items"></div>
     <div class="eb-footer">
       <div class="eb-hero-cloud">
         <button class="hero-btn" id="heroBtn" type="button" disabled aria-label="Hero power">
@@ -4168,6 +4374,10 @@ const CHARACTERS = [
     desc:"Honey Swarm — clears the most common emoji type.", blurb:"Sweet but fierce." },
   { id:15, glyph:"🦋", name:"Flutter Bug", rarity:"rare", cost:400, spell:"guaranteed_stars",
     desc:"Butterfly Dust — spawns two Rainbow Stars.", blurb:"Delicate wings, deadly combos.", starCount:2 },
+  { id:16, glyph:"☄️", name:"Comet Kid", rarity:"epic", cost:950, spell:"meteor_rain",
+    desc:"Meteor Rain — 8 flaming tiles smash the board.", blurb:"Born under a lucky streak." },
+  { id:17, glyph:"💖", name:"Heartbeat", rarity:"legend", cost:2200, spell:"heart_beat",
+    desc:"Heart Pulse — clears your emoji + every neighbor.", blurb:"Love at first cascade." },
 ];
 
 
@@ -4188,6 +4398,8 @@ const CHAR_LORE = {
   13: "Storm Wolf howls along outer rings.",
   14: "Honey Bear shares sweet combos.",
   15: "Flutter Bug scatters stardust on clears.",
+  16: "Comet Kid rides fiery streaks across the sky.",
+  17: "Heartbeat turns every match into a love letter.",
 };
 
 const SPECIAL_GLYPH = { LightningCloud:"🌩️", Sunshine:"☀️", RainbowStar:"🌈" };
@@ -4210,6 +4422,8 @@ const FACE_PAL = {
   13:{bg:["#9aa4b2","#6b7585"], ear:"#4a5564", eye:"#c9f0ff", blush:"#ff8a9a"},
   14:{bg:["#c68642","#8b5a2b"], ear:"#6b4423", eye:"#16324f", blush:"#ff9a70", snout:"#f3d2b0"},
   15:{bg:["#b8f0ff","#7ad0ff"], ear:"#5b8def", eye:"#16324f", blush:"#ff9ad8", wing:"#e85aad"},
+  16:{bg:["#ff8f6d","#ef4d4d"], ear:"#c93d20", eye:"#16324f", blush:"#ffb070", accent:"#ffe07a"},
+  17:{bg:["#ff9ad8","#ff5fa8"], ear:"#e04f92", eye:"#16324f", blush:"#ffd0e6", accent:"#fff"},
 };
 const SPECIAL_PAL = {
   LightningCloud:{bg:["#9ad8ff","#4aa7e8"], icon:"⚡"},
@@ -5881,11 +6095,27 @@ const BOOSTERS = [
   { id:"sun", name:"Sun Start", ico:"☀️", desc:"Begin with Blitz meter at 50%", cost:70, currency:"coins", engineKey:"blitz50" },
   { id:"time", name:"+5 Seconds", ico:"⏱️", desc:"Extra time on the clock", cost:60, currency:"coins", engineKey:"time10" },
   { id:"coin", name:"Coin Rain", ico:"🪙", desc:"1.5× coin drops this round", cost:90, currency:"coins", engineKey:"magnet" },
+  { id:"score2", name:"Score ×2", ico:"🔥", desc:"Double score this round", cost:120, currency:"coins", engineKey:"score2" },
+  { id:"blitz50", name:"Blitz Jump", ico:"⚡", desc:"Start at 50% Blitz charge", cost:100, currency:"coins", engineKey:"blitz50" },
+  { id:"pack_hammer", name:"Hammer Pack", ico:"🔨", desc:"+2 Tile Hammers for battle", cost:80, currency:"coins", grantItem:"hammer", grantQty:2 },
+  { id:"pack_shuffle", name:"Shuffle Pack", ico:"🔀", desc:"+2 Board Shuffles", cost:70, currency:"coins", grantItem:"shuffle", grantQty:2 },
+  { id:"pack_bomb", name:"Mini Bomb", ico:"💣", desc:"+1 Mini Bomb (3×3 smash)", cost:110, currency:"coins", grantItem:"bomb", grantQty:1 },
+];
+
+/** In-round consumable battle items (mobile tray) */
+const BATTLE_ITEMS = [
+  { id:"hammer", name:"Hammer", ico:"🔨", desc:"Smash one tile", aim:true },
+  { id:"shuffle", name:"Shuffle", ico:"🔀", desc:"Reshuffle the board", aim:false },
+  { id:"brush", name:"Brush", ico:"🖌️", desc:"Paint 4 tiles to your hero", aim:false },
+  { id:"freeze", name:"Freeze", ico:"❄️", desc:"Freeze the clock 3s", aim:false },
+  { id:"hint", name:"Hint", ico:"💡", desc:"Highlight a valid move", aim:false },
+  { id:"bomb", name:"Bomb", ico:"💣", desc:"Blow up a 3×3 area", aim:true },
 ];
 
 const GEM_PACKS = [
   { id:"g2c1", name:"Gem Trade S", ico:"💎", desc:"25 gems → 200 coins", gems:25, coins:200 },
   { id:"g2c2", name:"Gem Trade L", ico:"💎", desc:"60 gems → 550 coins", gems:60, coins:550 },
+  { id:"g2i1", name:"Item Bundle", ico:"🎒", desc:"40 gems → hammer+shuffle+hint", gems:40, items:{hammer:1,shuffle:1,hint:1} },
 ];
 
 const SPIN_PRIZES = [
@@ -6252,7 +6482,8 @@ function defaultSave(){
     coins:200, gems:5, xp:0, level:1, best:0, games:0, clears:0, blitzes:0,
     lives:5, livesAt:0, lifeRegenAt:0,
     unlocked:[0], selected:0, levels:{}, dupes:{},
-    boosters:{ sun:0, time:0, coin:0, score2:0, time10:0, blitz50:0, magnet:0 },
+    boosters:{ sun:0, time:0, coin:0, score2:1, time10:0, blitz50:0, magnet:0, pack_hammer:1, pack_shuffle:1, pack_bomb:0 },
+    items:{ hammer:2, shuffle:1, brush:1, freeze:1, hint:2, bomb:1 },
     equippedBooster:null,
     pass:{ season:1, xp:0, vip:false, claimedFree:[], claimedVip:[], endsAt: now + SEASON_MS, claimHeat:0, upsells:0, socialBase:12847 },
     quests:{ day:"", list:[] },
@@ -6279,6 +6510,8 @@ function migrateSave(raw){
   if(!s.login.claimedDay) s.login.claimedDay = "";
   s.spin = { ...d.spin, ...(raw.spin||{}) };
   s.boosters = { ...d.boosters, ...(raw.boosters||{}) };
+  s.items = { ...d.items, ...(raw.items||{}) };
+  BATTLE_ITEMS.forEach(it => { if (s.items[it.id] == null) s.items[it.id] = 0; });
   s.achievements = { ...(raw.achievements||{}) };
   s.stats = { ...d.stats, ...(raw.stats||{}) };
   s.titles = Array.isArray(raw.titles)?raw.titles:d.titles;
@@ -6692,9 +6925,22 @@ function prepBoosterForEngine() {
   const b = BOOSTERS.find(x => x.id === uiId);
   if (!b || (save.boosters[uiId] || 0) <= 0) { save.equippedBooster = null; return; }
   save.boosters[uiId]--;
+  if (b.grantItem) {
+    save.items = save.items || {};
+    save.items[b.grantItem] = (save.items[b.grantItem] || 0) + (b.grantQty || 1);
+    save.equippedBooster = null;
+    writeSave();
+    return;
+  }
   const ek = b.engineKey || uiId;
   save.boosters[ek] = (save.boosters[ek] || 0) + 1;
   save.equippedBooster = ek;
+  writeSave();
+}
+
+function grantBattleItem(id, qty){
+  save.items = save.items || {};
+  save.items[id] = (save.items[id] || 0) + (qty|0);
   writeSave();
 }
 
@@ -7361,7 +7607,71 @@ function renderShop(){
   }
   const grid = $("shopGrid");
   if (!grid) return;
+
+  /* Dynamic battle-item / booster shelf (mega update) */
+  let shelf = grid.querySelector("#itemShelf");
+  if (!shelf) {
+    shelf = document.createElement("div");
+    shelf.id = "itemShelf";
+    shelf.style.cssText = "display:contents";
+    grid.appendChild(shelf);
+  }
+  shelf.innerHTML = "";
+  const offers = [
+    ...BATTLE_ITEMS.map(it => ({
+      kind:"item", id:it.id, ico:it.ico, name:it.name, desc:it.desc + " · owned ×" + (save.items?.[it.id]|0),
+      cost: it.id==="bomb"?110: it.id==="hammer"?55: it.id==="freeze"?50:40, currency:"coins"
+    })),
+    ...BOOSTERS.filter(b => b.grantItem || b.engineKey).slice(0, 6).map(b => ({
+      kind:"booster", id:b.id, ico:b.ico, name:b.name, desc:b.desc + " · ×" + (save.boosters[b.id]|0),
+      cost:b.cost, currency:b.currency||"coins"
+    })),
+    ...GEM_PACKS.map(g => ({
+      kind:"gempack", id:g.id, ico:g.ico, name:g.name, desc:g.desc, cost:g.gems, currency:"gems", pack:g
+    })),
+  ];
+  offers.forEach(o => {
+    const art = document.createElement("article");
+    art.className = "shop-box silver";
+    art.innerHTML = `
+      <div class="box-art">${o.ico}</div>
+      <div><span class="box-tag">${o.kind==="item"?"Item":o.kind==="gempack"?"Trade":"Boost"}</span>
+      <h3>${o.name}</h3><p>${o.desc}</p></div>
+      <button class="btn buy item-buy" type="button" data-offer="${o.kind}:${o.id}" data-cost="${o.cost}" data-cur="${o.currency}">
+        ${o.currency==="gems"?"💎":"🪙"} ${o.cost}
+      </button>`;
+    shelf.appendChild(art);
+  });
+  shelf.querySelectorAll(".item-buy").forEach(btn => {
+    btn.onclick = () => {
+      const [kind, id] = (btn.getAttribute("data-offer")||"").split(":");
+      const cost = parseInt(btn.getAttribute("data-cost"), 10) || 0;
+      const cur = btn.getAttribute("data-cur") || "coins";
+      if (cur === "gems") {
+        if (save.gems < cost) { toast("Need more gems"); return; }
+        save.gems -= cost;
+      } else {
+        if (save.coins < cost) { toast("Need more coins"); return; }
+        save.coins -= cost;
+      }
+      if (kind === "item") {
+        grantBattleItem(id, 1);
+        toast("Got " + id + "!");
+      } else if (kind === "booster") {
+        save.boosters[id] = (save.boosters[id]|0) + 1;
+        toast("Booster ready!");
+      } else if (kind === "gempack") {
+        const pack = GEM_PACKS.find(x => x.id === id);
+        if (pack?.coins) grantCoins(pack.coins, true);
+        if (pack?.items) Object.entries(pack.items).forEach(([k,v]) => grantBattleItem(k, v));
+        toast(pack?.name || "Deal claimed!");
+      }
+      writeSave(); sfx("coin"); refreshMenu(); renderShop();
+    };
+  });
+
   grid.querySelectorAll(".shop-box .buy").forEach(btn => {
+    if (btn.classList.contains("item-buy")) return;
     if (btn.dataset.shellBound) return;
     btn.dataset.shellBound = "1";
     btn.onclick = (e) => {
@@ -9581,6 +9891,291 @@ function exitBlitz() {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Ability cast cinematics + battle items (mega update)                        */
+/* -------------------------------------------------------------------------- */
+
+const SPELL_CAST_META = {
+  pattern_x: { title: "CROSSBURST", sub: "Diagonal wipe!" },
+  column_crush: { title: "PILLAR DROP", sub: "Columns crush!" },
+  row_sweep: { title: "ROW SWEEP", sub: "Horizontal slash!" },
+  time_pause: { title: "TIME FREEZE", sub: "Clock stopped!" },
+  guaranteed_stars: { title: "STAR SHOWER", sub: "Rainbow stars!" },
+  sun_storm: { title: "SUN STORM", sub: "Sunshine barrage!" },
+  color_bomb: { title: "COLOR BOMB", sub: "Type wipe!" },
+  board_pulse: { title: "DRAGON PULSE", sub: "Outer ring clear!" },
+  meteor_rain: { title: "METEOR RAIN", sub: "Sky fire!" },
+  heart_beat: { title: "HEART PULSE", sub: "Love clears all!" },
+};
+
+let aimingItem = null; /* battle item id waiting for board tap */
+
+async function playAbilityCast(spell) {
+  const overlay = $("abilityCast");
+  const btn = $("heroBtn");
+  if (btn) btn.classList.add("casting");
+  const meta = SPELL_CAST_META[spell] || { title: "POWER!", sub: hero?.desc || "" };
+  const glyph = $("castHeroGlyph");
+  const name = $("castName");
+  const sub = $("castSub");
+  if (glyph) {
+    try { glyph.innerHTML = faceHTML(hero.id); } catch (_) { glyph.textContent = hero.glyph || "⭐"; }
+  }
+  if (name) name.textContent = meta.title;
+  if (sub) sub.textContent = (hero && hero.name ? hero.name + " · " : "") + meta.sub;
+  if (overlay) {
+    overlay.className = "ability-cast show spell-" + (spell || "pattern_x");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+  document.body.classList.add("casting-power");
+  await sleep(560);
+  try { await playSpellBoardFx(spell); } catch (_) {}
+  if (overlay) {
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+  if (btn) btn.classList.remove("casting");
+  document.body.classList.remove("casting-power");
+}
+
+async function playSpellBoardFx(spell) {
+  if (!fxEl && !boardEl) return;
+  const host = fxEl || boardEl;
+  const s = cellPx();
+  const w = s * COLS + readGapPx() * (COLS - 1);
+  const h = s * ROWS + readGapPx() * (ROWS - 1);
+
+  if (boardEl) {
+    boardEl.classList.add("ability-hit");
+    setTimeout(() => boardEl.classList.remove("ability-hit"), 400);
+  }
+
+  if (spell === "pattern_x") {
+    for (const rot of [45, -45]) {
+      const el = document.createElement("div");
+      el.className = "fx-slash";
+      el.style.width = w * 1.2 + "px";
+      el.style.left = (w * -0.1) + "px";
+      el.style.top = (h / 2 - 4) + "px";
+      el.style.transform = `rotate(${rot}deg)`;
+      host.appendChild(el);
+      setTimeout(() => el.remove(), 500);
+    }
+  } else if (spell === "column_crush" || spell === "row_sweep") {
+    for (let i = 0; i < 3; i++) {
+      const el = document.createElement("div");
+      el.className = "fx-slash";
+      if (spell === "column_crush") {
+        el.style.width = "10px";
+        el.style.height = h + "px";
+        el.style.left = ((i + 1) * w / 4) + "px";
+        el.style.top = "0";
+        el.style.background = "linear-gradient(180deg,transparent,#7dffb0,#ffe07a,transparent)";
+      } else {
+        el.style.width = w + "px";
+        el.style.left = "0";
+        el.style.top = ((i + 1) * h / 4) + "px";
+      }
+      host.appendChild(el);
+      setTimeout(() => el.remove(), 500);
+    }
+  } else if (spell === "time_pause") {
+    const el = document.createElement("div");
+    el.className = "fx-freeze";
+    el.style.position = "absolute";
+    el.style.inset = "0";
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  } else if (spell === "guaranteed_stars" || spell === "sun_storm") {
+    for (let i = 0; i < 6; i++) {
+      const el = document.createElement("div");
+      el.className = "fx-starfall";
+      el.textContent = spell === "sun_storm" ? "☀️" : "⭐";
+      el.style.left = (Math.random() * w * 0.8 + w * 0.1) + "px";
+      el.style.top = (Math.random() * h * 0.6 + h * 0.1) + "px";
+      host.appendChild(el);
+      setTimeout(() => el.remove(), 800);
+    }
+  } else if (spell === "meteor_rain") {
+    for (let i = 0; i < 8; i++) {
+      await sleep(40);
+      const el = document.createElement("div");
+      el.className = "fx-meteor";
+      el.style.left = (Math.random() * w * 0.85) + "px";
+      el.style.top = (Math.random() * h * 0.85) + "px";
+      host.appendChild(el);
+      setTimeout(() => el.remove(), 600);
+    }
+  } else if (spell === "board_pulse" || spell === "heart_beat" || spell === "color_bomb") {
+    const el = document.createElement("div");
+    el.className = "fx-ring";
+    el.style.width = Math.min(w, h) * 0.5 + "px";
+    el.style.height = el.style.width;
+    el.style.left = (w / 2 - parseFloat(el.style.width) / 2) + "px";
+    el.style.top = (h / 2 - parseFloat(el.style.width) / 2) + "px";
+    if (spell === "heart_beat") el.style.borderColor = "#ff5fa8";
+    if (spell === "color_bomb") el.style.borderColor = "#c44bff";
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 600);
+  }
+  await sleep(180);
+}
+
+function syncItemTray() {
+  const tray = $("itemTray");
+  if (!tray) return;
+  save.items = save.items || {};
+  tray.innerHTML = "";
+  BATTLE_ITEMS.forEach((it) => {
+    const n = save.items[it.id] | 0;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "item-btn" + (aimingItem === it.id ? " active" : "");
+    btn.disabled = n <= 0 || (state !== "Playing" && state !== "Blitz");
+    btn.innerHTML = `<span class="ico">${it.ico}</span><span class="n">×${n}</span>`;
+    btn.title = it.name + " — " + it.desc;
+    btn.onclick = () => safeRun(onItemTap(it.id), "item");
+    tray.appendChild(btn);
+  });
+  const hint = $("itemHint");
+  if (hint) {
+    hint.textContent = aimingItem
+      ? ("Aiming " + (BATTLE_ITEMS.find(x => x.id === aimingItem)?.name || "") + " — tap a tile")
+      : "";
+  }
+}
+
+function clearItemAim() {
+  aimingItem = null;
+  document.body.classList.remove("item-aim");
+  syncItemTray();
+}
+
+async function onItemTap(id) {
+  if (resolving || paused) return;
+  if (state !== "Playing" && state !== "Blitz") return;
+  save.items = save.items || {};
+  if ((save.items[id] | 0) <= 0) { toast("No more " + id); return; }
+  const def = BATTLE_ITEMS.find(x => x.id === id);
+  if (!def) return;
+
+  if (def.aim) {
+    if (aimingItem === id) { clearItemAim(); return; }
+    aimingItem = id;
+    document.body.classList.add("item-aim");
+    syncItemTray();
+    sfx("tap");
+    return;
+  }
+
+  save.items[id]--;
+  writeSave();
+  pushResolve();
+  try {
+    idle = false;
+    if (id === "shuffle") {
+      toast("Board shuffled!");
+      popResolve();
+      await shuffleBoard();
+      syncItemTray();
+      return;
+    }
+    if (id === "brush") {
+      const normals = [];
+      forEachCell((r, c, t) => { if (t && t.kind === SPECIAL_KINDS.NORMAL) normals.push({ r, c }); });
+      for (let i = 0; i < 4 && normals.length; i++) {
+        const cell = normals.splice(Math.floor(rng() * normals.length), 1)[0];
+        const t = get(cell.r, cell.c);
+        if (t) t.emojiType = hero.id;
+      }
+      syncSprites(true);
+      toast("Painted to " + hero.name + "!");
+      sfx("special");
+    } else if (id === "freeze") {
+      if (!blitzOn) {
+        timePaused = true;
+        pauseLeft = Math.max(pauseLeft, 3);
+        toast("Frozen +3s!");
+        try {
+          const el = document.createElement("div");
+          el.className = "fx-freeze";
+          el.style.position = "absolute";
+          el.style.inset = "0";
+          (fxEl || boardEl)?.appendChild(el);
+          setTimeout(() => el.remove(), 800);
+        } catch (_) {}
+      }
+      sfx("power");
+    } else if (id === "hint") {
+      const move = findValidMove();
+      if (!move) toast("No moves — try shuffle");
+      else {
+        [move.a, move.b].forEach((cell) => {
+          const t = get(cell.r, cell.c);
+          const el = t && sprites.get(t.uid);
+          if (el) {
+            el.classList.add("ability-target");
+            setTimeout(() => el.classList.remove("ability-target"), 1200);
+          }
+        });
+        toast("Hint highlighted!");
+      }
+      sfx("tap");
+    }
+    updateHud();
+  } finally {
+    popResolve();
+    syncItemTray();
+  }
+}
+
+async function applyAimedItem(cell) {
+  if (!aimingItem || !cell) return;
+  if (resolving || paused) return;
+  const id = aimingItem;
+  save.items = save.items || {};
+  if ((save.items[id] | 0) <= 0) { clearItemAim(); return; }
+  save.items[id]--;
+  clearItemAim();
+  writeSave();
+  pushResolve();
+  try {
+    idle = false;
+    if (id === "hammer") {
+      await cascadeFrom({
+        type: "plan",
+        plan: { cells: uniqCells([cell]), reason: CLEAR_REASON.CHARACTER },
+      });
+      toast("Smashed!");
+    } else if (id === "bomb") {
+      const cells = [];
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          cells.push({ r: cell.r + dr, c: cell.c + dc });
+        }
+      }
+      const el = document.createElement("div");
+      el.className = "fx-ring";
+      const p = pos(cell.r, cell.c);
+      el.style.width = cellPx() * 2.4 + "px";
+      el.style.height = el.style.width;
+      el.style.left = (p.x - cellPx() * 0.7) + "px";
+      el.style.top = (p.y - cellPx() * 0.7) + "px";
+      el.style.borderColor = "#ff6a3c";
+      (fxEl || boardEl)?.appendChild(el);
+      setTimeout(() => el.remove(), 500);
+      await cascadeFrom({
+        type: "plan",
+        plan: { cells: uniqCells(cells), reason: CLEAR_REASON.CHARACTER },
+      });
+      toast("Boom!");
+    }
+  } finally {
+    popResolve();
+    syncItemTray();
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Hero powers — firePower                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -9592,20 +10187,25 @@ async function firePower() {
   try {
     setHeroCharge(0);
     idle = false;
+    clearItemAim();
     sfx("power");
-    toast(hero.name + "!");
     roundPowers++;
     if (roundStats) roundStats.powers++;
     save.stats = save.stats || {};
     save.stats.powers = (save.stats.powers || 0) + 1;
 
-    const handler = SPELL_HANDLERS[hero.spell];
+    const spell = hero.spell;
+    try { await playAbilityCast(spell); } catch (e) { console.error("cast", e); }
+    toast((hero.name || "Hero") + "!");
+
+    const handler = SPELL_HANDLERS[spell];
     if (handler) await handler();
-    else console.warn("[EmojiRush] Unknown spell:", hero.spell);
+    else console.warn("[EmojiRush] Unknown spell:", spell);
   } catch (err) {
     console.error("firePower", err);
   } finally {
     popResolve();
+    syncItemTray();
   }
 }
 
@@ -9708,6 +10308,14 @@ function bindBoardInput() {
     pointerDown = hitCell(e.clientX, e.clientY);
     pointerLocked = false;
     if (!pointerDown) return;
+
+    if (aimingItem) {
+      const cell = pointerDown;
+      pointerDown = null;
+      selected = null;
+      safeRun(applyAimedItem(cell), "itemAim");
+      return;
+    }
 
     if (selected && isOrtho(selected, pointerDown)) {
       const a = selected;
@@ -9900,6 +10508,8 @@ function beginRound(character) {
   bindBoardInput();
   bindHeroButton();
   wireRoundModals();
+  clearItemAim();
+  syncItemTray();
   showScreen("game");
 
   updateHud();
@@ -10388,6 +10998,45 @@ const SPELL_HANDLERS = {
       const edge = r === 0 || c === 0 || r === ROWS - 1 || c === COLS - 1;
       const ring2 = hero.doubleRing && (r === 1 || c === 1 || r === ROWS - 2 || c === COLS - 2);
       if (edge || ring2) cells.push({ r, c });
+    });
+    await cascadeFrom({
+      type: "plan",
+      plan: { cells: uniqCells(cells), reason: CLEAR_REASON.CHARACTER },
+    });
+  },
+
+  meteor_rain: async () => {
+    const cells = [];
+    const used = new Set();
+    for (let i = 0; i < 8; i++) {
+      let guard = 0;
+      while (guard++ < 40) {
+        const r = Math.floor(rng() * ROWS);
+        const c = Math.floor(rng() * COLS);
+        const k = r * 8 + c;
+        if (used.has(k)) continue;
+        used.add(k);
+        cells.push({ r, c });
+        break;
+      }
+    }
+    await cascadeFrom({
+      type: "plan",
+      plan: { cells: uniqCells(cells), reason: CLEAR_REASON.CHARACTER },
+    });
+  },
+
+  heart_beat: async () => {
+    const cells = [];
+    const heroId = hero && hero.id;
+    forEachCell((r, c, t) => {
+      if (!t) return;
+      if (t.kind === SPECIAL_KINDS.NORMAL && t.emojiType === heroId) {
+        cells.push({ r, c });
+        for (const [dr, dc] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+          cells.push({ r: r + dr, c: c + dc });
+        }
+      }
     });
     await cascadeFrom({
       type: "plan",
