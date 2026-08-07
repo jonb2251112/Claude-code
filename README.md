@@ -1,5 +1,21 @@
 # Emoji Rush
 
+Single-file mobile Match-3 (`index.html`) with Emoji Blitz–inspired UI: cloud sky, purple score pill, dark blue board, timer bubble, blitz meter, hero-on-cloud power bar, missions hub, and emoji collection.
+
+## Run
+
+```bash
+npx serve -l 4173 .
+```
+
+Open `http://127.0.0.1:4173/`
+
+## Debug
+
+`window.RUSH` exposes helpers in the console.
+
+# Emoji Rush
+
 **One file.** Open [`index.html`](index.html) in a mobile browser or desktop Chrome.
 
 Soft-currency only — no real-money IAP.
