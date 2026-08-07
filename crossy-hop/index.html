@@ -465,7 +465,7 @@ html,body{
   text-shadow:0 5px 0 var(--grass-dk), 0 10px 0 rgba(18,52,80,.35), 0 22px 32px rgba(18,52,80,.4);
   transform:rotate(-2.5deg);
 }
-#title span{display:block;}
+#title .one,#title .two{display:block;}
 #title .two{color:var(--gold);text-shadow:0 5px 0 var(--gold-dk), 0 10px 0 rgba(18,52,80,.35), 0 22px 32px rgba(18,52,80,.4);}
 #tagline{
   font-size:clamp(11px,3.2vw,14px);letter-spacing:.24em;text-transform:uppercase;
@@ -1923,6 +1923,191 @@ kbd{
   background:linear-gradient(#fdba74,#f97316);color:#431407;
 }
 
+/* --- Seasonal brand logos (title wordmark) -------------------------------- */
+#title.brand{
+  display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.5vw,18px);
+  position:relative;
+}
+#title.brand .stack{display:flex;flex-direction:column;align-items:center;}
+#title.brand .logo-orn{
+  width:clamp(28px,8vw,52px);height:clamp(28px,8vw,52px);flex:0 0 auto;
+  position:relative;opacity:0;transform:scale(.6);
+  transition:opacity .35s ease, transform .35s cubic-bezier(.2,1.2,.3,1);
+}
+#title.brand .logo-orn::before,
+#title.brand .logo-orn::after{content:"";position:absolute;inset:0;margin:auto;}
+#seasonbadge{
+  margin-top:2px;padding:4px 12px;border-radius:999px;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:800;color:#fff;
+  background:rgba(12,38,62,.35);box-shadow:0 3px 0 rgba(12,38,62,.25);
+}
+#seasonbadge.show{display:inline-block;}
+#seasonbadge.hidden{display:none;}
+
+/* Halloween logo — carved pumpkin wordmark */
+body.brand-halloween #title{
+  transform:rotate(-3deg);
+  filter:drop-shadow(0 0 18px rgba(249,115,22,.45));
+}
+body.brand-halloween #title .one,
+body.brand-halloween #start:not(.hidden) #title .one{
+  color:#fdba74;
+  text-shadow:0 5px 0 #7c2d12, 0 10px 0 rgba(60,10,40,.45), 0 0 28px rgba(249,115,22,.55);
+  animation:hauntbob 2.6s ease-in-out infinite;
+}
+body.brand-halloween #title .two,
+body.brand-halloween #start:not(.hidden) #title .two{
+  color:#e9d5ff;
+  text-shadow:0 5px 0 #5b21b6, 0 10px 0 rgba(40,10,60,.5), 0 0 28px rgba(168,85,247,.55);
+  animation:hauntbob 2.6s ease-in-out .12s infinite;
+}
+body.brand-halloween #title .logo-orn{opacity:1;transform:scale(1);}
+body.brand-halloween #title .logo-orn::before{
+  width:86%;height:78%;top:14%;border-radius:45% 45% 40% 40%/55% 55% 45% 45%;
+  background:linear-gradient(160deg,#ffb347,#f97316 50%,#c2410c);
+  box-shadow:inset -4px -6px 0 rgba(0,0,0,.15), 0 3px 0 rgba(69,26,3,.4);
+}
+body.brand-halloween #title .logo-orn::after{
+  width:18%;height:18%;top:0;left:42%;
+  background:linear-gradient(#4d7c0f,#365314);border-radius:3px;
+  box-shadow:10px 18px 0 -2px #1c1917, -10px 18px 0 -2px #1c1917, 0 28px 0 -1px #1c1917;
+}
+body.brand-halloween #title .logo-orn.r{transform:scaleX(-1) scale(1);}
+body.brand-halloween #tagline{
+  color:#fdba74;letter-spacing:.28em;
+  text-shadow:0 2px 0 rgba(60,10,40,.5), 0 0 12px rgba(249,115,22,.4);
+}
+body.brand-halloween #seasonbadge{
+  background:linear-gradient(90deg,#f97316,#a855f7);color:#2e1065;
+  box-shadow:0 3px 0 #5b21b6, 0 0 16px rgba(249,115,22,.4);
+}
+body.brand-halloween #start{
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(249,115,22,.35), transparent 55%),
+    radial-gradient(80% 60% at 100% 20%, rgba(124,58,237,.28), transparent 50%),
+    radial-gradient(110% 55% at 50% 8%, rgba(40,10,60,.2), rgba(12,38,62,.5));
+}
+body.brand-halloween #btn-play{
+  background:linear-gradient(#f97316,#a855f7);color:#fff;
+  box-shadow:0 6px 0 #5b21b6, 0 14px 22px rgba(168,85,247,.35);
+}
+@keyframes hauntbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* Summer logo — sun + wave wordmark */
+body.brand-summer #title{
+  transform:rotate(-2deg);
+  filter:drop-shadow(0 0 16px rgba(34,211,238,.4));
+}
+body.brand-summer #title .one,
+body.brand-summer #start:not(.hidden) #title .one{
+  color:#67e8f9;
+  text-shadow:0 5px 0 #0e7490, 0 10px 0 rgba(8,47,73,.4), 0 0 24px rgba(34,211,238,.5);
+  animation:sunbob 2.4s ease-in-out infinite;
+}
+body.brand-summer #title .two,
+body.brand-summer #start:not(.hidden) #title .two{
+  color:#fde68a;
+  text-shadow:0 5px 0 #b45309, 0 10px 0 rgba(120,53,15,.4), 0 0 24px rgba(251,146,60,.45);
+  animation:sunbob 2.4s ease-in-out .1s infinite;
+}
+body.brand-summer #title .logo-orn{opacity:1;transform:scale(1);}
+body.brand-summer #title .logo-orn.l::before{
+  width:70%;height:70%;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff7ed,#fbbf24 45%,#f59e0b);
+  box-shadow:0 0 0 3px rgba(251,191,36,.35), 0 0 18px rgba(251,191,36,.55);
+}
+body.brand-summer #title .logo-orn.l::after{
+  width:100%;height:100%;
+  background:
+    radial-gradient(circle at 50% 0%, #fbbf24 18%, transparent 19%),
+    radial-gradient(circle at 50% 100%, #fbbf24 18%, transparent 19%),
+    radial-gradient(circle at 0% 50%, #fbbf24 18%, transparent 19%),
+    radial-gradient(circle at 100% 50%, #fbbf24 18%, transparent 19%);
+  opacity:.85;
+}
+body.brand-summer #title .logo-orn.r::before{
+  width:90%;height:40%;top:30%;
+  border-radius:0 0 50% 50%;
+  background:linear-gradient(180deg,#22d3ee,#0e7490);
+  box-shadow:0 8px 0 -2px #67e8f9, 0 14px 0 -4px #0891b2;
+}
+body.brand-summer #title .logo-orn.r::after{display:none;}
+body.brand-summer #tagline{
+  color:#a5f3fc;letter-spacing:.26em;
+  text-shadow:0 2px 0 rgba(8,47,73,.45), 0 0 12px rgba(34,211,238,.35);
+}
+body.brand-summer #seasonbadge{
+  background:linear-gradient(90deg,#22d3ee,#fbbf24);color:#083344;
+  box-shadow:0 3px 0 #0e7490, 0 0 14px rgba(34,211,238,.4);
+}
+body.brand-summer #start{
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(251,191,36,.38), transparent 55%),
+    radial-gradient(80% 60% at 0% 30%, rgba(34,211,238,.28), transparent 50%),
+    radial-gradient(110% 55% at 50% 8%, rgba(8,47,73,.12), rgba(12,38,62,.42));
+}
+body.brand-summer #btn-play{
+  background:linear-gradient(#22d3ee,#0891b2);color:#042f2e;
+  box-shadow:0 6px 0 #0e7490, 0 14px 22px rgba(34,211,238,.35);
+}
+@keyframes sunbob{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-5px) rotate(.5deg)}}
+
+/* Run meters */
+#soulmeter,#candymeter,#splashmeter,#heatmeter{
+  display:none;align-items:center;gap:6px;margin-top:4px;
+  padding:4px 8px;border-radius:12px;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:800;color:#fff;
+  box-shadow:0 3px 0 rgba(0,0,0,.25);
+}
+#soulmeter.show,#candymeter.show,#splashmeter.show,#heatmeter.show{display:flex;}
+#soulmeter{background:linear-gradient(90deg,#6b21a8,#312e81);}
+#candymeter{background:linear-gradient(90deg,#f97316,#b45309);}
+#splashmeter{background:linear-gradient(90deg,#0891b2,#155e75);}
+#heatmeter{background:linear-gradient(90deg,#f59e0b,#ea580c);}
+#soulmeter .bar,#candymeter .bar,#splashmeter .bar,#heatmeter .bar{
+  width:54px;height:7px;border-radius:4px;background:rgba(0,0,0,.28);overflow:hidden;
+}
+#soulmeter .bar i,#candymeter .bar i,#splashmeter .bar i,#heatmeter .bar i{
+  display:block;height:100%;width:0%;border-radius:4px;transition:width .2s ease;
+}
+#soul-bar{background:linear-gradient(90deg,#e9d5ff,#a855f7);}
+#candy-bar{background:linear-gradient(90deg,#fdba74,#f97316);}
+#splash-bar{background:linear-gradient(90deg,#a5f3fc,#22d3ee);}
+#heat-bar{background:linear-gradient(90deg,#fde68a,#f59e0b);}
+
+/* Home exclusive chips */
+#soulbank,#tidechip{display:none;}
+#soulbank.show,#tidechip.show{display:flex;}
+#soulbank{background:linear-gradient(135deg,#2e1065,#431407);color:#fff7ed;}
+#soulbank .ico{background:linear-gradient(#a855f7,#7c3aed);color:#fff;box-shadow:0 3px 0 #3b0764;}
+#soulbank .k{color:#fdba74;} #soulbank .n{color:#fff7ed;} #soulbank .h{color:#e9d5ff;}
+#tidechip{background:linear-gradient(135deg,#ecfeff,#fef3c7);color:var(--ink);}
+#tidechip .ico{background:linear-gradient(#22d3ee,#fbbf24);color:#083344;box-shadow:0 3px 0 #0e7490;}
+#tidechip .k{color:#0e7490;}
+
+/* Trick-or-Treat afterlife door */
+#treatdoor{
+  width:min(92vw,400px);padding:14px 16px;border-radius:18px;text-align:center;
+  background:linear-gradient(160deg,#3b0764,#431407);color:#fff7ed;
+  box-shadow:0 8px 0 #2e1065, 0 18px 28px rgba(0,0,0,.35);
+  display:flex;flex-direction:column;gap:6px;
+}
+#treatdoor.hidden{display:none;}
+#treatdoor .td-k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#fdba74;}
+#treatdoor .td-n{font-size:22px;font-weight:900;letter-spacing:.04em;}
+#treatdoor .td-h{font-size:11px;color:#e9d5ff;opacity:.9;}
+#treatdoor .td-btns{display:flex;gap:8px;margin-top:6px;}
+#treatdoor .td-btns .btn{flex:1;min-height:44px;}
+#btn-trick{background:linear-gradient(#6b21a8,#3b0764);color:#fff;box-shadow:0 5px 0 #2e1065;}
+#btn-treat{background:linear-gradient(#f97316,#ea580c);color:#fff;box-shadow:0 5px 0 #9a3412;}
+
+@media (prefers-reduced-motion:reduce){
+  body.brand-halloween #title .one,
+  body.brand-halloween #title .two,
+  body.brand-summer #title .one,
+  body.brand-summer #title .two{animation:none!important;}
+}
+
 /* Haunted fever chip tint on Halloween */
 body.season-halloween-world #streak.fever,
 body.season-halloween-world #streak.super,
@@ -2641,6 +2826,7 @@ body.season-halloween-world #streak.overdrive{
 }
 @media (max-width:520px) and (max-height:720px){
   #start #tagline{display:none;}
+  #seasonbadge.show{display:inline-block;font-size:9px;padding:3px 10px;}
   #tapcue,#tapcue2{display:none;}
   #playdock .playhint{display:none;}
   #slimmeta{font-size:11px;gap:6px 10px;}
@@ -2960,6 +3146,10 @@ body.season-halloween-world #streak.overdrive{
       </div>
       <div id="coinchip" class="chip"><i class="coin"></i><span class="val">0</span></div>
       <div id="multchip" class="hidden">×2 coins</div>
+      <div id="soulmeter" class="hidden" aria-label="Soul siphon"><span class="k">souls</span><span class="bar"><i id="soul-bar"></i></span><span class="n" id="soul-n">0/5</span></div>
+      <div id="candymeter" class="hidden" aria-label="Candy meter"><span class="k">candy</span><span class="bar"><i id="candy-bar"></i></span><span class="n" id="candy-n">0/8</span></div>
+      <div id="splashmeter" class="hidden" aria-label="Splash meter"><span class="k">splash</span><span class="bar"><i id="splash-bar"></i></span><span class="n" id="splash-n">0/6</span></div>
+      <div id="heatmeter" class="hidden" aria-label="Heatwave gauge"><span class="k">heat</span><span class="bar"><i id="heat-bar"></i></span><span class="n" id="heat-n">0/12</span></div>
       <div id="hudboost" class="hidden" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:linear-gradient(#ff9a3c,#e02b2b);border-radius:12px;padding:4px 10px;box-shadow:0 3px 0 #9a1818;">2× stars</div>
       <div id="hudstars"><span>★</span><b id="hudstars-n">0</b><span>stars</span></div>
     </div>
@@ -2995,8 +3185,16 @@ body.season-halloween-world #streak.overdrive{
 
   <!-- ===================== START ===================== -->
   <div id="start" class="screen">
-    <h1 id="title"><span class="one">CROSSY</span><span class="two">HOP</span></h1>
+    <h1 id="title" class="brand" aria-label="Crossy Hop">
+      <span class="logo-orn l" aria-hidden="true"></span>
+      <span class="stack">
+        <span class="one">CROSSY</span>
+        <span class="two">HOP</span>
+      </span>
+      <span class="logo-orn r" aria-hidden="true"></span>
+    </h1>
     <div id="tagline">one more hop</div>
+    <div id="seasonbadge" class="hidden" aria-live="polite">SEASON</div>
     <div id="slimmeta">
       <span>best <b id="s-best">0</b></span>
       <span>coins <b id="s-coins">0</b></span>
@@ -3044,6 +3242,22 @@ body.season-halloween-world #streak.overdrive{
           <span class="n" id="nest-n">Something is hatching</span>
           <span class="h" id="nest-h">come back when it cracks</span>
           <span class="bar"><i id="nest-bar" style="width:0%"></i></span>
+        </span>
+      </button>
+      <button type="button" id="soulbank" aria-label="Soul bank">
+        <span class="ico">SOUL</span>
+        <span class="copy">
+          <span class="k" id="soulbank-k">soul bank · halloween</span>
+          <span class="n" id="soulbank-n">0 souls stored</span>
+          <span class="h" id="soulbank-h">cash near-miss souls for candy loot</span>
+        </span>
+      </button>
+      <button type="button" id="tidechip" aria-label="Tide challenge">
+        <span class="ico">TIDE</span>
+        <span class="copy">
+          <span class="k" id="tide-k">tide challenge · summer</span>
+          <span class="n" id="tide-n">Beat the Tide</span>
+          <span class="h" id="tide-h">reach 40 before the tide turns</span>
         </span>
       </button>
       <button type="button" id="storychip" aria-label="Open story mode">
@@ -3099,6 +3313,15 @@ body.season-halloween-world #streak.overdrive{
       <div id="o-meta">journey <b id="o-stars">0</b> · xp gained this run</div>
     </div>
     <div id="newbest" class="hidden">new best!</div>
+    <div id="treatdoor" class="hidden" aria-label="Trick or Treat">
+      <div class="td-k">halloween exclusive</div>
+      <div class="td-n">Trick or Treat?</div>
+      <div class="td-h">one pick · soft currency only</div>
+      <div class="td-btns">
+        <button type="button" id="btn-trick" class="btn ghost">TRICK</button>
+        <button type="button" id="btn-treat" class="btn">TREAT</button>
+      </div>
+    </div>
     <div id="clutch">
       <div class="k">clutch salvage</div>
       <div class="n" id="clutch-n">MASH TO SALVAGE</div>
@@ -119279,7 +119502,7 @@ function updateTraffic(dt, focus){
       const ry = row.dir > 0 ? 0 : Math.PI;
       let minX = Infinity, maxX = -Infinity;
       for(const v of row.vehicles){
-        v.x += row.dir * row.speed * dt * effectiveSlow();
+        v.x += row.dir * row.speed * dt * effectiveSlow() * (typeof seasonTrafficMul === 'function' ? seasonTrafficMul() : 1);
         if(v.x < minX) minX = v.x;
         if(v.x > maxX) maxX = v.x;
       }
@@ -119309,7 +119532,7 @@ function updateTraffic(dt, focus){
       if(row.logs && row.logs.length){
         let minX = Infinity, maxX = -Infinity;
         for(const l of row.logs){
-          l.x += row.dir * row.speed * dt * effectiveSlow();
+          l.x += row.dir * row.speed * dt * effectiveSlow() * (typeof seasonTrafficMul === 'function' ? seasonTrafficMul() : 1);
           if(l.x < minX) minX = l.x;
           if(l.x > maxX) maxX = l.x;
         }
@@ -119526,6 +119749,7 @@ function landed(){
     if(!row.credited){ row.credited = true; stats.logRows++; run.logs++; tickQuests(); }
     Sfx.land(); Sfx.thump();
     landRing(player.x, player.y, player.z, perfect ? 'mint' : '');
+    try{ addSplash(1); }catch(e){}
   } else {
     player.col = Math.round(player.x);
     player.y = row.top + (worn().float || 0);
@@ -119549,6 +119773,7 @@ function landed(){
         run.coins += pay;
         camKick(0.22 + pay * 0.06);
         addictionOnCoin(pay);
+        try{ addCandy(1); }catch(e){}
         tickQuests();
       }
     }
@@ -119915,6 +120140,7 @@ function resetRun(){
   _feverId = '';
   hudMult();
   hideCombo();
+  try{ resetSeasonRunMeters(); }catch(e){}
 }
 
 /* --- fever ladder ---------------------------------------------------------
@@ -120151,6 +120377,15 @@ function onProgress(perfect){
   }
   // Tiny camera nod on every successful forward hop so the world feels alive.
   camKick(perfect ? 0.12 : 0.05);
+  try{
+    if(player.hopDir === 'up'){
+      const row = world.rows.get(player.row);
+      if(row && row.type !== 'water') addHeat(1);
+      else if(row && row.type === 'water') run.heat = Math.max(0, (run.heat|0) - 1);
+    }
+    tickTideChallenge();
+    hudSeasonMeters();
+  }catch(e){}
   tickQuests();
 }
 
@@ -120183,6 +120418,7 @@ function nearMiss(){
   state.shake = Math.max(state.shake, 0.25);
   nearMissPay();
   addFuse(4, 'near');
+  try{ addSouls(1); }catch(e){}
   checkAwards();
   tickQuests();
 }
@@ -121127,6 +121363,7 @@ function dailyGift(){
 }
 
 function startGame(){
+  try{ hideTreatDoor(); resetSeasonRunMeters(); hudSeasonMeters(); }catch(e){}
   // Taps reach here from both the overlay and the global pointer handler, and a
   // death animation must be allowed to finish, so guard the transition.
   if(state.mode === 'play' || state.mode === 'dying') return;
@@ -121181,6 +121418,7 @@ function gameOver(){
   showNextAward();
   saveGhostIfBest();
   addictionOnGameOver();
+  try{ bankRunSouls(); showTreatDoor(); refreshSeasonExclusiveChips(); }catch(e){}
   tickPass();
   const om = $("o-meta");
   if(om){ om.innerHTML = "journey <b id=\"o-stars\">" + (journeyStarsFromRun()) + "</b> · " + runRecap(); }
@@ -121748,7 +121986,7 @@ const SEASON_META = {
   summer: {
     id: 'summer', name: 'Summer Splash Pass', short: 'SUMMER',
     theme: 'summer', world: 'summer',
-    drops: ['tide rising','surf spin','gold surf chest','sunset trail','sunscreen shield','sunlord title','heatwave sale','coconut chest','shell magnet','tropical egg'],
+    drops: ['tide rising','splash meter','heatwave gauge','beat the tide','surf spin','gold surf chest','sunset trail','sunscreen shield','sunlord title','heatwave sale','coconut chest','shell magnet','tropical egg','summer logo'],
     feed: [
       'beakboss caught a GOLD surf chest',
       'log_rider unlocked Sunset trail',
@@ -121759,19 +121997,21 @@ const SEASON_META = {
     news: {
       tag: 'new season',
       headline: 'Summer Splash just dropped',
-      blurb: 'Boardwalk vibes, hotter VIP loot, and a tide that turns every few days — here’s what changed.',
+      blurb: 'A full Summer update: new Splash logo, Splash Meter, Heatwave Gauge, and Beat the Tide — not just a coat of paint.',
       features: [
-        { ico: 'SURF', title: 'Splash world theme', body: 'Roads lean tropical. Same hop rules, fresher look — your brain knows the season flipped.' },
-        { ico: 'PASS', title: 'Summer Splash Pass', body: 'New reward labels and a sun-soaked track. Progress resets so everyone starts the chase together.' },
-        { ico: 'HEAT', title: 'Heatwave VIP sale', body: 'Limited soft-currency discounts while the tide is high. The scare copy is the timer — use it.' },
-        { ico: 'LOOT', title: 'Sunset trails & tropical eggs', body: 'Fresh cosmetics and pet eggs on the VIP lane. Claim early — unclaimed loot washes out with the season.' },
+        { ico: 'LOGO', title: 'Summer Splash logo', body: 'The CROSSY HOP wordmark goes sun-and-wave — a whole new brand lockup while the tide is high.' },
+        { ico: 'WAVE', title: 'Splash Meter', body: 'Brand new: every water landing fills Splash. Hit 6 for a Tidal Surge coin rain mid-run.' },
+        { ico: 'HEAT', title: 'Heatwave Gauge', body: 'Brand new: chain grass hops to cook the Heat gauge. At 12 it dumps a Heatwave bonus — exclusive to Summer.' },
+        { ico: 'TIDE', title: 'Beat the Tide challenge', body: 'Brand new home chip: race to row 40 before the daily tide turns. Soft-currency prize if you beat it.' },
+        { ico: 'PASS', title: 'Summer Splash Pass', body: 'Sunlord title, Sunset trail, tropical eggs, coconut chests — progress resets with the season.' },
+        { ico: 'SURF', title: 'Boardwalk world', body: 'Sand roads, lagoon water, palm scatter. Same hop rules — entirely different vibes.' },
       ],
     },
   },
   halloween: {
     id: 'halloween', name: 'Halloween Spirit Pass', short: 'HALLOWEEN',
     theme: 'halloween', world: 'halloween',
-    drops: ['haunt rising','trick spin','gold pumpkin chest','candy corn trail','ghost shield','haunted hopper','witching sale','tomb chest','candy magnet','spooky egg','ghost mist trail','treat crate'],
+    drops: ['haunt rising','soul siphon','candy meter','trick-or-treat door','soul bank','trick spin','gold pumpkin chest','candy corn trail','ghost shield','haunted hopper','witching sale','tomb chest','candy magnet','spooky egg','ghost mist trail','treat crate','halloween logo'],
     feed: [
       'beakboss cracked a GOLD pumpkin chest',
       'nightowl unlocked Candy Corn trail',
@@ -121783,15 +122023,16 @@ const SEASON_META = {
     news: {
       tag: 'haunt drop',
       headline: 'Halloween Haunt is live',
-      blurb: 'A whole haunted map, denser VIP exclusives, Trick-or-Treat crates, and a pumpkin-headed chicken holding your pass.',
+      blurb: 'A full Halloween update: new pumpkin logo, Soul Siphon, Candy Meter, Trick-or-Treat door, and Soul Bank — brand new loops.',
       features: [
-        { ico: 'MAP', title: 'Haunted Hollow world', body: 'Night sky, dead trees, pumpkins, and tombstones. Same hop rules — entirely new vibes under your feet.' },
-        { ico: 'PASS', title: 'Spirit Pass exclusives', body: 'More jackpots than Summer: Candy Corn trail, Ghost Mist, spooky pet eggs, pumpkin chests, and the Haunted Hopper title.' },
-        { ico: 'TREAT', title: 'Trick-or-Treat crates', body: 'Hourly drops become candy hauls — denser soft-loot odds, pumpkin chests, and a rare Haunted Hopper drip.' },
-        { ico: 'FEVER', title: 'Haunt Fever + candy rain', body: 'Streak heat renames to Haunt Fever with thicker candy rain, luck, and magnet range — exclusive to Halloween.' },
-        { ico: 'NIGHT', title: 'Haunt-only run events', body: 'Candy Rain, Haunt Night, Pumpkin Patch, and Witching Spark only roll while the season is live.' },
-        { ico: 'SALE', title: 'Witching sale', body: 'Pumpkin Pass dips lower than Summer VIP during the first 48 hours. Soft currency only — miss it and it vanishes.' },
-        { ico: 'VIP', title: 'Pumpkin-head VIP chicken', body: 'The animated chicken enticing VIP now wears a carved pumpkin. Tap it before the witching hour ends.' },
+        { ico: 'LOGO', title: 'Halloween brand logo', body: 'CROSSY HOP gets a carved-pumpkin wordmark — orange CROSSY, violet HOP, jack-o ornaments. Entirely new title energy.' },
+        { ico: 'SOUL', title: 'Soul Siphon', body: 'Brand new loop: near-misses fill a Soul meter. Hit 5 for a Spirit Burst — candy coins + a short ghost pass.' },
+        { ico: 'CANDY', title: 'Candy Meter', body: 'Brand new: coins scooped during the haunt fill Candy. At 8 you pop a Candy Jackpot mid-run.' },
+        { ico: 'DOOR', title: 'Trick-or-Treat door', body: 'Brand new afterlife choice on game over — TREAT pays soft loot, TRICK gambles a curse-or-jackpot.' },
+        { ico: 'BANK', title: 'Soul Bank', body: 'Brand new home chip: bank leftover souls between runs and cash them for haunted soft loot.' },
+        { ico: 'FEVER', title: 'Haunt Fever + candy rain', body: 'Streak heat renames with thicker candy rain, luck, and magnet — exclusive to Halloween.' },
+        { ico: 'NIGHT', title: 'Haunt-only run events', body: 'Candy Rain, Haunt Night, Pumpkin Patch, Witching Spark only roll this season.' },
+        { ico: 'VIP', title: 'Pumpkin-head VIP chicken', body: 'The VIP chicken wears a carved pumpkin. Witching sale dips the Pumpkin Pass price.' },
       ],
     },
   },
@@ -121841,7 +122082,33 @@ function applySeasonTheme(id){
       return '<span class="drop' + cls + '">' + d + '</span>';
     }).join('');
   }
+  try{
+    document.body.classList.toggle('brand-halloween', meta.theme === 'halloween');
+    document.body.classList.toggle('brand-summer', meta.theme === 'summer');
+    document.body.classList.toggle('brand-classic', meta.theme === 'classic' || !meta.theme);
+  }catch(e){}
   applyWorldTheme(meta.world);
+  updateSeasonBrand(meta);
+  try{ refreshSeasonExclusiveChips(); }catch(e){}
+}
+function updateSeasonBrand(meta){
+  meta = meta || seasonMeta(currentSeasonId());
+  const tag = $('tagline');
+  const badge = $('seasonbadge');
+  const doc = document.querySelector('title');
+  if(meta.theme === 'halloween'){
+    if(tag) tag.textContent = 'haunt the hop';
+    if(badge){ badge.textContent = 'HALLOWEEN UPDATE'; badge.classList.add('show'); badge.classList.remove('hidden'); }
+    if(doc) doc.textContent = 'CROSSY HOP — Halloween';
+  } else if(meta.theme === 'summer'){
+    if(tag) tag.textContent = 'ride the tide';
+    if(badge){ badge.textContent = 'SUMMER SPLASH'; badge.classList.add('show'); badge.classList.remove('hidden'); }
+    if(doc) doc.textContent = 'CROSSY HOP — Summer';
+  } else {
+    if(tag) tag.textContent = 'one more hop';
+    if(badge){ badge.classList.remove('show'); badge.classList.add('hidden'); }
+    if(doc) doc.textContent = 'CROSSY HOP — 3D';
+  }
 }
 function refreshWorldForSeason(){
   applyWorldTheme(seasonMeta(currentSeasonId()).world);
@@ -121851,6 +122118,292 @@ function refreshWorldForSeason(){
     try{ seedStart(); resetPlayer(); rebuildStatic(); }catch(e){}
   }
 }
+
+/* --- SEASON EXCLUSIVE LOOPS (Halloween + Summer addictive systems) --------
+ * Halloween: Soul Siphon, Candy Meter, Trick-or-Treat door, Soul Bank
+ * Summer:    Splash Meter, Heatwave Gauge, Beat the Tide challenge
+ * These are brand-new loops — not reskins of classic systems.
+ * ------------------------------------------------------------------------ */
+function seasonLoopActive(kind){
+  const id = currentSeasonId();
+  if(kind === 'halloween') return id === 'halloween';
+  if(kind === 'summer') return id === 'summer';
+  return false;
+}
+function resetSeasonRunMeters(){
+  run.souls = 0;
+  run.candy = 0;
+  run.splash = 0;
+  run.heat = 0;
+  run.spiritIframe = 0;
+  run.trickCurse = !!(stats.pendingTrickCurse);
+  stats.pendingTrickCurse = 0;
+  run.tideArmed = seasonLoopActive('summer') && !!(stats.tideArmed);
+  hudSeasonMeters();
+}
+function hudSeasonMeters(){
+  const haunt = seasonLoopActive('halloween');
+  const summer = seasonLoopActive('summer');
+  const setMeter = (id, show, cur, max, barId, nId) => {
+    const el = $(id);
+    if(!el) return;
+    el.classList.toggle('show', !!show && state.mode === 'play');
+    el.classList.toggle('hidden', !(show && state.mode === 'play'));
+    const bar = $(barId);
+    const n = $(nId);
+    const c = cur|0, m = max|0;
+    if(bar) bar.style.width = Math.min(100, Math.round((c / Math.max(1, m)) * 100)) + '%';
+    if(n) n.textContent = c + '/' + m;
+  };
+  setMeter('soulmeter', haunt, run.souls, 5, 'soul-bar', 'soul-n');
+  setMeter('candymeter', haunt, run.candy, 8, 'candy-bar', 'candy-n');
+  setMeter('splashmeter', summer, run.splash, 6, 'splash-bar', 'splash-n');
+  setMeter('heatmeter', summer, run.heat, 12, 'heat-bar', 'heat-n');
+}
+function addSouls(n){
+  if(!seasonLoopActive('halloween') || state.mode !== 'play') return;
+  run.souls = Math.min(5, (run.souls|0) + (n|0));
+  hudSeasonMeters();
+  if((run.souls|0) >= 5){
+    run.souls = 0;
+    const pay = 6 + Math.min(10, run.coinMult|1);
+    addCoins(pay); run.coins += pay;
+    player.iframe = Math.max(player.iframe||0, 1.6);
+    run.spiritIframe = 1.6;
+    badge('Spirit Burst!', '+' + pay + ' candy coins · ghost pass');
+    toast('SPIRIT BURST', player.x, player.y + 1.3, player.z, 'mega');
+    flyCoins(player.x, player.y + 0.5, player.z, Math.min(pay, 5));
+    burstConfetti(28, ['#a855f7','#f97316','#e9d5ff','#ffffff']);
+    flashScreen('mega');
+    Sfx.prize();
+    stats.soulBursts = (stats.soulBursts|0) + 1;
+    hudSeasonMeters();
+  }
+}
+function addCandy(n){
+  if(!seasonLoopActive('halloween') || state.mode !== 'play') return;
+  run.candy = Math.min(8, (run.candy|0) + (n|0));
+  hudSeasonMeters();
+  if((run.candy|0) >= 8){
+    run.candy = 0;
+    const pay = 12 + (run.coinMult|1) * 2;
+    addCoins(pay); run.coins += pay;
+    addJourneyStars(2);
+    badge('Candy Jackpot!', '+' + pay + ' coins · +2 stars');
+    toast('CANDY JACKPOT', player.x, player.y + 1.35, player.z, 'overdrive');
+    flyCoins(player.x, player.y + 0.55, player.z, 5);
+    burstConfetti(36, ['#f97316','#fdba74','#a855f7','#ffffff']);
+    flashScreen('gold');
+    Sfx.prize();
+    stats.candyJackpots = (stats.candyJackpots|0) + 1;
+    hudSeasonMeters();
+  }
+}
+function addSplash(n){
+  if(!seasonLoopActive('summer') || state.mode !== 'play') return;
+  run.splash = Math.min(6, (run.splash|0) + (n|0));
+  hudSeasonMeters();
+  if((run.splash|0) >= 6){
+    run.splash = 0;
+    const pay = 8 + (run.coinMult|1) * 2;
+    addCoins(pay); run.coins += pay;
+    badge('Tidal Surge!', '+' + pay + ' coins rain');
+    toast('TIDAL SURGE', player.x, player.y + 1.3, player.z, 'ultra');
+    flyCoins(player.x, player.y + 0.5, player.z, 5);
+    burstConfetti(30, ['#22d3ee','#67e8f9','#fde68a','#ffffff']);
+    flashScreen('ultra');
+    Sfx.prize();
+    stats.tidalSurges = (stats.tidalSurges|0) + 1;
+    hudSeasonMeters();
+  }
+}
+function addHeat(n){
+  if(!seasonLoopActive('summer') || state.mode !== 'play') return;
+  run.heat = Math.min(12, (run.heat|0) + (n|0));
+  hudSeasonMeters();
+  if((run.heat|0) >= 12){
+    run.heat = 0;
+    const pay = 10 + (run.coinMult|1) * 2;
+    addCoins(pay); run.coins += pay;
+    addJourneyStars(1);
+    badge('Heatwave!', '+' + pay + ' coins · +1 star');
+    toast('HEATWAVE', player.x, player.y + 1.35, player.z, 'fever');
+    flyCoins(player.x, player.y + 0.55, player.z, 4);
+    burstConfetti(32, ['#fbbf24','#f97316','#22d3ee','#ffffff']);
+    flashScreen('gold');
+    Sfx.prize();
+    stats.heatwaves = (stats.heatwaves|0) + 1;
+    hudSeasonMeters();
+  }
+}
+function bankRunSouls(){
+  if(!seasonLoopActive('halloween')) return;
+  const left = run.souls|0;
+  if(left <= 0) return;
+  stats.soulBank = (stats.soulBank|0) + left;
+  run.souls = 0;
+  save();
+}
+function refreshSeasonExclusiveChips(){
+  const haunt = seasonLoopActive('halloween');
+  const summer = seasonLoopActive('summer');
+  const sb = $('soulbank');
+  if(sb){
+    sb.classList.toggle('show', haunt);
+    const n = $('soulbank-n');
+    const h = $('soulbank-h');
+    const bank = stats.soulBank|0;
+    if(n) n.textContent = bank + ' soul' + (bank === 1 ? '' : 's') + ' stored';
+    if(h) h.textContent = bank > 0 ? 'tap to cash haunted soft loot' : 'survive near-misses to fill souls';
+  }
+  const tc = $('tidechip');
+  if(tc){
+    const day = todayISO();
+    if(stats.tideDay !== day){ stats.tideDay = day; stats.tideWon = 0; stats.tideArmed = 0; }
+    tc.classList.toggle('show', summer);
+    const n = $('tide-n');
+    const h = $('tide-h');
+    const k = $('tide-k');
+    if(stats.tideWon){
+      if(k) k.textContent = 'tide challenge · cleared';
+      if(n) n.textContent = 'Tide beaten today';
+      if(h) h.textContent = 'come back tomorrow for another race';
+    } else if(stats.tideArmed){
+      if(k) k.textContent = 'tide challenge · LIVE';
+      if(n) n.textContent = 'Reach 40 before you wipe';
+      if(h) h.textContent = 'soft prize waiting · go hop';
+    } else {
+      if(k) k.textContent = 'tide challenge · summer';
+      if(n) n.textContent = 'Beat the Tide';
+      if(h) h.textContent = 'tap to arm · reach 40 this run';
+    }
+  }
+  try{ refreshFeaturedDrop(); }catch(e){}
+}
+function cashSoulBank(){
+  if(!seasonLoopActive('halloween')){ badge('Soul Bank', 'Halloween exclusive'); return; }
+  const bank = stats.soulBank|0;
+  if(bank <= 0){ badge('Soul Bank', 'empty — near-miss to fill'); Sfx.bump(); return; }
+  stats.soulBank = 0;
+  const pay = 8 + bank * 4;
+  addCoins(pay);
+  if(bank >= 5){ stats.spins = (stats.spins|0) + 1; }
+  if(bank >= 8){ addJourneyStars(3); }
+  badge('Soul Bank cashed!', '+' + pay + ' candy coins' + (bank >= 5 ? ' · +1 spin' : ''));
+  burstConfetti(26, ['#a855f7','#f97316','#ffffff']);
+  flashScreen('mega');
+  Sfx.prize();
+  save();
+  refreshSeasonExclusiveChips();
+  hudMeta();
+}
+function armTideChallenge(){
+  if(!seasonLoopActive('summer')){ badge('Tide Challenge', 'Summer exclusive'); return; }
+  const day = todayISO();
+  if(stats.tideDay !== day){ stats.tideDay = day; stats.tideWon = 0; }
+  if(stats.tideWon){ badge('Tide Challenge', 'already cleared today'); Sfx.bump(); return; }
+  stats.tideArmed = 1;
+  run.tideArmed = true;
+  badge('Tide Armed!', 'reach 40 this run');
+  Sfx.milestone();
+  save();
+  refreshSeasonExclusiveChips();
+}
+function tickTideChallenge(){
+  if(!seasonLoopActive('summer')) return;
+  if(!(stats.tideArmed || run.tideArmed)) return;
+  if(stats.tideWon) return;
+  if((state.score|0) < 40) return;
+  stats.tideWon = 1;
+  stats.tideArmed = 0;
+  run.tideArmed = false;
+  const pay = 45;
+  addCoins(pay);
+  addJourneyStars(5);
+  badge('Tide Beaten!', '+' + pay + ' coins · +5 stars');
+  burstConfetti(40, ['#22d3ee','#fbbf24','#ffffff','#67e8f9']);
+  flashScreen('overdrive');
+  Sfx.prize();
+  save();
+  refreshSeasonExclusiveChips();
+}
+function showTreatDoor(){
+  const door = $('treatdoor');
+  if(!door) return;
+  const show = seasonLoopActive('halloween');
+  door.classList.toggle('hidden', !show);
+  if(show) door.dataset.open = '1';
+}
+function hideTreatDoor(){
+  const door = $('treatdoor');
+  if(door){ door.classList.add('hidden'); door.dataset.open = ''; }
+}
+function pickTreatDoor(kind){
+  if(!seasonLoopActive('halloween')) return;
+  const door = $('treatdoor');
+  if(!door || door.classList.contains('hidden')) return;
+  hideTreatDoor();
+  if(kind === 'treat'){
+    const pay = 18 + Math.floor(Math.random() * 22);
+    addCoins(pay);
+    if(Math.random() < 0.35){ stats.bankShield = (stats.bankShield|0) + 1; badge('TREAT!', '+' + pay + ' coins · +1 ghost shield'); }
+    else { badge('TREAT!', '+' + pay + ' candy coins'); }
+    burstConfetti(24, ['#f97316','#fdba74','#ffffff']);
+    flashScreen('gold');
+    Sfx.prize();
+    stats.treatPicks = (stats.treatPicks|0) + 1;
+  } else {
+    // TRICK — 55% curse next run, 45% jackpot
+    if(Math.random() < 0.45){
+      const pay = 40 + Math.floor(Math.random() * 40);
+      addCoins(pay);
+      addJourneyStars(2);
+      badge('TRICK? Jackpot!', '+' + pay + ' · +2 stars');
+      burstConfetti(36, ['#a855f7','#f97316','#ffffff']);
+      flashScreen('mega');
+      Sfx.prize();
+    } else {
+      stats.pendingTrickCurse = 1;
+      badge('TRICK!', 'next run starts cursed · denser traffic');
+      Sfx.bump();
+      flashScreen('mega');
+    }
+    stats.trickPicks = (stats.trickPicks|0) + 1;
+  }
+  save();
+  hudMeta();
+}
+function seasonTrafficMul(){
+  // Halloween TRICK curse + Summer tide pressure
+  let m = 1;
+  if(run.trickCurse) m *= 1.18;
+  if(run.tideArmed && seasonLoopActive('summer')) m *= 1.06;
+  return m;
+}
+function wireSeasonExclusiveUi(){
+  const sb = $('soulbank');
+  if(sb && !sb.dataset.wired){
+    sb.dataset.wired = '1';
+    sb.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); cashSoulBank(); });
+  }
+  const tc = $('tidechip');
+  if(tc && !tc.dataset.wired){
+    tc.dataset.wired = '1';
+    tc.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); armTideChallenge(); });
+  }
+  const trick = $('btn-trick');
+  if(trick && !trick.dataset.wired){
+    trick.dataset.wired = '1';
+    trick.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); pickTreatDoor('trick'); });
+  }
+  const treat = $('btn-treat');
+  if(treat && !treat.dataset.wired){
+    treat.dataset.wired = '1';
+    treat.addEventListener('click', e => { e.stopPropagation(); Sfx.click(); pickTreatDoor('treat'); });
+  }
+}
+wireSeasonExclusiveUi();
+
 function resetJourneyProgress(){
   stats.journeyStep = 0;
   stats.journeyStars = 0;
@@ -121902,6 +122455,7 @@ function journeySeasonEnd(){
     stats.seasonStartedAt = now;
     if(!stats.seasonId) stats.seasonId = 'classic';
     ensureSeasonApplied();
+  try{ refreshSeasonExclusiveChips(); updateSeasonBrand(seasonMeta(currentSeasonId())); }catch(e){}
     save();
   }
   ensureSeasonApplied();
@@ -125381,6 +125935,12 @@ function refreshFeaturedDrop(){
   else if(vault && vault.classList.contains('show')) pick = vault;
   else if(story && story.classList.contains('show')){ pick = story; soft = true; }
   else if(crate && crate.classList.contains('show')){ pick = crate; soft = true; }
+  // Season exclusives jump the featured rail when ready/armed.
+  const soul = $('soulbank');
+  const tide = $('tidechip');
+  if(soul && soul.classList.contains('show') && (stats.soulBank|0) >= 3){ pick = soul; soft = false; }
+  else if(tide && tide.classList.contains('show') && (stats.tideArmed|0) && !(stats.tideWon|0)){ pick = tide; soft = false; }
+  else if(tide && tide.classList.contains('show') && !(stats.tideWon|0) && !(stats.tideArmed|0) && currentSeasonId()==='summer' && !pick){ pick = tide; soft = true; }
 
   if(pick){
     pick.classList.add('featured');
@@ -125391,7 +125951,7 @@ function refreshFeaturedDrop(){
     if(el) el.classList.add('parked');
   }
   let extras = 0;
-  for(const id of ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip']){
+  for(const id of ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip','soulbank','tidechip']){
     const el = $(id);
     if(!el || el === pick) continue;
     if(el.classList.contains('show')) extras++;
@@ -125685,6 +126245,17 @@ function addictionLoad(raw){
   stats.adminSeasonForce = raw.adminSeasonForce || '';
   stats.newsSeenSeason = raw.newsSeenSeason || '';
   stats.newsPending = raw.newsPending || '';
+  stats.soulBank = raw.soulBank|0;
+  stats.soulBursts = raw.soulBursts|0;
+  stats.candyJackpots = raw.candyJackpots|0;
+  stats.tidalSurges = raw.tidalSurges|0;
+  stats.heatwaves = raw.heatwaves|0;
+  stats.tideDay = raw.tideDay || '';
+  stats.tideWon = raw.tideWon|0;
+  stats.tideArmed = raw.tideArmed|0;
+  stats.pendingTrickCurse = raw.pendingTrickCurse|0;
+  stats.treatPicks = raw.treatPicks|0;
+  stats.trickPicks = raw.trickPicks|0;
   stats.storyChapter = raw.storyChapter|0;
   stats.storyObjs = (raw.storyObjs && typeof raw.storyObjs === 'object') ? raw.storyObjs : {};
   stats.storyDone = Array.isArray(raw.storyDone) ? raw.storyDone : [];
@@ -125724,6 +126295,17 @@ function addictionSaveFields(){
     adminSeasonForce: stats.adminSeasonForce || '',
     newsSeenSeason: stats.newsSeenSeason || '',
     newsPending: stats.newsPending || '',
+    soulBank: stats.soulBank|0,
+    soulBursts: stats.soulBursts|0,
+    candyJackpots: stats.candyJackpots|0,
+    tidalSurges: stats.tidalSurges|0,
+    heatwaves: stats.heatwaves|0,
+    tideDay: stats.tideDay || '',
+    tideWon: stats.tideWon|0,
+    tideArmed: stats.tideArmed|0,
+    pendingTrickCurse: stats.pendingTrickCurse|0,
+    treatPicks: stats.treatPicks|0,
+    trickPicks: stats.trickPicks|0,
     storyChapter: stats.storyChapter|0,
     storyObjs: stats.storyObjs || {},
     storyDone: stats.storyDone || [],
@@ -129010,6 +129592,7 @@ window.HOP = {
   openHourlyCrate, buyMysteryDeal, cashStreakVault, cashStarVault,
   openEchoNest, acceptWager, doComebackRevive, detonateFuse, startClutchSalvage, tapClutch,
   rotateToSeason, adminForceSeason, currentSeasonId, applySeasonTheme, refreshWorldForSeason,
+  updateSeasonBrand, refreshSeasonExclusiveChips, cashSoulBank, armTideChallenge,
   JOURNEY_CLASSIC, JOURNEY_SUMMER, JOURNEY_HALLOWEEN, SEASON_META,
   STORY_CHAPTERS, STORY_CUTSCENES, playStoryCutscene, renderStory, claimStoryChapter, tickStoryObjectives,
   refreshFeaturedDrop, parkLooprailInMore,
