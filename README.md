@@ -4,6 +4,8 @@
 
 Soft-currency only — no real-money IAP.
 
+UI is Crossy Hop–inspired: sky gradient, paper chips, chunky gold Play button, Baloo 2 type, claim rails, and 44px+ touch targets with safe-area padding.
+
 ## Core Match-3
 - 7×7 board, 60s rounds, valid-only swaps with reject animation
 - Gravity + cascades; specials (Lightning Cloud / Sun King / Rainbow Star) + combines
