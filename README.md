@@ -1,6 +1,6 @@
 # Emoji Rush
 
-Single-file mobile Match-3 (`index.html`) with Emoji Blitz–inspired UI: cloud sky, purple score pill, dark blue board, timer bubble, blitz meter, hero-on-cloud power bar, missions hub, and emoji collection.
+A single-file mobile Match-3 inspired by **Disney Emoji Blitz** cloud UI and systems — original characters, soft currency only.
 
 ## Run
 
@@ -10,39 +10,18 @@ npx serve -l 4173 .
 
 Open `http://127.0.0.1:4173/`
 
-## Debug
+## What’s included (~10k lines)
 
-`window.RUSH` exposes helpers in the console.
+- **Play HUD:** coin + ear-hat pills, purple score pill, `:60` timer bubble, dark-blue checkerboard board, pink top track, purple blitz rail, hero-on-cloud + lightning meter
+- **Specials (EB rules):** Lightning Cloud (swipe axis), Sunshine (row+col cross), Rainbow Star, full combines
+- **Blitz Mode** ×3 score, hero powers, cascades/combos
+- **Meta:** lives regen, missions hub, emoji collection + levels/dupes, Silver/Gold/Series/Diamond boxes, prize wheel, events, battle pass, quests, achievements
+- **Debug:** `window.RUSH` in the console (`findValidMove`, `trySwap`, `fillBlitz`, `fillPower`, …)
 
-# Emoji Rush
+## Build
 
-**One file.** Open [`index.html`](index.html) in a mobile browser or desktop Chrome.
+Sources live in `eb-build/` (`ui.css`, `ui.html`, `shell.js`, `extra_content.js`, `engine.js`). Assemble with:
 
-Soft-currency only — no real-money IAP.
-
-UI is Crossy Hop–inspired: sky gradient, paper chips, chunky gold Play button, Baloo 2 type, claim rails, and 44px+ touch targets with safe-area padding.
-
-## Core Match-3
-- 7×7 board, 60s rounds, valid-only swaps with reject animation
-- Gravity + cascades; specials (Lightning Cloud / Sun King / Rainbow Star) + combines
-- Blitz Meter (3× score, pool 4, 5s); hero powers when charged
-- 14 characters with rarity, unlock costs, unique spells
-- Touch swipe, safe-area insets, Web Audio SFX/music
-
-## Retention (Crossy Hop–style loops)
-- **Currencies:** coins + gems (gems rarer; from pass/spin/gifts)
-- **Daily gift / login streak** — claim once/day; streak grows reward
-- **Hourly free crate** — claimable every 60 minutes
-- **Battle Pass / Season Journey** — ~30 tiers, FREE + VIP tracks (VIP = 🪙 800 satire), 7-day FOMO clock
-- **Daily Quests** — 3 seeded per calendar day with mid-day progress
-- **Lucky Spin** — CSS prize wheel, 1 free/day or coins, pity meter
-- **XP & player level** — level-ups grant coins
-- **Shop** — soft boosters (Score ×2, +10s, Half Blitz, Coin Magnet) + gem→coin trades
-- **Achievements** — 17 tracked goals with coin claims
-- **Results juice** — stars, XP/pass bars, quest updates, optional coin revive (+15s)
-- Persist everything in `localStorage` key `emojiRush_v2`
-
-## Debug
-`window.RUSH` exposes `{ save, grantCoins, grantXP, openScreen, grantGems, grantPassXP }`.
-
-No install. No build. No CDN. No other files required.
+```bash
+python3 eb-build/assemble.py
+```
