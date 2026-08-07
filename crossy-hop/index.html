@@ -125299,7 +125299,6 @@ function startClutchSalvage(){
   }
   clutch.active = true;
   try{ const c=$('clutch'); if(c) c.classList.add('armed'); const o=$('over'); if(o) o.classList.add('simple-revive'); }catch(e){}
-;
   clutch.taps = 0;
   clutch.t = CLUTCH_MS / 1000;
   clutch.paid = potential;
