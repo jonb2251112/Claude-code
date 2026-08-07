@@ -167,8 +167,10 @@ body.blitz{
   appearance:none;border:0;width:44px;height:44px;border-radius:14px;cursor:pointer;
   background:var(--paper);color:var(--ink);font-size:18px;font-weight:800;
   box-shadow:0 4px 0 rgba(18,52,80,.18);flex-shrink:0;
+  display:grid;place-items:center;line-height:1;
 }
 .back:active,.close-btn:active,.pause-fab:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(18,52,80,.18)}
+.pause-fab{font-size:14px;letter-spacing:.04em}
 .head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .head h1{
   flex:1;font-size:clamp(20px,5.5vw,26px);font-weight:800;color:#fff;
