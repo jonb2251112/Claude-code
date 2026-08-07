@@ -2642,12 +2642,14 @@ body.season-halloween-world #streak.overdrive{
   background:rgba(255,253,246,.78)!important;
   position:relative;overflow:visible!important;
 }
-.morebtn.has-news::before{
+.morebtn.has-news::before,
+.morebtn.has-rewards::before{
   content:"";position:absolute;top:10px;right:16px;width:10px;height:10px;z-index:2;
   border-radius:50%;background:#ef4d4d;
   box-shadow:0 0 0 3px rgba(239,77,77,.25);
   animation:newsdot 1.1s ease-in-out infinite;
 }
+.morebtn.has-rewards:not(.has-news)::before{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25);}
 @keyframes newsdot{50%{transform:scale(1.2);opacity:.85;}}
 #tapcue, #tapcue2{
   font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#fff;opacity:.7;
@@ -2657,6 +2659,97 @@ body.season-halloween-world #streak.overdrive{
 #over > .card{max-width:min(92vw,400px);}
 #retrydock{width:min(92vw,400px);}
 #retrydock #btn-retry{width:100%;min-height:56px;font-size:clamp(18px,5vw,22px);}
+
+
+/* --- Simplified UI hierarchy (same style, less noise) -------------------- */
+/* Home first viewport: brand → stats → 1 reward → Play → 3 tabs → More */
+#slimmeta .extra{display:none;}
+#start #xpbar.slim{display:none;}
+#start #banners{min-height:0;gap:4px;}
+#start #banners > :nth-child(n+2):not(.hidden){display:none!important;} /* one banner max */
+#playdock .playhint,
+#tapcue.quiet,
+#tapcue2.quiet{display:none!important;}
+#btn-more-drops{display:none!important;} /* More button owns overflow */
+#sniperfeed,
+#chipbank{display:none!important;} /* keep JS; hide chatter */
+
+/* 3 primary tabs — News stays wired but lives in More */
+#hotbar, #hotbar2{
+  grid-template-columns:repeat(3,1fr);
+}
+#hotbar .nav-secondary,
+#hotbar2 .nav-secondary{display:none!important;}
+
+/* Featured reward: calmer pulse so Play stays the hero */
+#start #looprail > .featured{
+  transform:none;
+  animation:none;
+  box-shadow:0 5px 0 rgba(18,52,80,.22), 0 12px 22px rgba(18,52,80,.22);
+}
+#start #looprail{
+  margin:2px 0 0;
+  gap:0;
+  min-height:0;
+}
+#start #looprail.empty{display:none!important;}
+
+/* Play stays dominant */
+#playdock{margin-top:4px;}
+#playdock #btn-play{
+  min-height:58px;
+  animation:playpulse 2.8s ease-in-out infinite;
+}
+
+/* Journey: phone-clean chrome on ALL sizes — track + timer + VIP + list */
+#journey #j-value,
+#journey #j-dangle,
+#journey #j-feed,
+#journey #j-claimpulse,
+#journey #j-lanes,
+#journey #j-drops,
+#journey #j-social,
+#journey #j-heat,
+#journey #j-flash,
+#journey #j-vipbar{display:none!important;}
+#journey:not(.season-halloween):not(.season-summer) #j-mascot{display:none!important;}
+#journey.season-summer #j-mascot,
+#journey.season-halloween #j-mascot{display:flex!important;}
+#journey #j-fomo .scare{display:none;}
+#journey #j-progress .fillhint,
+#journey #j-progress .neartag{display:none;}
+/* Pass actions: keep VIP + claim; tuck the rest */
+#j-actions #btn-skip-tier,
+#j-actions #btn-star-boost,
+#j-actions #btn-buy-stars{display:none!important;}
+#j-actions{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+#j-actions .btn{flex:1 1 140px;}
+
+/* Game over: score → one interrupt → one revive → Retry → tabs */
+#over #o-meta.quiet{font-size:11px;opacity:.75;margin-top:4px;}
+#over #nextaward .k{font-size:9px;}
+#over #clutch:not(.armed){display:none!important;}
+#over.simple-revive #revivewrap{display:none!important;}
+#over.simple-revive #btn-comeback:not(.show){display:none!important;}
+#over #hotbar2{margin-top:2px;}
+#over #btn-more2{min-height:42px!important;}
+
+/* More sheet: rewards first, tighter copy */
+#more .morenote{font-size:11px;opacity:.8;line-height:1.35;margin:4px 2px 8px;}
+#more .newsrow{display:flex;flex-wrap:wrap;gap:8px;}
+#more .newsrow .btn{flex:1 1 140px;}
+#more .moredrops{display:flex;flex-direction:column;gap:8px;min-height:0;}
+#more .moredrops:empty::after{
+  content:"Nothing waiting — hit Play";
+  display:block;padding:12px;border-radius:14px;
+  background:rgba(12,38,62,.06);color:var(--ink-soft);
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;
+  text-align:center;
+}
+
+/* HUD chatter already gates on .show / .on — leave that alone */
 
 /* News sheet — season switch explainer */
 #news.sheet .body{display:flex;flex-direction:column;gap:12px;padding-bottom:18px;}
@@ -2984,16 +3077,20 @@ body.season-halloween-world #streak.overdrive{
   /* Keep the pass list dominant — collapse secondary FOMO chrome on phones */
   #j-mascot, #j-value, #j-dangle, #j-feed, #j-claimpulse, #j-lanes,
   #j-drops, #j-social, #j-heat, #j-flash, #j-vipbar{display:none !important;}
-  /* Halloween exclusive: keep the pumpkin-head VIP chicken visible on phones */
-  #journey.season-halloween #j-mascot{
+  /* Seasonal VIP chicken stays visible on phones (pumpkin / shades) */
+  #journey.season-halloween #j-mascot,
+  #journey.season-summer #j-mascot{
     display:flex !important;
     margin:2px 0 4px;
     padding:8px 10px;
     gap:8px;
   }
-  #journey.season-halloween #j-mascot .stage{transform:scale(.92);transform-origin:left center;}
-  #journey.season-halloween #j-mascot .copy .h{display:none;}
-  #journey.season-halloween #j-mascot .cta-pill{padding:6px 10px;font-size:11px;}
+  #journey.season-halloween #j-mascot .stage,
+  #journey.season-summer #j-mascot .stage{transform:scale(.92);transform-origin:left center;}
+  #journey.season-halloween #j-mascot .copy .h,
+  #journey.season-summer #j-mascot .copy .h{display:none;}
+  #journey.season-halloween #j-mascot .cta-pill,
+  #journey.season-summer #j-mascot .cta-pill{padding:6px 10px;font-size:11px;}
   #j-fomo{padding:6px 10px;border-radius:12px;gap:1px;}
   #j-fomo .scare{display:none;}
   #j-fomo .clock{font-size:13px;}
@@ -3198,8 +3295,8 @@ body.season-halloween-world #streak.overdrive{
     <div id="slimmeta">
       <span>best <b id="s-best">0</b></span>
       <span>coins <b id="s-coins">0</b></span>
-      <span>lv <b id="s-level">1</b></span>
-      <span class="soft"><span id="s-rank">Hatchling</span></span>
+      <span class="extra">lv <b id="s-level">1</b></span>
+      <span class="extra soft"><span id="s-rank">Hatchling</span></span>
     </div>
     <div id="xpbar" class="slim"><i></i></div>
     <!-- kept for JS writers; visually folded into slimmeta -->
@@ -3287,11 +3384,11 @@ body.season-halloween-world #streak.overdrive{
       <button id="btn-quests" class="btn ghost">Today</button>
       <button id="btn-journey" class="btn ghost">Journey</button>
       <button id="btn-story" class="btn ghost">Story</button>
-      <button id="btn-news" class="btn ghost">News</button>
+      <button id="btn-news" class="btn ghost nav-secondary">News</button>
     </div>
     <button type="button" id="btn-more" class="btn ghost morebtn">More</button>
     <div id="gametip" class="sr-only">One more hop is always justified.</div>
-    <div id="tapcue">or tap anywhere</div>
+    <div id="tapcue" class="quiet">or tap anywhere</div>
   </div>
 
   <!-- ===================== GAME OVER ===================== -->
@@ -3305,12 +3402,12 @@ body.season-halloween-world #streak.overdrive{
         <div class="stat"><span class="k">Coins</span><span class="v gold" id="o-coins">0</span></div>
       </div>
       <div id="nextaward">
-        <span class="k">Next award</span>
+        <span class="k">Next</span>
         <span class="n">Hatchling</span>
         <span class="bar"><i></i></span>
         <span class="h">reach 10 — 4/10</span>
       </div>
-      <div id="o-meta">journey <b id="o-stars">0</b> · xp gained this run</div>
+      <div id="o-meta" class="quiet">journey <b id="o-stars">0</b></div>
     </div>
     <div id="newbest" class="hidden">new best!</div>
     <div id="treatdoor" class="hidden" aria-label="Trick or Treat">
@@ -3341,10 +3438,10 @@ body.season-halloween-world #streak.overdrive{
       <button id="btn-quests2" class="btn ghost">Today</button>
       <button id="btn-journey2" class="btn ghost">Journey</button>
       <button id="btn-story2" class="btn ghost">Story</button>
-      <button id="btn-news2" class="btn ghost">News</button>
+      <button id="btn-news2" class="btn ghost nav-secondary">News</button>
     </div>
     <button type="button" id="btn-more2" class="btn ghost morebtn">More</button>
-    <div id="tapcue2">or tap anywhere to hop again</div>
+    <div id="tapcue2" class="quiet">or tap anywhere to hop again</div>
   </div>
 
 
@@ -3376,17 +3473,17 @@ body.season-halloween-world #streak.overdrive{
       <button class="close-btn" data-close="more" aria-label="Close">✕</button>
     </div>
     <div class="body">
-      <div class="subhead">What&apos;s new</div>
+      <div class="subhead">Rewards ready</div>
+      <div id="more-drops" class="moredrops"></div>
+      <div class="subhead">Season</div>
       <div class="newsrow">
         <button id="btn-news-more" class="btn ghost" type="button">
           <span>Season News</span>
           <span class="dot" aria-hidden="true"></span>
         </button>
-      </div>
-      <div class="subhead">Play loops</div>
-      <div class="newsrow">
         <button id="btn-spin" class="btn ghost" type="button">Lucky Spin</button>
       </div>
+      <div class="subhead">Collection</div>
       <div class="moregrid">
         <button id="btn-chars" class="btn ghost">Characters</button>
         <button id="btn-pets" class="btn ghost">Pets</button>
@@ -3394,16 +3491,14 @@ body.season-halloween-world #streak.overdrive{
         <button id="btn-weekly" class="btn ghost">Weekly</button>
         <button id="btn-titles" class="btn ghost">Titles</button>
       </div>
-      <div class="subhead">Shop &amp; bank</div>
+      <div class="subhead">Shop</div>
       <div class="moregrid">
         <button id="btn-shop" class="btn ghost">Shop</button>
         <button id="btn-bank" class="btn ghost">Bank</button>
         <button id="btn-encyc" class="btn ghost">Stats</button>
         <button id="btn-admin" class="btn ghost">Admin</button>
       </div>
-      <div class="subhead">Other rewards</div>
-      <div id="more-drops" class="moredrops"></div>
-      <p class="morenote">Claimable drops also appear on the home screen one at a time — so the next tap is always obvious.</p>
+      <p class="morenote">Home shows one reward at a time. Everything else lives here.</p>
       <button id="btn-awards2" class="sr-only" tabindex="-1" aria-hidden="true">Awards</button>
       <button id="btn-chars2" class="sr-only" tabindex="-1" aria-hidden="true">Characters</button>
     </div>
@@ -121421,16 +121516,24 @@ function gameOver(){
   try{ bankRunSouls(); showTreatDoor(); refreshSeasonExclusiveChips(); }catch(e){}
   tickPass();
   const om = $("o-meta");
-  if(om){ om.innerHTML = "journey <b id=\"o-stars\">" + (journeyStarsFromRun()) + "</b> · " + runRecap(); }
-  // Aggressive soft-currency upsell after a run if VIP is locked.
-  if(!stats.vipPass && (stats.journeyStep|0) >= 2){
-    setTimeout(() => maybeShowJourneyUpsell('death'), 700);
+  if(om){ om.innerHTML = "journey <b id=\"o-stars\">" + (journeyStarsFromRun()) + "</b>"; }
+  // Soft VIP upsell — less aggressive so Retry stays clear.
+  if(!stats.vipPass && (stats.journeyStep|0) >= 4){
+    setTimeout(() => maybeShowJourneyUpsell('death'), 1200);
   }
-  // Dangle a second chance — but Clutch Salvage owns the screen first.
+  // One revive path at a time. Clutch owns the screen when armed.
+  const over = $('over');
+  if(over) over.classList.add('simple-revive');
+  const clutchEl = $('clutch');
+  if(clutchEl) clutchEl.classList.toggle('armed', !!(clutch && clutch.active));
   const wrap = $('revivewrap');
   const offer = canRevive();
+  const comebackOk = (typeof canComebackRevive === 'function') && canComebackRevive();
   if(clutch.active){
     wrap.classList.add('hidden');
+  } else if(comebackOk){
+    wrap.classList.add('hidden');
+    updateComebackBtn();
   } else {
     wrap.classList.toggle('hidden', !offer);
     if(offer){
@@ -125195,6 +125298,7 @@ function startClutchSalvage(){
     return;
   }
   clutch.active = true;
+  try{ const c=$('clutch'); if(c) c.classList.add('armed'); const o=$('over'); if(o) o.classList.add('simple-revive'); }catch(e){}
   clutch.taps = 0;
   clutch.t = CLUTCH_MS / 1000;
   clutch.paid = potential;
@@ -125875,7 +125979,10 @@ function refreshNewsUi(){
   }
   for(const id of ['btn-more','btn-more2']){
     const el = $(id);
-    if(el) el.classList.toggle('has-news', unread);
+    if(!el) continue;
+    el.classList.toggle('has-news', unread);
+    if(unread) el.textContent = 'More · new';
+    else if(!el.classList.contains('has-rewards')) el.textContent = 'More';
   }
   const chip = $('newschip');
   if(chip){
@@ -125910,42 +126017,37 @@ function refreshFeaturedDrop(){
   // If the rail is parked inside More, don't collapse it to one chip.
   if(rail.closest('#more-drops')){
     for(const el of rail.children){
-      el.classList.remove('parked');
+      el.classList.remove('parked','featured','soft');
     }
+    rail.classList.remove('empty');
     return;
   }
-  const ids = ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip','sniperfeed','chipbank'];
+  const ids = ['hourlycrate','echonest','newschip','storychip','mysterydeal','streakvaultchip','soulbank','tidechip','sniperfeed','chipbank'];
   for(const id of ids){
     const el = $(id);
     if(el){ el.classList.remove('featured','soft','parked'); }
   }
   let pick = null;
-  let soft = false;
   const crate = $('hourlycrate');
   const nest = $('echonest');
   const news = $('newschip');
   const story = $('storychip');
   const deal = $('mysterydeal');
   const vault = $('streakvaultchip');
+  const soul = $('soulbank');
+  const tide = $('tidechip');
+  // Only claimable / hot things on home — never soft teasers. Play stays the hero.
   if(crate && crate.classList.contains('show') && crateIsReady()) pick = crate;
   else if(nest && nestIsReady()) pick = nest;
+  else if(soul && soul.classList.contains('show') && (stats.soulBank|0) >= 3) pick = soul;
+  else if(tide && tide.classList.contains('show') && (stats.tideArmed|0) && !(stats.tideWon|0)) pick = tide;
   else if(news && news.classList.contains('show') && newsUnread()) pick = news;
   else if(story && story.classList.contains('show') && storyIsHot()) pick = story;
   else if(deal && deal.classList.contains('show')) pick = deal;
-  else if(vault && vault.classList.contains('show')) pick = vault;
-  else if(story && story.classList.contains('show')){ pick = story; soft = true; }
-  else if(crate && crate.classList.contains('show')){ pick = crate; soft = true; }
-  // Season exclusives jump the featured rail when ready/armed.
-  const soul = $('soulbank');
-  const tide = $('tidechip');
-  if(soul && soul.classList.contains('show') && (stats.soulBank|0) >= 3){ pick = soul; soft = false; }
-  else if(tide && tide.classList.contains('show') && (stats.tideArmed|0) && !(stats.tideWon|0)){ pick = tide; soft = false; }
-  else if(tide && tide.classList.contains('show') && !(stats.tideWon|0) && !(stats.tideArmed|0) && currentSeasonId()==='summer' && !pick){ pick = tide; soft = true; }
+  else if(vault && vault.classList.contains('show') && (stats.streakVault|0) > 0) pick = vault;
 
-  if(pick){
-    pick.classList.add('featured');
-    if(soft) pick.classList.add('soft');
-  }
+  if(pick) pick.classList.add('featured');
+  rail.classList.toggle('empty', !pick);
   for(const id of ['sniperfeed','chipbank']){
     const el = $(id);
     if(el) el.classList.add('parked');
@@ -125956,14 +126058,15 @@ function refreshFeaturedDrop(){
     if(!el || el === pick) continue;
     if(el.classList.contains('show')) extras++;
   }
+  // "More rewards" link stays hidden — More button gets a green/red dot instead.
   const btn = $('btn-more-drops');
-  if(btn){
-    if(extras > 0){
-      btn.classList.remove('hidden');
-      btn.textContent = extras === 1 ? '1 more reward in More' : (extras + ' more rewards in More');
-    } else {
-      btn.classList.add('hidden');
-    }
+  if(btn) btn.classList.add('hidden');
+  for(const id of ['btn-more','btn-more2']){
+    const el = $(id);
+    if(!el) continue;
+    el.classList.toggle('has-rewards', extras > 0);
+    if(el.classList.contains('has-news')) el.textContent = 'More · new';
+    else el.textContent = extras > 0 ? ('More · ' + extras) : 'More';
   }
 }
 function parkLooprailInMore(open){
