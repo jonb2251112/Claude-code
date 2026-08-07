@@ -497,9 +497,23 @@ kbd{
   color:#fff;opacity:.92;text-shadow:0 2px 0 rgba(18,52,80,.35);
 }
 #startstats b{color:var(--gold);font-size:1.25em;}
-#hud.menu #topleft{opacity:0;}
+#hud.menu #topleft{opacity:0;visibility:hidden;pointer-events:none;}
 #topleft{transition:opacity .25s;}
-#hud.away{opacity:0;pointer-events:none;transition:opacity .2s;}
+/* Home/sheets own the chrome — hide play HUD so it never peeks over currency pills. */
+#hud.menu #topright,
+#hud.menu #alert,
+#hud.menu #badges,
+#hud.menu #toasts,
+#hud.menu #powers,
+#hud.menu #eventban,
+#hud.menu #rivalban,
+#hud.menu #wagerchip,
+#hud.menu #dopafuse,
+#hud.menu #combo,
+#hud.menu #dpad{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+#hud.away{opacity:0;pointer-events:none;visibility:hidden;transition:opacity .2s;}
 #tapcue{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.85;
   animation:blink 1.6s infinite;text-shadow:0 2px 0 rgba(18,52,80,.3);}
 @keyframes blink{50%{opacity:.3;}}
@@ -3248,30 +3262,36 @@ body.season-halloween-world #streak.overdrive{
 }
 #hub-top > *{pointer-events:auto;}
 #currencypills{
-  display:flex;gap:8px;align-items:center;justify-content:center;
+  display:flex;gap:10px;align-items:center;justify-content:space-between;
   width:min(94vw,420px);
 }
 #currencypills .pill{
-  display:flex;align-items:center;gap:6px;
-  min-height:36px;padding:6px 12px 6px 10px;
+  display:flex;align-items:center;gap:7px;
+  min-height:38px;padding:7px 14px 7px 11px;
   border-radius:999px;
   background:var(--pill);
   backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   box-shadow:0 3px 0 var(--pill-edge), 0 8px 18px rgba(18,52,80,.16);
   color:var(--ink);font-weight:900;font-variant-numeric:tabular-nums;
+  flex:0 1 auto;
 }
 #currencypills .pill .k{
   font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
 }
-#currencypills .pill b{font-size:15px;line-height:1;}
+#currencypills .pill b{font-size:16px;line-height:1;}
+#currencypills .coinpill{
+  min-width:88px;
+  background:linear-gradient(180deg,#fffef8,#fff6d6);
+  box-shadow:0 3px 0 #e2a112, 0 8px 18px rgba(18,52,80,.16);
+}
 #currencypills .coinpill .coin{
   width:18px;height:18px;border-radius:50%;
   background:radial-gradient(circle at 30% 30%,#ffe07a,#ffc224 55%,#e2a112);
   box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), 0 1px 0 rgba(255,255,255,.4);
   display:inline-block;
 }
-#currencypills .bestpill{padding-left:12px;}
-#currencypills .lvlpill{margin-left:auto;}
+#currencypills .bestpill{padding-left:14px;}
+#currencypills .lvlpill{margin-left:0;}
 #currencypills .coinpill.punch{animation:pillpunch .42s cubic-bezier(.2,1.5,.3,1);}
 @keyframes pillpunch{0%{transform:scale(1)}35%{transform:scale(1.08)}100%{transform:scale(1)}}
 #hub-top #xpbar.slim.hubxp{
@@ -3531,6 +3551,53 @@ body.brand-summer #start.hub{
   #btn-play.play-cta,#btn-retry.play-cta{min-height:48px!important;font-size:16px!important;}
 }
 
+
+/* ==========================================================================
+   MOBILE GAME UI 2.0 — FINAL OVERRIDE
+   Wins over older phone/landscape rules that undid hub padding / CTA / HUD.
+   ========================================================================== */
+#hud.menu #topright,
+#hud.menu #topleft,
+#hud.menu #combo,
+#hud.menu #dpad{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+body.mode-start #hud #topright,
+body.mode-start #hud #topleft,
+body.mode-start #hud #combo,
+body.mode-start #hud #dpad{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+#start.hub #tapcue{display:none!important;}
+#over #tapcue2{display:none!important;}
+#start.hub #hub-bottom{
+  padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;
+}
+#btn-play.play-cta, #btn-retry.play-cta{
+  min-height:60px!important;
+  border-radius:22px!important;
+}
+#over > .card{
+  width:min(92vw,400px);
+  border-radius:26px!important;
+  padding:16px 18px 14px!important;
+}
+#overtitle{
+  font-size:clamp(36px,11vmin,64px)!important;
+  margin-top:calc(var(--safe-t) + 8px);
+}
+#over-dock #btn-retry.play-cta{letter-spacing:.2em;}
+#hud:not(.menu):not(.away) #btnrow .icon-btn{
+  width:44px;height:44px;border-radius:15px;
+}
+#hud:not(.menu):not(.away) #coinchip{
+  border-radius:999px;padding:8px 13px;
+  background:rgba(255,253,246,.94);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+}
+@media (max-width:420px){
+  #currencypills{gap:8px;}
+  #currencypills .pill{padding:6px 11px;min-height:34px;}
+  #currencypills .pill b{font-size:14px;}
+  .navbtn .lbl{font-size:9px;}
+  .navbtn .ico{width:32px;height:20px;font-size:8px;}
+}
 </style>
 </head>
 <body>
@@ -121961,7 +122028,7 @@ let padOn = IS_TOUCH, chromeKey = null;
 /** Show or hide the touch pad and the in-run score, keyed to the mode. */
 function applyChrome(){
   const menu = state.mode === 'menu';
-  const key = padOn + '|' + menu + '|' + state.panel;
+  const key = padOn + '|' + menu + '|' + state.panel + '|' + state.mode;
   if(key === chromeKey) return;
   chromeKey = key;
   $('dpad').classList.toggle('hide', !padOn || menu || !!state.panel);
@@ -121969,6 +122036,15 @@ function applyChrome(){
   $('hud').classList.toggle('menu', menu);
   // A sheet owns the whole screen; the HUD buttons would collide with its header.
   $('hud').classList.toggle('away', !!state.panel);
+  // Body mode classes drive final CSS overrides (hide hub HUD, play chrome, etc.).
+  const body = document.body;
+  const modes = ['mode-start','mode-play','mode-over','mode-paused','mode-dying'];
+  for(const c of modes) body.classList.remove(c);
+  if(menu) body.classList.add('mode-start');
+  else if(state.mode === 'play') body.classList.add('mode-play');
+  else if(state.mode === 'over') body.classList.add('mode-over');
+  else if(state.mode === 'paused') body.classList.add('mode-paused');
+  else if(state.mode === 'dying') body.classList.add('mode-dying');
 }
 function toggleSound(){
   Sfx.resume();
