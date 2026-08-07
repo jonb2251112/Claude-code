@@ -122448,6 +122448,7 @@ function ensureSeasonApplied(){
   const id = currentSeasonId();
   syncJourneyTable();
   applySeasonTheme(id);
+  try{ refreshSeasonExclusiveChips(); updateSeasonBrand(seasonMeta(id)); }catch(e){}
 }
 function journeySeasonEnd(){
   const now = Date.now();
@@ -122455,7 +122456,6 @@ function journeySeasonEnd(){
     stats.seasonStartedAt = now;
     if(!stats.seasonId) stats.seasonId = 'classic';
     ensureSeasonApplied();
-  try{ refreshSeasonExclusiveChips(); updateSeasonBrand(seasonMeta(currentSeasonId())); }catch(e){}
     save();
   }
   ensureSeasonApplied();
