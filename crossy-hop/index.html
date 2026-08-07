@@ -3559,11 +3559,39 @@ body.brand-summer #start.hub{
 #hud.menu #topright,
 #hud.menu #topleft,
 #hud.menu #combo,
-#hud.menu #dpad{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+#hud.menu #dpad,
+#hud.menu #rivalban,
+#hud.menu #dopafuse,
+#hud.menu #eventban,
+#hud.menu #wagerchip{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
 body.mode-start #hud #topright,
 body.mode-start #hud #topleft,
 body.mode-start #hud #combo,
-body.mode-start #hud #dpad{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+body.mode-start #hud #dpad,
+body.mode-start #hud #rivalban,
+body.mode-start #hud #dopafuse,
+body.mode-over #hud #topright,
+body.mode-over #hud #topleft,
+body.mode-over #hud #combo,
+body.mode-over #hud #dpad,
+body.mode-over #hud #rivalban,
+body.mode-over #hud #dopafuse,
+body.mode-over #hud #eventban,
+body.mode-over #hud #wagerchip,
+body.mode-over #hud #alert,
+body.mode-over #hud #btnrow,
+body.mode-paused #hud #topright,
+body.mode-paused #hud #topleft,
+body.mode-paused #hud #combo,
+body.mode-paused #hud #dpad,
+body.mode-paused #hud #rivalban,
+body.mode-paused #hud #dopafuse,
+body.mode-paused #hud #eventban,
+body.mode-paused #hud #wagerchip,
+body.mode-paused #hud #alert{
+  opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+/* confetti / flycoins / flash stay visible under overlays */
 #start.hub #tapcue{display:none!important;}
 #over #tapcue2{display:none!important;}
 #start.hub #hub-bottom{
@@ -3573,16 +3601,38 @@ body.mode-start #hud #dpad{opacity:0!important;visibility:hidden!important;point
   min-height:60px!important;
   border-radius:22px!important;
 }
+#over{
+  padding-top:calc(var(--safe-t) + 24px)!important;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 110px)!important;
+}
 #over > .card{
   width:min(92vw,400px);
   border-radius:26px!important;
   padding:16px 18px 14px!important;
+  background:rgba(255,253,246,.96)!important;
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
 }
 #overtitle{
   font-size:clamp(36px,11vmin,64px)!important;
-  margin-top:calc(var(--safe-t) + 8px);
+  margin-top:0;
+  text-shadow:0 4px 0 rgba(18,52,80,.35), 0 12px 28px rgba(0,0,0,.28)!important;
+}
+#overwhy{
+  max-width:min(90vw,380px);
+  text-align:center;
+  line-height:1.35;
 }
 #over-dock #btn-retry.play-cta{letter-spacing:.2em;}
+#btn-comeback{
+  width:min(92vw,400px)!important;
+  min-height:52px!important;
+  border-radius:18px!important;
+  margin:4px 0 8px!important;
+}
+#newbest{
+  border-radius:999px!important;
+  letter-spacing:.2em!important;
+}
 #hud:not(.menu):not(.away) #btnrow .icon-btn{
   width:44px;height:44px;border-radius:15px;
 }
@@ -3591,8 +3641,19 @@ body.mode-start #hud #dpad{opacity:0!important;visibility:hidden!important;point
   background:rgba(255,253,246,.94);
   backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
 }
+/* Featured reward rail — one clear offer card */
+#hub-main #looprail > .featured,
+#hub-main #looprail > button.featured,
+#hourlycrate, #mysterydeal{
+  border-radius:20px!important;
+}
+#currencypills{
+  justify-content:center!important;
+  gap:10px!important;
+}
+#hub-top #xpbar.slim.hubxp{width:min(94vw,420px)!important;}
 @media (max-width:420px){
-  #currencypills{gap:8px;}
+  #currencypills{gap:8px!important;}
   #currencypills .pill{padding:6px 11px;min-height:34px;}
   #currencypills .pill b{font-size:14px;}
   .navbtn .lbl{font-size:9px;}
@@ -122034,7 +122095,7 @@ function applyChrome(){
   $('dpad').classList.toggle('hide', !padOn || menu || !!state.panel);
   $('btn-pad').classList.toggle('off', !padOn);
   $('hud').classList.toggle('menu', menu);
-  // A sheet owns the whole screen; the HUD buttons would collide with its header.
+  // Sheets park the whole HUD; over/paused hide chrome via body.mode-* CSS so fx can still play.
   $('hud').classList.toggle('away', !!state.panel);
   // Body mode classes drive final CSS overrides (hide hub HUD, play chrome, etc.).
   const body = document.body;
