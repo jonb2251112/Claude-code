@@ -147,6 +147,11 @@ body.blitz{
 }
 .btn.ghost:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(18,52,80,.16)}
 .btn.gold{background:linear-gradient(180deg,#ffe07a,var(--gold));color:#3c2500;box-shadow:0 6px 0 var(--gold-dk)}
+.btn.vip{
+  background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;box-shadow:0 6px 0 #c97800;
+  font-weight:900;
+}
+.btn.vip:active{transform:translateY(3px);box-shadow:0 2px 0 #c97800}
 .btn:disabled{filter:grayscale(.45) brightness(.9);cursor:default;pointer-events:none}
 .btn .badge-n{
   position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 6px;
@@ -768,25 +773,315 @@ body.blitz .eb-blitz .bar>i,body.blitz .board-top-track>i{animation:shine .65s l
 .shake{animation:shake .28s linear}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 
-/* PASS / QUESTS / SPIN / SHOP / ACH */
+/* PASS / QUESTS / SPIN / SHOP / ACH — addictive Journey Pass (Crossy-inspired) */
 .pass-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .pass-timer{
   font-weight:800;font-size:12px;color:#3c2500;background:linear-gradient(180deg,#ffe07a,var(--gold));
   padding:6px 12px;border-radius:999px;box-shadow:0 3px 0 var(--gold-dk);
 }
-.pass-track{display:grid;gap:8px}
-.tier{
-  display:grid;grid-template-columns:48px 1fr 1fr;gap:7px;align-items:center;
-  padding:10px;border-radius:18px;background:var(--paper);box-shadow:0 6px 0 rgba(18,52,80,.1);
+#screen-pass{
+  display:flex;flex-direction:column;gap:0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,210,74,.35),transparent 60%),
+    radial-gradient(ellipse 60% 30% at 90% 20%,rgba(255,95,168,.2),transparent 55%),
+    linear-gradient(180deg,rgba(255,255,255,.55),rgba(234,246,255,.35));
 }
-.tier .n{font-weight:800;font-size:1.15rem;text-align:center;color:var(--ink)}
-.tier .track{padding:8px;border-radius:14px;background:#eef4fa;font-size:12px;font-weight:800;min-height:56px;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.tier .track.vip{background:linear-gradient(135deg,#fff3c4,#ffe0a0)}
-.tier .track button{padding:7px 8px;font-size:12px;border-radius:12px;min-height:36px}
-.tier.locked{opacity:.55}
-.tier.current{outline:3px solid var(--mint)}
+#screen-pass > .head{flex:0 0 auto;margin-bottom:6px}
+#screen-pass .pass-hero{
+  flex:0 0 auto;max-height:min(42dvh,380px);overflow-x:hidden;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  display:flex;flex-direction:column;gap:6px;padding-bottom:4px;
+}
+#screen-pass .pass-track{
+  flex:1 1 auto;min-height:180px;display:flex;flex-direction:column;gap:8px;
+  overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:18px;
+}
+
+/* FOMO season bar */
+#jFomo{
+  display:flex;flex-direction:column;gap:3px;
+  background:linear-gradient(90deg,#ef4d4d,#ff6a3c);color:#fff;border-radius:14px;
+  padding:8px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  box-shadow:0 4px 0 #9a1818;animation:fomoPulse 1.1s ease-in-out infinite;
+}
+#jFomo .row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font-weight:800}
+#jFomo .clock{font-variant-numeric:tabular-nums;font-size:15px;letter-spacing:.04em;font-weight:900}
+#jFomo .scare{font-size:9px;letter-spacing:.12em;opacity:.95;font-weight:700;text-transform:none;letter-spacing:.02em}
+#jFomo.urgent{background:linear-gradient(90deg,#b91c1c,#ef4d4d);animation:fomoPulse .55s ease-in-out infinite}
+@keyframes fomoPulse{50%{filter:brightness(1.12);transform:scale(1.01)}}
+
+/* Animated emoji holding VIP ticket */
+#jMascot{
+  position:relative;display:flex;align-items:center;gap:12px;
+  flex:0 0 auto;min-height:86px;
+  background:linear-gradient(135deg,#ffffff 0%,#fff6e8 55%,#ffe8f4 100%);
+  border-radius:18px;padding:12px 12px 12px 8px;
+  box-shadow:0 5px 0 rgba(26,58,102,.18);
+  cursor:pointer;border:0;width:100%;font-family:inherit;text-align:left;
+  overflow:hidden;isolation:isolate;
+  transition:transform .28s cubic-bezier(.2,1.2,.3,1), box-shadow .28s ease;
+}
+#jFomo{flex:0 0 auto}
+#jSocial,#jValue,#jDrops,#jDangle,#jVipBar,#jProgress,#jHeat,#jClaimPulse,#jActions,#jLanes{flex:0 0 auto}
+#jMascot:hover{transform:translateY(-2px);box-shadow:0 7px 0 rgba(26,58,102,.2)}
+#jMascot:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(26,58,102,.18)}
+#jMascot.owned{
+  background:linear-gradient(135deg,#ffffff,#fff3c4);
+  cursor:default;
+}
+#jMascot .stage{
+  position:relative;width:78px;height:78px;flex:0 0 78px;
+  display:grid;place-items:center;
+}
+#jMascot .shadow{
+  position:absolute;bottom:6px;left:50%;width:48px;height:10px;margin-left:-24px;
+  background:rgba(26,58,102,.28);border-radius:50%;filter:blur(2px);
+  animation:jShadow 2.2s cubic-bezier(.45,.05,.55,.95) infinite;
+}
+#jMascot .emoji-hold{
+  position:relative;z-index:2;font-size:42px;line-height:1;
+  animation:jBob 2.2s cubic-bezier(.45,.05,.55,.95) infinite;
+  filter:drop-shadow(0 4px 0 rgba(26,58,102,.18));
+}
+#jMascot .ticket-wrap{
+  position:absolute;z-index:3;right:-2px;top:8px;
+  animation:jOffer 2.6s cubic-bezier(.33,1.2,.4,1) infinite;
+  transform-origin:20% 80%;
+}
+#jMascot .ticket{
+  position:relative;width:54px;height:34px;
+  background:linear-gradient(135deg,#ffd24a 0%,#ff9f1c 45%,#ff5fa8 100%);
+  border-radius:6px;box-shadow:0 3px 0 rgba(26,58,102,.25);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#1a3a66;overflow:hidden;
+}
+#jMascot .ticket::before,
+#jMascot .ticket::after{
+  content:"";position:absolute;top:50%;width:10px;height:10px;margin-top:-5px;
+  background:#fff6e8;border-radius:50%;
+}
+#jMascot .ticket::before{left:-5px}
+#jMascot .ticket::after{right:-5px}
+#jMascot .ticket .shine{
+  position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.7) 50%,transparent 65%);
+  animation:jShine 2.4s ease-in-out infinite;
+}
+#jMascot .ticket .lbl{position:relative;z-index:1;font-size:11px;font-weight:900;letter-spacing:.12em;line-height:1}
+#jMascot .ticket .sub{position:relative;z-index:1;font-size:8px;font-weight:800;opacity:.85;letter-spacing:.06em}
+#jMascot .spark{
+  position:absolute;width:6px;height:6px;border-radius:1px;background:#ffd24a;
+  box-shadow:0 0 6px #ffd24a;animation:jSpark 2.2s ease-in-out infinite;z-index:4;
+}
+#jMascot .spark.s1{top:8px;right:2px;animation-delay:.2s}
+#jMascot .spark.s2{top:28px;right:-6px;animation-delay:1.1s;width:4px;height:4px}
+#jMascot .spark.s3{top:2px;left:52px;animation-delay:1.8s;width:5px;height:5px}
+#jMascot .copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#jMascot .copy .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#d9482b;font-weight:800}
+#jMascot .copy .n{font-size:15px;color:var(--ink);line-height:1.15;font-weight:900}
+#jMascot .copy .h{font-size:11px;color:var(--ink-soft);line-height:1.25;font-weight:700}
+#jMascot .cta-pill{
+  flex:0 0 auto;align-self:center;padding:8px 12px;border-radius:999px;
+  background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;
+  font-size:12px;font-weight:900;box-shadow:0 3px 0 #c97800;
+  animation:jCta 1.4s ease-in-out infinite;white-space:nowrap;
+}
+#jMascot.owned .ticket{background:linear-gradient(135deg,#3ecf8e,#239a62);color:#fff}
+#jMascot.owned .ticket-wrap{animation:jOwned 2.4s cubic-bezier(.45,.05,.55,.95) infinite}
+#jMascot.owned .cta-pill{background:linear-gradient(180deg,#7dffb0,#3ecf8e);box-shadow:0 3px 0 #239a62;animation:none;color:#0d3d28}
+#jMascot.owned .copy .k{color:#1e9a52}
+#screen-pass.active #jMascot{animation:jMascotIn .55s cubic-bezier(.2,1.15,.3,1) both}
+@keyframes jBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes jShadow{0%,100%{transform:scaleX(1);opacity:.35}50%{transform:scaleX(.72);opacity:.2}}
+@keyframes jOffer{
+  0%,100%{transform:translate(0,0) rotate(0deg) scale(1)}
+  35%{transform:translate(6px,-8px) rotate(8deg) scale(1.06)}
+  55%{transform:translate(4px,-6px) rotate(4deg) scale(1.04)}
+  75%{transform:translate(8px,-10px) rotate(10deg) scale(1.08)}
+}
+@keyframes jOwned{0%,100%{transform:translate(0,0) rotate(0) scale(1)}50%{transform:translate(2px,-4px) rotate(-6deg) scale(1.05)}}
+@keyframes jShine{0%{transform:translateX(-60%)}45%,100%{transform:translateX(120%)}}
+@keyframes jSpark{0%,100%{opacity:0;transform:scale(.4) rotate(0)}40%{opacity:1;transform:scale(1) rotate(25deg)}70%{opacity:.3;transform:scale(.7) rotate(50deg)}}
+@keyframes jCta{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes jMascotIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+#jSocial{
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);
+  font-weight:800;text-align:center;opacity:.85;
+}
+#jValue{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:linear-gradient(135deg,#1a3a66,#2a5080);color:#fff;border-radius:14px;
+  padding:10px 12px;box-shadow:0 4px 0 rgba(18,52,80,.35);
+}
+#jValue .k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;font-weight:800}
+#jValue .n{font-size:15px;font-weight:900;letter-spacing:.02em}
+#jValue .n b{color:#ffe07a}
+#jDrops{
+  overflow:hidden;border-radius:12px;background:rgba(255,255,255,.55);
+  box-shadow:inset 0 0 0 2px rgba(26,58,102,.08);padding:6px 0;
+}
+#jDrops .track{
+  display:flex;gap:8px;width:max-content;
+  animation:jMarquee 22s linear infinite;padding:0 8px;
+}
+#jDrops .drop{
+  flex:0 0 auto;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:900;
+  background:#eaf6ff;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;
+}
+#jDrops .drop.vip{background:linear-gradient(90deg,#ffe07a,#ffb347);color:#3c2500}
+#jDrops .drop.hot{background:linear-gradient(90deg,#ff5fa8,#ff6a3c);color:#fff}
+@keyframes jMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+#jDangle{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#fff,#fff6d6);border-radius:14px;padding:8px 12px;
+  box-shadow:0 3px 0 rgba(226,161,18,.35);
+}
+#jDangle .jack{
+  flex:0 0 auto;padding:6px 8px;border-radius:10px;font-size:9px;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;
+}
+#jDangle .t{font-size:14px;font-weight:900;color:var(--ink)}
+#jDangle .s{font-size:11px;font-weight:700;color:var(--ink-soft)}
+
+#jVipBar{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;
+  background:rgba(255,255,255,.7);box-shadow:0 3px 0 rgba(26,58,102,.1);
+}
+#jVipBar .vipbadge{
+  flex:0 0 auto;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900;
+  letter-spacing:.1em;background:#dce8f4;color:var(--ink-soft);
+}
+#jVipBar .vipbadge.on{background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;box-shadow:0 2px 0 #c97800}
+#jVipBar .t{font-size:13px;font-weight:900}
+#jVipBar .s{font-size:11px;font-weight:700;color:var(--ink-soft)}
+
+#jProgress{
+  background:rgba(255,255,255,.75);border-radius:14px;padding:10px 12px;
+  box-shadow:0 3px 0 rgba(26,58,102,.1);position:relative;
+}
+#jProgress .neartag{
+  position:absolute;top:-8px;right:12px;padding:3px 8px;border-radius:999px;
+  background:linear-gradient(90deg,#ff5fa8,#ff6a3c);color:#fff;font-size:9px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;animation:jCta 1.2s ease-in-out infinite;
+}
+#jProgress .neartag.hide{display:none}
+#jProgress .row{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px}
+#jProgress .bar{height:12px;border-radius:999px;background:#e8eef4;overflow:hidden}
+#jProgress .bar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--coral),var(--gold));transition:width .35s ease}
+#jProgress .fillhint{font-size:10px;font-weight:700;color:var(--ink-soft);margin-top:5px}
+
+#jHeat{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;
+  background:rgba(255,95,168,.12);font-size:11px;font-weight:800;
+}
+#jHeat .fire{color:#d9482b;letter-spacing:.06em;text-transform:uppercase}
+#jHeat .pips{display:flex;gap:4px;flex:1}
+#jHeat .pips i{width:12px;height:8px;border-radius:3px;background:#ffd0e4}
+#jHeat .pips i.on{background:linear-gradient(90deg,#ff5fa8,#ff9f1c);box-shadow:0 0 6px rgba(255,95,168,.6)}
+
+#jClaimPulse{
+  display:none;align-items:center;justify-content:space-between;gap:8px;width:100%;
+  border:0;border-radius:14px;padding:10px 14px;cursor:pointer;font-family:inherit;
+  background:linear-gradient(90deg,#3ecf8e,#ffd24a);color:var(--ink);font-weight:900;
+  box-shadow:0 4px 0 rgba(35,154,98,.45);animation:jCta 1.1s ease-in-out infinite;
+}
+#jClaimPulse.show{display:flex}
+#jClaimPulse .n{background:#fff;border-radius:999px;padding:2px 10px;font-size:14px}
+
+#jActions{display:flex;flex-wrap:wrap;gap:6px}
+#jActions .btn{flex:1 1 40%;min-width:120px;padding:10px 8px;font-size:13px;min-height:44px}
+#jActions .btn.vip{
+  background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500;box-shadow:0 4px 0 #c97800;
+}
+#jActions .btn.vip:disabled{opacity:.7;filter:grayscale(.2)}
+#jActions .btn.skip{background:linear-gradient(180deg,#fff,#eaf6ff);color:var(--ink);box-shadow:0 4px 0 rgba(26,58,102,.15)}
+#jLanes{
+  display:grid;grid-template-columns:44px 1fr 1fr;gap:7px;padding:0 4px;
+  font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
+}
+#jLanes .vip{color:#c97800}
+
+/* Dual-lane journey tiers */
+.tier{
+  display:grid;grid-template-columns:44px 1fr 1fr;gap:7px;align-items:stretch;
+  padding:8px;border-radius:16px;background:rgba(255,255,255,.82);box-shadow:0 5px 0 rgba(18,52,80,.1);
+  position:relative;
+}
+.tier .n{
+  font-weight:900;font-size:1.1rem;text-align:center;color:var(--ink);
+  display:grid;place-items:center;background:#eaf6ff;border-radius:12px;
+}
+.tier .track{
+  padding:8px;border-radius:14px;background:#eef4fa;font-size:11px;font-weight:800;
+  min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:4px;
+  position:relative;cursor:pointer;transition:transform .15s ease;
+}
+.tier .track:active{transform:scale(.97)}
+.tier .track.vip{
+  background:linear-gradient(160deg,#fff3c4 0%,#ffe0a0 50%,#ffd1e8 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,159,28,.35);
+}
+.tier .track .tag{
+  position:absolute;top:-6px;right:6px;font-size:8px;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 6px;border-radius:999px;background:#1a3a66;color:#fff;font-weight:900;
+}
+.tier .track .tag.ex{background:linear-gradient(90deg,#ff5fa8,#ff9f1c)}
+.tier .track .tag.jack{background:linear-gradient(90deg,#ffd24a,#ff6a3c);color:#3c2500}
+.tier .track .odds{font-size:9px;opacity:.55;font-weight:700}
+.tier .track button,.tier .track .claim-lab{
+  padding:7px 8px;font-size:11px;border-radius:12px;min-height:34px;border:0;font-family:inherit;font-weight:900;
+}
+.tier .track .claim-lab{display:grid;place-items:center;background:rgba(255,255,255,.55);color:var(--ink-soft)}
+.tier .track.claimable{
+  outline:2px solid var(--mint);animation:jClaimPulse .9s ease-in-out infinite;
+  box-shadow:0 0 12px rgba(62,207,142,.45);
+}
+.tier .track.vip.claimable{outline-color:#ff9f1c;box-shadow:0 0 12px rgba(255,159,28,.5)}
+.tier .track.locked{opacity:.7}
+.tier .track.claimed{opacity:.55;filter:saturate(.7)}
+.tier.locked{opacity:.72}
+.tier.current{outline:3px solid var(--coral);background:rgba(255,255,255,.95)}
+.tier.jackpot{
+  background:linear-gradient(135deg,rgba(255,210,74,.35),rgba(255,95,168,.2));
+  box-shadow:0 5px 0 rgba(226,161,18,.35),0 0 16px rgba(255,210,74,.35);
+}
+.tier.jackpot .n{background:linear-gradient(180deg,#ffe07a,#ff9f1c);color:#3c2500}
+@keyframes jClaimPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 .claim-heat{animation:claimHeat .45s ease}
 @keyframes claimHeat{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* VIP upsell modal */
+#jUpsell{
+  display:none;position:fixed;inset:0;z-index:80;align-items:center;justify-content:center;
+  background:rgba(10,24,48,.55);padding:20px;backdrop-filter:blur(4px);
+}
+#jUpsell.show{display:flex;animation:jMascotIn .4s cubic-bezier(.2,1.4,.4,1) both}
+#jUpsell .card{
+  width:min(92vw,360px);background:linear-gradient(180deg,#fff,#fff6e8);
+  border-radius:22px;padding:18px 16px;text-align:center;
+  box-shadow:0 16px 0 rgba(18,52,80,.25);display:flex;flex-direction:column;gap:8px;
+}
+#jUpsell .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#ef4d4d;font-weight:900}
+#jUpsell .n{font-size:22px;font-weight:900;color:var(--ink)}
+#jUpsell .h{font-size:13px;font-weight:700;color:var(--ink-soft)}
+#jUpsell .miss{
+  margin:4px 0;padding:10px;border-radius:14px;font-weight:900;
+  background:linear-gradient(90deg,#1a3a66,#2a5080);color:#ffe07a;font-size:14px;
+}
+#jUpsell .btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+#jUpsell .btns .btn{flex:1;min-width:120px}
+#jUpsell .ticket-big{
+  width:72px;height:44px;margin:4px auto;border-radius:8px;
+  background:linear-gradient(135deg,#ffd24a,#ff5fa8);
+  display:grid;place-items:center;font-weight:900;color:#1a3a66;
+  box-shadow:0 4px 0 rgba(26,58,102,.2);animation:jOffer 2s ease-in-out infinite;
+}
+
+/* Hub pass tab hot pulse when loot waiting */
+.mtab.hot-pass{animation:jCta 1.2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(255,159,28,.45)}
+.mtab.hot-pass .badge-n{display:inline-grid !important}
+
 .quest-card{padding:14px;display:flex;flex-direction:column;gap:6px}
 .quest-card h3{font-size:1.05rem;font-weight:800}
 .quest-card p{font-size:.8rem;font-weight:700;opacity:.7}
@@ -3496,6 +3791,7 @@ body.blitz .eb-blitz .bar>i,body.blitz .board-top-track>i{animation:shine .65s l
         <div class="list-note" id="resQuestNote">Tap balloons before they float away!</div>
         <div class="actions">
           <button class="btn play cloud-play" id="btnReplay" type="button">Play Again</button>
+          <button class="btn vip" id="btnResultPass" type="button">🎟️ Journey Pass</button>
           <button class="btn secondary" id="btnResultMenu" type="button">Main Menu</button>
           <button class="btn ghost" id="btnResultChars" type="button">Collection</button>
         </div>
@@ -3588,99 +3884,135 @@ body.blitz .eb-blitz .bar>i,body.blitz .board-top-track>i{animation:shine .65s l
     </div>
   </section>
 
-  <!-- Season pass track -->
+  <!-- Season Journey Pass — Crossy-inspired addictive track -->
   <section class="screen" id="screen-pass">
     <div class="head">
       <button class="back" data-back="menu" type="button" aria-label="Back">←</button>
-      <h1>Season Journey</h1>
+      <h1>Journey Pass</h1>
+      <span class="chip" id="passSeasonChip" style="margin-left:auto;font-size:11px">S1</span>
     </div>
-    <div class="pass-head" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-      <div class="chip" id="passXpChip">⭐ 0</div>
-      <div class="pass-timer" id="passTimer">7d 0h</div>
-      <button class="btn gold" id="btnBuyVip" type="button" style="width:auto;padding:8px 12px;font-size:.85rem">VIP · 🪙 800</button>
+
+    <div class="pass-hero" id="passHero">
+      <div id="jFomo">
+        <div class="row"><span>Season ends in</span><span class="clock" id="passTimer">7d 0h</span></div>
+        <div class="scare" id="jScare">unclaimed VIP loot vanishes with the season</div>
+      </div>
+
+      <button type="button" id="jMascot" aria-label="Unlock VIP Journey Pass">
+        <div class="stage" aria-hidden="true">
+          <div class="shadow"></div>
+          <div class="emoji-hold" id="jMascotEmoji">🦊</div>
+          <div class="ticket-wrap">
+            <div class="ticket">
+              <span class="shine"></span>
+              <span class="lbl" id="jTicketLbl">VIP</span>
+              <span class="sub" id="jTicketSub">pass</span>
+            </div>
+          </div>
+          <span class="spark s1"></span>
+          <span class="spark s2"></span>
+          <span class="spark s3"></span>
+        </div>
+        <div class="copy">
+          <div class="k" id="jMascotK">limited VIP ticket</div>
+          <div class="n" id="jMascotN">This emoji has your pass</div>
+          <div class="h" id="jMascotH">Tap to unlock the juicy VIP lane</div>
+        </div>
+        <span class="cta-pill" id="jMascotCta">Get VIP</span>
+      </button>
+
+      <div id="jSocial">12,847 blitzers unlocked VIP this season</div>
+
+      <div id="jValue">
+        <div>
+          <div class="k">VIP lane value locked</div>
+          <div class="n" id="jValueN">~<b>0</b> coins on the table</div>
+        </div>
+        <div class="k" id="jValueSub">tap emoji</div>
+      </div>
+
+      <div id="jDrops" aria-hidden="true">
+        <div class="track" id="jDropsTrack">
+          <span class="drop hot">ending soon</span>
+          <span class="drop vip">legend box</span>
+          <span class="drop">gold chest</span>
+          <span class="drop vip">exclusive hero</span>
+          <span class="drop">blitz booster</span>
+          <span class="drop vip">title: blitz lord</span>
+          <span class="drop hot">flash sale</span>
+          <span class="drop">silver box</span>
+          <span class="drop vip">gem vault</span>
+          <span class="drop">spin ticket</span>
+          <span class="drop hot">ending soon</span>
+          <span class="drop vip">legend box</span>
+          <span class="drop">gold chest</span>
+          <span class="drop vip">exclusive hero</span>
+          <span class="drop">blitz booster</span>
+          <span class="drop vip">title: blitz lord</span>
+          <span class="drop hot">flash sale</span>
+          <span class="drop">silver box</span>
+          <span class="drop vip">gem vault</span>
+          <span class="drop">spin ticket</span>
+        </div>
+      </div>
+
+      <div id="jDangle">
+        <span class="jack">Next jackpot</span>
+        <div class="txt">
+          <div class="t" id="jDangleN">GOLD chest</div>
+          <div class="s" id="jDangleS">Tier 10 · 0 XP away</div>
+        </div>
+      </div>
+
+      <div id="jVipBar">
+        <span class="vipbadge off" id="jVipBadge">FREE</span>
+        <div class="txt">
+          <div class="t" id="jVipTitle">VIP locked</div>
+          <div class="s" id="jVipSub">unlock juicier rewards on every tier</div>
+        </div>
+      </div>
+
+      <div id="jProgress">
+        <span class="neartag hide" id="jNearTag">so close!</span>
+        <div class="row"><span>Tier progress</span><span><b id="passXpChip">0</b> / <b id="passXpGoal">100</b> ★</span></div>
+        <div class="bar"><i id="passNearBar" style="width:0%"></i></div>
+        <div class="fillhint" id="passNearLab">keep blitzing · stars drop every round</div>
+      </div>
+
+      <div id="jHeat">
+        <span class="fire" id="jHeatFire">heat x0</span>
+        <div class="pips" id="jHeatPips"><i></i><i></i><i></i><i></i><i></i></div>
+        <span id="jHeatHint">claim streak</span>
+      </div>
+
+      <button type="button" id="jClaimPulse"><span>Rewards ready</span><span class="n" id="jClaimPulseN">0</span></button>
+
+      <div id="jActions">
+        <button type="button" class="btn vip" id="btnBuyVip">Unlock VIP</button>
+        <button type="button" class="btn skip" id="btnSkipTier">Skip tier · 🪙 120</button>
+        <button type="button" class="btn ghost" id="btnClaimAllPass">Claim all</button>
+      </div>
+
+      <div id="jLanes"><span></span><span class="free">Free lane</span><span class="vip">VIP lane · illegally juicy</span></div>
     </div>
-    <div class="progress-line panel" style="margin-bottom:8px">
-      <div class="lab" id="passNearLab">Next tier in 100 XP</div>
-      <div class="fill"><i id="passNearBar" style="width:0%"></i></div>
-    </div>
-    <div class="scroll pass-track" id="passTrack">
-      <div class="tier current" data-tier="1">
-        <div class="n">1</div>
-        <div class="track"><span>Free</span><span>🪙 50</span></div>
-        <div class="track vip"><span>VIP</span><span>💎 1</span></div>
-      </div>
-      <div class="tier" data-tier="2">
-        <div class="n">2</div>
-        <div class="track"><span>Free</span><span>🪙 75</span></div>
-        <div class="track vip"><span>VIP</span><span>🪙 100</span></div>
-      </div>
-      <div class="tier" data-tier="3">
-        <div class="n">3</div>
-        <div class="track"><span>Free</span><span>💎 2</span></div>
-        <div class="track vip"><span>VIP</span><span>📦 Silver</span></div>
-      </div>
-      <div class="tier" data-tier="4">
-        <div class="n">4</div>
-        <div class="track"><span>Free</span><span>🪙 100</span></div>
-        <div class="track vip"><span>VIP</span><span>💎 3</span></div>
-      </div>
-      <div class="tier" data-tier="5">
-        <div class="n">5</div>
-        <div class="track"><span>Free</span><span>📦 Silver</span></div>
-        <div class="track vip"><span>VIP</span><span>🪙 200</span></div>
-      </div>
-      <div class="tier locked" data-tier="6">
-        <div class="n">6</div>
-        <div class="track"><span>Free</span><span>🪙 125</span></div>
-        <div class="track vip"><span>VIP</span><span>📦 Gold</span></div>
-      </div>
-      <div class="tier locked" data-tier="7">
-        <div class="n">7</div>
-        <div class="track"><span>Free</span><span>💎 3</span></div>
-        <div class="track vip"><span>VIP</span><span>💎 5</span></div>
-      </div>
-      <div class="tier locked" data-tier="8">
-        <div class="n">8</div>
-        <div class="track"><span>Free</span><span>🪙 150</span></div>
-        <div class="track vip"><span>VIP</span><span>🪙 300</span></div>
-      </div>
-      <div class="tier locked" data-tier="9">
-        <div class="n">9</div>
-        <div class="track"><span>Free</span><span>📦 Gold</span></div>
-        <div class="track vip"><span>VIP</span><span>📦 Diamond</span></div>
-      </div>
-      <div class="tier locked" data-tier="10">
-        <div class="n">10</div>
-        <div class="track"><span>Free</span><span>🪙 200</span></div>
-        <div class="track vip"><span>VIP</span><span>💎 8</span></div>
-      </div>
-      <div class="tier locked" data-tier="11">
-        <div class="n">11</div>
-        <div class="track"><span>Free</span><span>💎 5</span></div>
-        <div class="track vip"><span>VIP</span><span>🪙 400</span></div>
-      </div>
-      <div class="tier locked" data-tier="12">
-        <div class="n">12</div>
-        <div class="track"><span>Free</span><span>🪙 250</span></div>
-        <div class="track vip"><span>VIP</span><span>📦 Series</span></div>
-      </div>
-      <div class="tier locked" data-tier="13">
-        <div class="n">13</div>
-        <div class="track"><span>Free</span><span>📦 Series</span></div>
-        <div class="track vip"><span>VIP</span><span>💎 10</span></div>
-      </div>
-      <div class="tier locked" data-tier="14">
-        <div class="n">14</div>
-        <div class="track"><span>Free</span><span>🪙 300</span></div>
-        <div class="track vip"><span>VIP</span><span>🪙 500</span></div>
-      </div>
-      <div class="tier locked" data-tier="15">
-        <div class="n">15</div>
-        <div class="track"><span>Free</span><span>💎 8</span></div>
-        <div class="track vip"><span>VIP</span><span>👑 Legend box</span></div>
-      </div>
-    </div>
+
+    <div class="scroll pass-track" id="passTrack"></div>
   </section>
+
+  <!-- VIP upsell pressure modal -->
+  <div id="jUpsell" role="dialog" aria-modal="true" aria-labelledby="jUpsellN">
+    <div class="card">
+      <div class="k">don't miss out</div>
+      <div class="ticket-big">VIP</div>
+      <div class="n" id="jUpsellN">VIP Journey</div>
+      <div class="h" id="jUpsellH">You left rewards on the table</div>
+      <div class="miss" id="jUpsellMiss">~0 coins of VIP loot locked</div>
+      <div class="btns">
+        <button type="button" class="btn vip" id="btnUpsellVip">Unlock VIP</button>
+        <button type="button" class="btn ghost" id="btnUpsellDismiss">Not now</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Achievements list -->
   <section class="screen" id="screen-ach">
@@ -3785,7 +4117,10 @@ const ROWS = 7, COLS = 7, ROUND = 60, BLITZ_SEC = 5, POOL_N = 5, BLITZ_POOL = 4;
 const FILL = 1, DECAY = 2, MULT = 3, CHARGE = 8;
 const ANIM = { swap: 80, reject: 110, clear: 90, spawn: 120, special: 140, transform: 110 };
 const SEASON_MS = 7 * 24 * 60 * 60 * 1000;
-const VIP_COST = 800;
+const VIP_COST_FULL = 800;
+const VIP_COST_SALE = 480;
+const VIP_COST = VIP_COST_FULL; /* legacy alias */
+const SKIP_TIER_COST = 120;
 const SPIN_COST = 40;
 const REVIVE_COST = 50;
 const REVIVE_SCORE_MIN = 400;
@@ -5567,21 +5902,30 @@ const SPIN_PRIZES = [
 function makePassRewards(){
   const list = [];
   for(let i=1;i<=PASS_TIERS;i++){
+    const jackpot = i===10 || i===20 || i===30 || i%8===0;
     const free = i%5===0
-      ? (i===10 ? {type:"char",id:8,label:"🐧 Chill Penguin"}
-        : i===20 ? {type:"title",id:"CASCADE KING",label:"Title: Cascade King"}
-        : i===30 ? {type:"gems",amount:15,label:"💎 15"}
-        : {type:"booster",id:"score2",label:"Score ×2"})
-      : (i%3===0 ? {type:"gems",amount:2,label:"💎 2"} : {type:"coins",amount:20+i*3,label:`🪙 ${20+i*3}`});
+      ? (i===10 ? {type:"char",id:8,label:"🐧 Chill Penguin",value:450}
+        : i===20 ? {type:"title",id:"CASCADE KING",label:"Title: Cascade King",value:300}
+        : i===30 ? {type:"gems",amount:15,label:"💎 15",value:450}
+        : {type:"booster",id:"score2",label:"Score ×2",value:120})
+      : (i%3===0
+        ? {type:"gems",amount:2,label:"💎 2",value:60}
+        : {type:"coins",amount:20+i*3,label:`🪙 ${20+i*3}`,value:20+i*3});
     const vip = i%6===0
-      ? (i===12 ? {type:"char",id:2,label:"🐱 Cat Nap"}
-        : i===18 ? {type:"char",id:12,label:"🐰 Lucky Bunny"}
-        : i===24 ? {type:"title",id:"BLITZ LORD",label:"Title: Blitz Lord"}
-        : i===30 ? {type:"title",id:"SEASON STAR",label:"Title: Season Star"}
-        : {type:"gems",amount:8,label:"💎 8"})
-      : (i%2===0 ? {type:"booster",id:BOOSTERS[i%BOOSTERS.length].id,label:BOOSTERS[i%BOOSTERS.length].name}
-        : {type:"coins",amount:40+i*5,label:`🪙 ${40+i*5}`});
-    list.push({ tier:i, xp:i*PASS_XP_PER_TIER, free, vip });
+      ? (i===12 ? {type:"char",id:2,label:"🐱 Cat Nap",value:600,exclusive:true}
+        : i===18 ? {type:"char",id:12,label:"🐰 Lucky Bunny",value:700,exclusive:true}
+        : i===24 ? {type:"title",id:"BLITZ LORD",label:"Title: Blitz Lord",value:500,exclusive:true}
+        : i===30 ? {type:"title",id:"SEASON STAR",label:"Title: Season Star",value:800,exclusive:true}
+        : {type:"gems",amount:8,label:"💎 8",value:240,exclusive:true})
+      : (jackpot
+        ? {type:"booster",id:"blitz50",label:"⚡ Blitz Start + Gold",value:220+i*8,exclusive:true}
+        : (i%2===0
+          ? {type:"booster",id:BOOSTERS[i%BOOSTERS.length].id,label:BOOSTERS[i%BOOSTERS.length].name,value:90+i*4}
+          : {type:"coins",amount:40+i*8,label:`🪙 ${40+i*8}`,value:40+i*8}));
+    if(i===10) vip.label = "👑 Legend box";
+    if(i===10){ vip.type="gems"; vip.amount=12; vip.value=360; vip.exclusive=true; }
+    if(i===20){ vip.type="booster"; vip.id="score2"; vip.label="🔥 Mega Score ×2"; vip.value=280; vip.exclusive=true; }
+    list.push({ tier:i, xp:(i-1)*PASS_XP_PER_TIER, free, vip, jackpot });
   }
   return list;
 }
@@ -5635,7 +5979,7 @@ const ACHIEVEMENTS = [
   { id:"login_3", name:"Comeback Kid", desc:"3-day login streak", ico:"🎁", check:s=>s.login.streak>=3, reward:70 },
   { id:"login_7", name:"Week Warrior", desc:"7-day login streak", ico:"📆", check:s=>s.login.streak>=7, reward:200 },
   { id:"spins_10", name:"Wheel Wizard", desc:"Spin 10 times", ico:"🎡", check:s=>(s.stats&&s.stats.spins>=10), reward:80 },
-  { id:"pass_10", name:"Journey Bound", desc:"Reach pass tier 10", ico:"🎟️", check:s=>Math.floor(s.pass.xp/PASS_XP_PER_TIER)>=10, reward:150 },
+  { id:"pass_10", name:"Journey Bound", desc:"Reach pass tier 10", ico:"🎟️", check:s=>Math.floor(s.pass.xp/PASS_XP_PER_TIER)+1>=10, reward:150 },
   { id:"power_10", name:"Spell Caster", desc:"Use hero power 10 times", ico:"✨", check:s=>(s.stats&&s.stats.powers>=10), reward:90 },
 ];
 
@@ -5910,7 +6254,7 @@ function defaultSave(){
     unlocked:[0], selected:0, levels:{}, dupes:{},
     boosters:{ sun:0, time:0, coin:0, score2:0, time10:0, blitz50:0, magnet:0 },
     equippedBooster:null,
-    pass:{ season:1, xp:0, vip:false, claimedFree:[], claimedVip:[], endsAt: now + SEASON_MS },
+    pass:{ season:1, xp:0, vip:false, claimedFree:[], claimedVip:[], endsAt: now + SEASON_MS, claimHeat:0, upsells:0, socialBase:12847 },
     quests:{ day:"", list:[] },
     login:{ last:"", streak:0, claimedDay:"" },
     spin:{ lastFree:"", pity:0 },
@@ -5927,6 +6271,9 @@ function migrateSave(raw){
   s.pass = { ...d.pass, ...(raw.pass||{}) };
   s.pass.claimedFree = Array.isArray(s.pass.claimedFree)?s.pass.claimedFree:[];
   s.pass.claimedVip = Array.isArray(s.pass.claimedVip)?s.pass.claimedVip:[];
+  if(s.pass.claimHeat == null) s.pass.claimHeat = 0;
+  if(s.pass.upsells == null) s.pass.upsells = 0;
+  if(s.pass.socialBase == null) s.pass.socialBase = 12847 + Math.floor(Math.random()*400);
   s.quests = { ...d.quests, ...(raw.quests||{}) };
   s.login = { ...d.login, ...(raw.login||{}) };
   if(!s.login.claimedDay) s.login.claimedDay = "";
@@ -6136,6 +6483,9 @@ function ensureSeason(){
     save.pass.vip = false;
     save.pass.claimedFree = [];
     save.pass.claimedVip = [];
+    save.pass.claimHeat = 0;
+    save.pass.upsells = 0;
+    save.pass.socialBase = 12000 + Math.floor(Math.random()*1800);
     save.pass.endsAt = now + SEASON_MS;
     writeSave();
     toast("New Season " + save.pass.season + "!");
@@ -6146,10 +6496,15 @@ function formatRemain(ms){
   const d = Math.floor(ms/86400000);
   const h = Math.floor((ms%86400000)/3600000);
   const m = Math.floor((ms%3600000)/60000);
+  const s = Math.floor((ms%60000)/1000);
   if(d>0) return `${d}d ${h}h`;
-  return `${h}h ${m}m`;
+  if(h>0) return `${h}h ${m}m`;
+  return `${m}m ${String(s).padStart(2,"0")}s`;
 }
-function passTier(){ return Math.min(PASS_TIERS, Math.floor(save.pass.xp / PASS_XP_PER_TIER)); }
+function passTier(){
+  /* Highest unlocked journey tier (tier 1 free at 0 XP) */
+  return Math.min(PASS_TIERS, Math.floor(save.pass.xp / PASS_XP_PER_TIER) + 1);
+}
 function unclaimedPassCount(){
   ensureSeason();
   const t = passTier();
@@ -6159,6 +6514,46 @@ function unclaimedPassCount(){
     if(save.pass.vip && !save.pass.claimedVip.includes(i)) n++;
   }
   return n;
+}
+function vipPrice(){
+  ensureSeason();
+  const age = Date.now() - (save.pass.endsAt - SEASON_MS);
+  const sale = age < 48 * 3600e3 || (save.pass.upsells|0) >= 1;
+  return sale ? VIP_COST_SALE : VIP_COST_FULL;
+}
+function vipSaleActive(){ return vipPrice() < VIP_COST_FULL; }
+function rewardCoinValue(rew){
+  if(!rew) return 0;
+  if(typeof rew.value === "number") return rew.value;
+  if(rew.type==="coins") return rew.amount|0;
+  if(rew.type==="gems") return (rew.amount|0) * 30;
+  if(rew.type==="booster") return 90;
+  if(rew.type==="char") return 500;
+  if(rew.type==="title") return 250;
+  return 40;
+}
+function lockedVipValue(){
+  ensureSeason();
+  let total = 0;
+  const t = passTier();
+  PASS_REWARDS.forEach(tier=>{
+    if(save.pass.claimedVip.includes(tier.tier)) return;
+    /* Count unlocked VIP loot + tease remaining season VIP */
+    if(tier.tier <= t || tier.jackpot || tier.vip.exclusive) total += rewardCoinValue(tier.vip);
+  });
+  return total;
+}
+function nextJackpotTier(){
+  const t = passTier();
+  return PASS_REWARDS.find(x => x.jackpot && x.tier > t) || PASS_REWARDS.filter(x=>x.jackpot).slice(-1)[0];
+}
+function bumpClaimHeat(){
+  save.pass.claimHeat = Math.min(5, (save.pass.claimHeat|0) + 1);
+  if(save.pass.claimHeat >= 3 && save.pass.claimHeat % 3 === 0){
+    const bonus = 15 + save.pass.claimHeat * 5;
+    grantCoins(bonus, true);
+    toast("Claim heat! +" + bonus + " 🪙");
+  }
 }
 function ensureLogin(){
   const today = dayKey();
@@ -6401,8 +6796,14 @@ function refreshMenu(){
   }
   const ub = unclaimedPassCount();
   const badge = $("passBadge");
-  if(ub>0){ badge.hidden=false; badge.textContent=String(ub); }
-  else badge.hidden=true;
+  const passBtn = $("btnPass");
+  const lockedVip = !save.pass.vip ? Math.min(9, Math.ceil(lockedVipValue()/200)) : 0;
+  const hotN = ub || lockedVip;
+  if(badge){
+    if(hotN>0){ badge.hidden=false; badge.textContent=String(ub>0?ub:lockedVip); }
+    else badge.hidden=true;
+  }
+  if(passBtn) passBtn.classList.toggle("hot-pass", !save.pass.vip || ub>0);
 }
 
 function renderCharGrid(){
@@ -6525,60 +6926,286 @@ function renderSelectGrid(){
   $("btnStartRound").onclick = () => { ensureAudio(); prepBoosterForEngine(); startMusic(); beginRound(current); };
 }
 
+function showVipUpsell(reason){
+  ensureSeason();
+  if(save.pass.vip) return;
+  save.pass.upsells = (save.pass.upsells|0) + 1;
+  writeSave();
+  const miss = lockedVipValue();
+  const price = vipPrice();
+  const el = $("jUpsell");
+  if(!el) return;
+  const n = $("jUpsellN");
+  const h = $("jUpsellH");
+  const m = $("jUpsellMiss");
+  if(n) n.textContent = vipSaleActive() ? "FLASH SALE · VIP" : "VIP Journey";
+  if(h) h.textContent = reason || "You left rewards on the table";
+  if(m) m.textContent = `~${miss} coins of VIP loot locked · only 🪙 ${price}`;
+  el.classList.add("show");
+  sfx("tap");
+}
+function hideVipUpsell(){
+  $("jUpsell")?.classList.remove("show");
+}
+function buyVipPass(fromUpsell){
+  ensureSeason();
+  if(save.pass.vip){ toast("VIP already active"); return false; }
+  const price = vipPrice();
+  if(save.coins < price){
+    toast("Need 🪙 " + price + (vipSaleActive() ? " · sale ends soon!" : ""));
+    if(!fromUpsell) showVipUpsell("You're so close — grab the ticket");
+    return false;
+  }
+  save.coins -= price;
+  save.pass.vip = true;
+  save.pass.socialBase = (save.pass.socialBase|0) + 1;
+  writeSave();
+  sfx("unlock");
+  toast(vipSaleActive() ? "VIP unlocked on FLASH SALE!" : "VIP Journey unlocked!");
+  hideVipUpsell();
+  try{
+    confettiBurst && confettiBurst();
+  }catch(_){}
+  /* soft screen flash */
+  document.body.animate?.([
+    {filter:"brightness(1)"},{filter:"brightness(1.35)"},{filter:"brightness(1)"}
+  ], {duration:420});
+  renderPass(); refreshMenu();
+  return true;
+}
+function skipPassTier(){
+  ensureSeason();
+  if(passTier() >= PASS_TIERS){ toast("Season maxed"); return; }
+  if(save.coins < SKIP_TIER_COST){ toast("Need 🪙 " + SKIP_TIER_COST); return; }
+  save.coins -= SKIP_TIER_COST;
+  grantPassXP(PASS_XP_PER_TIER);
+  toast("Skipped a tier!");
+  sfx("claim");
+  if(!save.pass.vip && Math.random() < 0.45) showVipUpsell("Skipped ahead — VIP loot is waiting");
+  renderPass(); refreshMenu();
+}
+function claimPassReward(tierN, which){
+  const rew = PASS_REWARDS.find(x=>x.tier===tierN);
+  if(!rew) return false;
+  const unlocked = save.pass.xp >= rew.xp;
+  if(!unlocked) return false;
+  if(which==="free"){
+    if(save.pass.claimedFree.includes(tierN)) return false;
+    save.pass.claimedFree.push(tierN);
+    applyReward(rew.free);
+  } else {
+    if(!save.pass.vip){ showVipUpsell("That VIP reward is locked behind the ticket"); return false; }
+    if(save.pass.claimedVip.includes(tierN)) return false;
+    save.pass.claimedVip.push(tierN);
+    applyReward(rew.vip);
+  }
+  bumpClaimHeat();
+  writeSave();
+  sfx("claim");
+  toast("Claimed " + (which==="free"?rew.free.label:rew.vip.label));
+  checkAchievements();
+  return true;
+}
+function claimAllPass(){
+  ensureSeason();
+  const t = passTier();
+  let n = 0;
+  for(let i=1;i<=t;i++){
+    if(!save.pass.claimedFree.includes(i) && claimPassReward(i,"free")) n++;
+    if(save.pass.vip && !save.pass.claimedVip.includes(i) && claimPassReward(i,"vip")) n++;
+  }
+  if(!n){
+    if(!save.pass.vip) showVipUpsell("Claim all on VIP — don't leave loot hanging");
+    else toast("Nothing to claim");
+    return;
+  }
+  toast("Claimed " + n + " rewards!");
+  renderPass(); refreshMenu();
+}
+
 function renderPass(){
   ensureSeason();
-  $("passXpChip").textContent = "⭐ " + save.pass.xp;
-  $("passTimer").textContent = formatRemain(save.pass.endsAt - Date.now());
-  const buy = $("btnBuyVip");
-  if(save.pass.vip){ buy.textContent = "VIP ACTIVE"; buy.disabled = true; }
-  else { buy.textContent = `VIP · 🪙 ${VIP_COST}`; buy.disabled = save.coins < VIP_COST; }
   const t = passTier();
   const into = save.pass.xp % PASS_XP_PER_TIER;
-  $("passNearLab").textContent = t>=PASS_TIERS ? "Season maxed!" : `Tier ${t} → ${t+1} · ${into}/${PASS_XP_PER_TIER}`;
-  $("passNearBar").style.width = (t>=PASS_TIERS?100:(into/PASS_XP_PER_TIER)*100) + "%";
+  const remain = save.pass.endsAt - Date.now();
+  const price = vipPrice();
+  const sale = vipSaleActive();
+  const lockedVal = lockedVipValue();
+  const jack = nextJackpotTier();
+  const hero = CHARACTERS.find(c=>c.id===save.selected) || CHARACTERS[0];
+
+  const setTxt = (id, v) => { const el=$(id); if(el) el.textContent = v; };
+  setTxt("passSeasonChip", "S" + (save.pass.season||1));
+  setTxt("passTimer", formatRemain(remain));
+  setTxt("passXpChip", String(into));
+  setTxt("passXpGoal", String(PASS_XP_PER_TIER));
+
+  const fomo = $("jFomo");
+  if(fomo) fomo.classList.toggle("urgent", remain < 24*3600e3);
+  const scare = $("jScare");
+  if(scare){
+    scare.textContent = remain < 6*3600e3
+      ? "FINAL HOURS · claim VIP before loot resets"
+      : sale
+        ? ("FLASH SALE · VIP 🪙 " + price + " (was " + VIP_COST_FULL + ")")
+        : "unclaimed VIP loot vanishes with the season";
+  }
+
+  const mascot = $("jMascot");
+  if(mascot) mascot.classList.toggle("owned", !!save.pass.vip);
+  setTxt("jMascotEmoji", hero.glyph || "🦊");
+  setTxt("jTicketLbl", save.pass.vip ? "OWNED" : "VIP");
+  setTxt("jTicketSub", save.pass.vip ? "active" : (sale ? "sale" : "pass"));
+  setTxt("jMascotK", save.pass.vip ? "vip ticket secured" : (sale ? "flash sale ticket" : "limited VIP ticket"));
+  setTxt("jMascotN", save.pass.vip ? (hero.name + " unlocked your lane") : (hero.name + " is holding your pass"));
+  setTxt("jMascotH", save.pass.vip
+    ? "Claim every juicy VIP reward below"
+    : ("Tap to unlock · only 🪙 " + price + (sale ? " today" : "")));
+  setTxt("jMascotCta", save.pass.vip ? "VIP ON" : (sale ? "Steal VIP" : "Get VIP"));
+
+  const socialN = (save.pass.socialBase|0) + Math.floor((Date.now()/60000) % 37);
+  setTxt("jSocial", socialN.toLocaleString() + " blitzers unlocked VIP this season");
+
+  const valueN = $("jValueN");
+  if(valueN) valueN.innerHTML = save.pass.vip
+    ? `VIP open · <b>${lockedVal}</b> still claimable`
+    : `~<b>${lockedVal}</b> coins on the table`;
+  setTxt("jValueSub", save.pass.vip ? "claim below" : (sale ? "steal it · sale live" : "tap emoji"));
+
+  if(jack){
+    const need = Math.max(0, jack.xp - save.pass.xp);
+    setTxt("jDangleN", jack.vip.label);
+    setTxt("jDangleS", "Tier " + jack.tier + " · " + need + " XP away");
+  }
+
+  const badge = $("jVipBadge");
+  if(badge){
+    badge.textContent = save.pass.vip ? "VIP" : "FREE";
+    badge.classList.toggle("on", !!save.pass.vip);
+    badge.classList.toggle("off", !save.pass.vip);
+  }
+  setTxt("jVipTitle", save.pass.vip ? "VIP lane open" : "VIP locked");
+  setTxt("jVipSub", save.pass.vip ? "tap gold cells to claim" : "unlock juicier rewards on every tier");
+
+  const near = into / PASS_XP_PER_TIER;
+  const nearTag = $("jNearTag");
+  if(nearTag) nearTag.classList.toggle("hide", !(near >= 0.65 && t < PASS_TIERS));
+  const bar = $("passNearBar");
+  if(bar) bar.style.width = (t>=PASS_TIERS ? 100 : near*100) + "%";
+  setTxt("passNearLab", t>=PASS_TIERS
+    ? "Season maxed — claim everything!"
+    : (near >= 0.8 ? "ONE MORE HIT · don't stop now" : "keep blitzing · stars drop every round"));
+
+  const heat = save.pass.claimHeat|0;
+  setTxt("jHeatFire", "heat x" + heat);
+  const pips = $("jHeatPips");
+  if(pips){
+    [...pips.children].forEach((pip,i)=> pip.classList.toggle("on", i < heat));
+  }
+  setTxt("jHeatHint", heat>=3 ? "bonus streak live" : "claim streak");
+
+  const ready = unclaimedPassCount();
+  const pulse = $("jClaimPulse");
+  if(pulse){
+    pulse.classList.toggle("show", ready > 0);
+    setTxt("jClaimPulseN", String(ready));
+  }
+
+  const buy = $("btnBuyVip");
+  if(buy){
+    if(save.pass.vip){ buy.textContent = "VIP ACTIVE"; buy.disabled = true; }
+    else {
+      buy.textContent = sale
+        ? `FLASH · 🪙 ${price}`
+        : `Unlock VIP · 🪙 ${price}`;
+      buy.disabled = false;
+    }
+  }
+  const skip = $("btnSkipTier");
+  if(skip) skip.textContent = `Skip tier · 🪙 ${SKIP_TIER_COST}`;
+
   const track = $("passTrack");
+  if(!track) return;
   track.innerHTML = "";
   PASS_REWARDS.forEach(tier=>{
     const unlocked = save.pass.xp >= tier.xp;
     const el = document.createElement("div");
-    el.className = "tier" + (unlocked?"":" locked") + (tier.tier===Math.min(PASS_TIERS,t+1)?" current":"");
+    const isCur = tier.tier === Math.min(PASS_TIERS, Math.max(1, t + (into>0||t===0?1:0)));
+    el.className = "tier"
+      + (unlocked ? "" : " locked")
+      + (tier.tier === Math.min(PASS_TIERS, t || 1) || (tier.tier === t+1 && t < PASS_TIERS) ? " current" : "")
+      + (tier.jackpot ? " jackpot" : "");
     const freeClaimed = save.pass.claimedFree.includes(tier.tier);
     const vipClaimed = save.pass.claimedVip.includes(tier.tier);
+    const freeReady = unlocked && !freeClaimed;
+    const vipReady = save.pass.vip && unlocked && !vipClaimed;
+    const vipLocked = !save.pass.vip;
+
+    const freeCls = "track free"
+      + (freeReady ? " claimable" : "")
+      + (freeClaimed ? " claimed" : "")
+      + (!unlocked ? " locked" : "");
+    const vipCls = "track vip"
+      + (vipReady ? " claimable" : "")
+      + (vipClaimed ? " claimed" : "")
+      + ((vipLocked || !unlocked) ? " locked" : "");
+
+    const freeTag = tier.jackpot ? `<span class="tag jack">JACKPOT</span>` : "";
+    const vipTag = tier.vip.exclusive
+      ? `<span class="tag ex">EXCLUSIVE</span>`
+      : (tier.jackpot ? `<span class="tag jack">JACKPOT</span>` : "");
+    const odds = (0.4 + (tier.tier % 7) * 0.11).toFixed(1);
+
     el.innerHTML = `
       <div class="n">${tier.tier}</div>
-      <div class="track free">
+      <div class="${freeCls}" data-lane="free" data-tier="${tier.tier}">
+        ${freeTag}
         <div>${tier.free.label}</div>
-        ${unlocked && !freeClaimed ? `<button class="btn" data-claim="free" data-tier="${tier.tier}">Claim</button>`
-          : `<div style="opacity:.6">${freeClaimed?"✓ Claimed":"🔒"}</div>`}
+        ${freeReady
+          ? `<button class="btn" type="button" data-claim="free" data-tier="${tier.tier}">TAP TO CLAIM</button>`
+          : `<div class="claim-lab">${freeClaimed ? "✓ Claimed" : (unlocked ? "Ready" : "🔒")}</div>`}
+        <div class="odds">${odds}% drop</div>
       </div>
-      <div class="track vip">
+      <div class="${vipCls}" data-lane="vip" data-tier="${tier.tier}">
+        ${vipTag}
         <div>${tier.vip.label}</div>
-        ${save.pass.vip && unlocked && !vipClaimed ? `<button class="btn gold" data-claim="vip" data-tier="${tier.tier}">Claim</button>`
-          : `<div style="opacity:.6">${vipClaimed?"✓ Claimed":(save.pass.vip?"🔒":"VIP")}</div>`}
+        ${vipReady
+          ? `<button class="btn gold" type="button" data-claim="vip" data-tier="${tier.tier}">TAP TO CLAIM</button>`
+          : `<div class="claim-lab">${vipClaimed ? "✓ Claimed" : (vipLocked ? "VIP only" : "🔒")}</div>`}
+        <div class="odds">${(parseFloat(odds)+0.3).toFixed(1)}% VIP</div>
       </div>`;
     track.appendChild(el);
   });
+
   track.querySelectorAll("[data-claim]").forEach(btn=>{
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
       const tierN = +btn.getAttribute("data-tier");
       const which = btn.getAttribute("data-claim");
-      const rew = PASS_REWARDS.find(x=>x.tier===tierN);
-      if(!rew) return;
-      if(which==="free"){
-        if(save.pass.claimedFree.includes(tierN)) return;
-        save.pass.claimedFree.push(tierN);
-        applyReward(rew.free);
-      } else {
-        if(!save.pass.vip || save.pass.claimedVip.includes(tierN)) return;
-        save.pass.claimedVip.push(tierN);
-        applyReward(rew.vip);
+      if(claimPassReward(tierN, which)){
+        btn.classList.add("claim-heat");
+        renderPass(); refreshMenu();
       }
-      writeSave(); sfx("claim");
-      btn.classList.add("claim-heat");
-      toast("Claimed " + (which==="free"?rew.free.label:rew.vip.label));
-      checkAchievements();
-      renderPass(); refreshMenu();
     };
+  });
+  track.querySelectorAll(".track[data-lane]").forEach(cell=>{
+    cell.addEventListener("click", () => {
+      const tierN = +cell.getAttribute("data-tier");
+      const lane = cell.getAttribute("data-lane");
+      const unlocked = save.pass.xp >= (tierN - 1) * PASS_XP_PER_TIER;
+      if(lane==="vip" && !save.pass.vip){
+        showVipUpsell("VIP only · " + (PASS_REWARDS.find(x=>x.tier===tierN)?.vip.label||"loot") + " is waiting");
+        return;
+      }
+      if(!unlocked){ toast("Reach tier " + tierN + " first"); return; }
+      if(claimPassReward(tierN, lane)){ renderPass(); refreshMenu(); }
+    });
+  });
+
+  /* Auto-scroll current tier into view */
+  requestAnimationFrame(()=>{
+    const cur = track.querySelector(".tier.current");
+    if(cur) cur.scrollIntoView({block:"nearest", behavior:"smooth"});
   });
 }
 
@@ -6943,13 +7570,24 @@ if($("btnEvents")) $("btnEvents").onclick = () => { sfx("tap"); renderEvents(); 
 if($("btnHow")) $("btnHow").onclick = () => { sfx("tap"); showScreen("howto"); };
 if($("btnSettings")) $("btnSettings").onclick = () => { sfx("tap"); bindToggles(); showScreen("settings"); };
 
-if($("btnBuyVip")) $("btnBuyVip").onclick = () => {
-  if(save.pass.vip) return;
-  if(save.coins < VIP_COST){ toast("Need 🪙 "+VIP_COST); return; }
-  save.coins -= VIP_COST;
-  save.pass.vip = true;
-  writeSave(); sfx("unlock"); toast("VIP unlocked (soft currency satire)!");
-  renderPass(); refreshMenu();
+if($("btnBuyVip")) $("btnBuyVip").onclick = () => buyVipPass(false);
+if($("jMascot")) $("jMascot").onclick = () => {
+  if(save.pass.vip){ toast("VIP lane is open — claim below!"); return; }
+  buyVipPass(false);
+};
+if($("btnSkipTier")) $("btnSkipTier").onclick = () => skipPassTier();
+if($("btnClaimAllPass")) $("btnClaimAllPass").onclick = () => claimAllPass();
+if($("jClaimPulse")) $("jClaimPulse").onclick = () => claimAllPass();
+if($("btnUpsellVip")) $("btnUpsellVip").onclick = () => buyVipPass(true);
+if($("btnUpsellDismiss")) $("btnUpsellDismiss").onclick = () => {
+  hideVipUpsell();
+  toast("Loot is still waiting…");
+};
+if($("jUpsell")) $("jUpsell").addEventListener("click", (e) => {
+  if(e.target.id === "jUpsell") hideVipUpsell();
+});
+if($("jValue")) $("jValue").onclick = () => {
+  if(!save.pass.vip) showVipUpsell("Look at all that VIP value locked away");
 };
 if($("btnDoSpin")) $("btnDoSpin").onclick = () => doSpin();
 
@@ -7020,6 +7658,9 @@ if($("btnSkipRevive")) $("btnSkipRevive").onclick = () => {
 if($("btnReplay")) $("btnReplay").onclick = () => { ensureAudio(); prepBoosterForEngine(); startMusic(); sfx("tap"); beginRound(CHARACTERS.find(c=>c.id===save.selected)||CHARACTERS[0]); };
 if($("btnResultChars")) $("btnResultChars").onclick = () => { sfx("tap"); stopMusic(); showScreen("chars"); renderCharGrid(); };
 if($("btnResultMenu")) $("btnResultMenu").onclick = () => { sfx("tap"); stopMusic(); refreshMenu(); showScreen("menu"); };
+if($("btnResultPass")) $("btnResultPass").onclick = () => {
+  sfx("tap"); stopMusic(); ensureSeason(); renderPass(); showScreen("pass");
+};
 
 /* wheel labels */
 (function paintWheelLabels(){
@@ -9348,7 +9989,7 @@ function finishRound() {
   }
 
   const into = save.pass.xp % PASS_XP_PER_TIER;
-  if (resPassLab) resPassLab.textContent = `Pass +${passGain}★ · Tier ${passTier()}`;
+  if (resPassLab) resPassLab.textContent = `Pass +${passGain}★ · Tier ${passTier()}` + (save.pass.vip ? " · VIP" : " · FREE");
   if (resPassBar) {
     resPassBar.style.width = "0%";
     requestAnimationFrame(() => {
@@ -9360,12 +10001,21 @@ function finishRound() {
     const qDone = (save.quests && save.quests.list)
       ? save.quests.list.filter((q) => q.progress >= q.target && !q.claimed).length
       : 0;
-    resQuestNote.textContent = qDone ? `${qDone} quest ready to claim!` : "Keep chasing daily quests.";
+    if (!save.pass.vip) {
+      resQuestNote.textContent = `🎟️ VIP loot ~${lockedVipValue()} coins locked · open Journey Pass`;
+    } else {
+      resQuestNote.textContent = qDone ? `${qDone} quest ready to claim!` : "Keep chasing daily quests.";
+    }
   }
 
   sfx(isBest || stars >= 2 ? "unlock" : "coin");
   showScreen("result");
   refreshMenu();
+
+  /* Soft FOMO: after a scoring run, tease VIP if not owned */
+  if (!save.pass.vip && score >= 600 && Math.random() < 0.55) {
+    setTimeout(() => showVipUpsell("Your run filled the Journey — VIP loot is still locked"), 900);
+  }
 }
 
 /* -------------------------------------------------------------------------- */
